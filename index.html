@@ -644,6 +644,150 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
+
+  /* ── SETUP SCREEN STYLES ── */
+  .setup-container {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .setup-section-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .type-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .type-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px;
+    padding: 20px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .type-card:hover {
+    background: rgba(255,255,255,0.05);
+    border-color: rgba(255,255,255,0.2);
+  }
+
+  .type-card.selected {
+    background: rgba(139, 92, 246, 0.1);
+    border-color: #a78bfa;
+    box-shadow: 0 0 0 1px #a78bfa;
+  }
+
+  .type-card-icon {
+    font-size: 24px;
+    color: #a78bfa;
+  }
+
+  .type-card-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .type-card-desc {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+  }
+
+  .pill-group {
+    display: flex;
+    gap: 12px;
+  }
+
+  .pill-btn {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 100px;
+    padding: 10px 20px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    font-weight: 500;
+    flex: 1;
+    text-align: center;
+  }
+
+  .pill-btn:hover {
+    background: rgba(255,255,255,0.1);
+  }
+
+  .pill-btn.selected {
+    background: rgba(79, 195, 247, 0.15);
+    border-color: #4fc3f7;
+    color: #4fc3f7;
+  }
+
+  .setup-summary {
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.05);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+  }
+
+  .checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 15px;
+    color: var(--text-primary);
+    cursor: pointer;
+  }
+
+  .checklist-item input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    accent-color: #a78bfa;
+    cursor: pointer;
+  }
+
+  select.modern-select {
+    width: 100%;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: white;
+    font-size: 15px;
+    cursor: pointer;
+    appearance: none;
+  }
+
+  select.modern-select:focus {
+    outline: none;
+    border-color: #a78bfa;
+  }
   
   /* ── PROGRESS CONTAINER ── */
   .progress-section {
@@ -968,7 +1112,7 @@
       <div style="display: flex; flex-direction: column; gap: 24px;">
         
         <!-- Interactive Glowing Start Interview Button Card -->
-        <button onclick="triggerPhase2Toast()" class="btn btn-start-interview">
+        <button onclick="openSetupView()" class="btn btn-start-interview">
           <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
             <div style="display: flex; align-items: center; gap: 16px; text-align: left;">
               <i class="fa-solid fa-circle-play" style="font-size: 32px;"></i>
@@ -977,7 +1121,6 @@
                 <div style="font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 2px;">Behavioral, technical, DSA or system design.</div>
               </div>
             </div>
-            <span class="phase-tag">Coming in Phase 2</span>
           </div>
         </button>
         
@@ -1041,6 +1184,126 @@
       </div>
     </div>
   </div>
+
+  <!-- ==========================================
+       SETUP VIEW (Pre-Interview Configuration)
+       ========================================== -->
+  <div id="setup-view" class="card" style="display: none; width: 100%; max-width: 800px; margin: 40px auto; padding: 40px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
+      <h2 style="margin: 0; font-size: 24px;">Configure Your Session</h2>
+      <button class="btn btn-secondary" onclick="switchView('dashboard-view')" style="padding: 8px 16px; font-size: 13px;">Cancel</button>
+    </div>
+
+    <div class="setup-container">
+      
+      <!-- SECTION 4: Pre-filled from profile (Moved to top for context) -->
+      <div>
+        <div class="setup-summary">
+          <div>
+            <span style="color: var(--text-secondary);">Interviewing for:</span> 
+            <strong id="setup-profile-role" style="color: white; margin-left: 4px;">Role</strong> at 
+            <strong id="setup-profile-company" style="color: white;">Company</strong>
+          </div>
+          <a href="#" style="color: #4fc3f7; text-decoration: none; font-size: 13px; font-weight: 600;" onclick="alert('Profile editing coming soon');">Change</a>
+        </div>
+      </div>
+
+      <!-- SECTION 1: Interview Type -->
+      <div>
+        <div class="setup-section-title">1. Interview Type</div>
+        <div class="type-grid">
+          <div class="type-card" onclick="selectType('behavioral')" id="type-behavioral">
+            <i class="fa-solid fa-comment-dots type-card-icon"></i>
+            <div class="type-card-title">Behavioral</div>
+            <div class="type-card-desc">STAR method, teamwork, leadership</div>
+          </div>
+          <div class="type-card" onclick="selectType('technical')" id="type-technical">
+            <i class="fa-solid fa-code type-card-icon"></i>
+            <div class="type-card-title">Technical</div>
+            <div class="type-card-desc">DSA, problem solving, algorithms</div>
+          </div>
+          <div class="type-card" onclick="selectType('system_design')" id="type-system_design">
+            <i class="fa-solid fa-cubes type-card-icon"></i>
+            <div class="type-card-title">System Design</div>
+            <div class="type-card-desc">Architecture, scale, trade-offs</div>
+          </div>
+          <div class="type-card" onclick="selectType('hr')" id="type-hr">
+            <i class="fa-solid fa-user-tie type-card-icon"></i>
+            <div class="type-card-title">HR / Culture</div>
+            <div class="type-card-desc">Motivation, goals, culture fit</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 2: Difficulty -->
+      <div>
+        <div class="setup-section-title">2. Difficulty</div>
+        <div class="pill-group">
+          <div class="pill-btn" onclick="selectDifficulty('easy')" id="diff-easy">
+            <div style="font-weight: 600; color: white;">Easy</div>
+            <div style="font-size: 11px; margin-top: 2px;">Fresher / first round</div>
+          </div>
+          <div class="pill-btn selected" onclick="selectDifficulty('medium')" id="diff-medium">
+            <div style="font-weight: 600; color: white;">Medium</div>
+            <div style="font-size: 11px; margin-top: 2px;">Experienced / second round</div>
+          </div>
+          <div class="pill-btn" onclick="selectDifficulty('hard')" id="diff-hard">
+            <div style="font-weight: 600; color: white;">Hard</div>
+            <div style="font-size: 11px; margin-top: 2px;">Senior / final round</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 3: Duration -->
+      <div>
+        <div class="setup-section-title">3. Duration</div>
+        <select id="setup-duration" class="modern-select">
+          <option value="15">15 minutes (3-4 questions)</option>
+          <option value="25" selected>25 minutes (5-6 questions)</option>
+          <option value="40">40 minutes (7-8 questions)</option>
+        </select>
+      </div>
+
+      <!-- INTERVIEW MODE TOGGLE -->
+      <div>
+        <div class="setup-section-title">Interview Mode</div>
+        <div class="pill-group">
+          <div class="pill-btn" onclick="selectMode('text')" id="mode-text">
+            <i class="fa-solid fa-keyboard"></i> Text Chat Only
+          </div>
+          <div class="pill-btn selected" onclick="selectMode('video')" id="mode-video">
+            <i class="fa-solid fa-video"></i> Voice & Video
+          </div>
+        </div>
+      </div>
+
+      <!-- SECTION 5: Readiness Checklist -->
+      <div id="setup-checklist-section">
+        <div class="setup-section-title">Readiness Checklist</div>
+        <div class="checklist">
+          <label class="checklist-item">
+            <input type="checkbox" id="check-mic" onchange="validateSetupForm()">
+            <span>My microphone is working</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" id="check-cam" onchange="validateSetupForm()">
+            <span>My camera is working</span>
+          </label>
+          <label class="checklist-item">
+            <input type="checkbox" id="check-quiet" onchange="validateSetupForm()">
+            <span>I am in a quiet environment</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- START BUTTON -->
+      <button id="btn-begin-interview" class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 18px; margin-top: 16px;" onclick="beginInterview()" disabled>
+        Start Interview <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
+      </button>
+
+    </div>
+  </div>
+
 </main>
 
 <!-- Phase 2 Floating Toast Tip -->
@@ -1629,6 +1892,95 @@ SESSION CONTEXT:
     console.log(prompt);
     console.log('═══════════════════════════════════════════════');
     return { context: dummyCtx, systemPrompt: prompt };
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     PHASE 2.06 — SESSION SETUP LOGIC
+     ══════════════════════════════════════════════════════════════════ */
+  let setupState = {
+    type: null,
+    difficulty: 'medium',
+    mode: 'video'
+  };
+
+  function openSetupView() {
+    // Populate profile summary
+    document.getElementById('setup-profile-role').textContent = document.getElementById('dash-role').textContent || 'Software Engineer';
+    const companies = document.getElementById('dash-companies').textContent;
+    document.getElementById('setup-profile-company').textContent = companies ? companies.split(',')[0].trim() : 'a top tech company';
+    
+    switchView('setup-view');
+    validateSetupForm();
+  }
+
+  function selectType(typeId) {
+    setupState.type = typeId;
+    document.querySelectorAll('.type-card').forEach(c => c.classList.remove('selected'));
+    document.getElementById(`type-${typeId}`).classList.add('selected');
+    validateSetupForm();
+  }
+
+  function selectDifficulty(diff) {
+    setupState.difficulty = diff;
+    document.querySelectorAll('.pill-btn[id^="diff-"]').forEach(c => c.classList.remove('selected'));
+    document.getElementById(`diff-${diff}`).classList.add('selected');
+  }
+
+  function selectMode(mode) {
+    setupState.mode = mode;
+    document.querySelectorAll('.pill-btn[id^="mode-"]').forEach(c => c.classList.remove('selected'));
+    document.getElementById(`mode-${mode}`).classList.add('selected');
+    
+    // Show/hide checklist based on mode
+    const checklist = document.getElementById('setup-checklist-section');
+    if (mode === 'video') {
+      checklist.style.display = 'block';
+    } else {
+      checklist.style.display = 'none';
+    }
+    validateSetupForm();
+  }
+
+  function validateSetupForm() {
+    const btn = document.getElementById('btn-begin-interview');
+    let isValid = true;
+    
+    if (!setupState.type) isValid = false;
+    
+    if (setupState.mode === 'video') {
+      if (!document.getElementById('check-mic').checked) isValid = false;
+      if (!document.getElementById('check-cam').checked) isValid = false;
+      if (!document.getElementById('check-quiet').checked) isValid = false;
+    }
+    
+    btn.disabled = !isValid;
+    if (isValid) {
+      btn.style.opacity = '1';
+    } else {
+      btn.style.opacity = '0.5';
+    }
+  }
+
+  async function beginInterview() {
+    const btn = document.getElementById('btn-begin-interview');
+    setLoadingState(btn, true, 'Preparing Session...');
+    
+    try {
+      // Create session in Supabase and inject context (from Phase 2.02 logic)
+      // Note: we are passing setupState values to the orchestrator
+      await startInterviewSession(setupState.type, setupState.difficulty);
+      
+      // Navigate to the live interview screen (Phase 2.07 - coming next)
+      // For now, we just alert since the view isn't built yet
+      alert(`Session Created! ID: ${activeSession.id}\nRouting to Interview Chat Screen...`);
+      // switchView('interview-view'); 
+      
+    } catch (err) {
+      console.error("Failed to start session:", err);
+      alert("Failed to create session. Check console.");
+    } finally {
+      setLoadingState(btn, false, 'Start Interview <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>');
+    }
   }
 
   /* ══════════════════════════════════════════════════════════════════
