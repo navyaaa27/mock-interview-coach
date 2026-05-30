@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mock Interview Coach — Practice interviews that feel real</title>
+<!-- Google Fonts: Plus Jakarta Sans for premium typography -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<!-- FontAwesome for modern visual dashboard icons -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<!-- Supabase JS Library -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+  /* ── CSS DESIGN SYSTEM (Slate/Violet palette matching mock_interview_hero) ── */
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+  
+  :root {
+    --bg-color: #000000;
+    --card-bg: rgba(10, 10, 12, 0.65);
+    --card-border: rgba(255, 255, 255, 0.08);
+    --card-border-focus: rgba(139, 92, 246, 0.4);
+    --text-primary: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --text-muted: rgba(255, 255, 255, 0.38);
+    --primary-glow: linear-gradient(135deg, #4fc3f7, #7e57c2);
+    --primary-accent: #8b5cf6;
+    --primary-accent-glow: rgba(139, 92, 246, 0.15);
+    --error-color: #ef5350;
+    --success-color: #4caf50;
+  }
+  
+  body {
+    background: var(--bg-color);
+    color: var(--text-primary);
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-x: hidden;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+  }
+  
+  /* ── HEADER NAVIGATION ── */
+  header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 30;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+  
+  .logo {
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .logo span {
+    background: linear-gradient(135deg, #4fc3f7, #ab47bc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+  }
+  
+  .user-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 6px 14px;
+    border-radius: 100px;
+    font-size: 13px;
+    color: var(--text-secondary);
+  }
+  
+  .btn-signout {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    font-size: 12px;
+    cursor: pointer;
+    margin-left: 8px;
+    transition: color 0.2s;
+  }
+  
+  .btn-signout:hover {
+    color: var(--error-color);
+  }
+  
+  /* ── MAIN CONTENT LAYER ── */
+  main {
+    position: relative;
+    z-index: 10;
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 100px 24px 60px 24px;
+  }
+  
+  /* ── COMPONENT: GLASS CARD CONTAINER ── */
+  .auth-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 480px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    display: none; /* Controlled by router */
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  .dashboard-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 900px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    display: none; /* Controlled by router */
+    animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  /* ── TYPOGRAPHY ── */
+  h2 {
+    font-size: 26px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  
+  h2 span {
+    background: linear-gradient(135deg, #4fc3f7, #ab47bc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  .subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 30px;
+  }
+  
+  /* ── FORM ELEMENTS ── */
+  .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+  
+  label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .input-wrapper {
+    position: relative;
+  }
+  
+  .input-wrapper i {
+    position: absolute;
+    left: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--card-border);
+    color: var(--text-primary);
+    padding: 14px 16px 14px 44px;
+    border-radius: 12px;
+    font-size: 14px;
+    font-family: inherit;
+    transition: all 0.25s ease;
+    outline: none;
+  }
+  
+  select {
+    padding-left: 16px; /* Select dropdowns don't need absolute left icons */
+    appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg fill='white' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+  }
+  
+  input:focus,
+  select:focus {
+    border-color: var(--primary-accent);
+    background: rgba(139, 92, 246, 0.04);
+    box-shadow: 0 0 0 3px var(--primary-accent-glow);
+  }
+  
+  /* ── COMPONENT: BUTTONS ── */
+  .btn {
+    width: 100%;
+    padding: 14px 24px;
+    border-radius: 100px;
+    font-size: 14px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  
+  .btn-primary {
+    background: var(--primary-glow);
+    color: #ffffff;
+    box-shadow: 0 4px 15px rgba(126, 87, 194, 0.35);
+  }
+  
+  .btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(126, 87, 194, 0.45);
+  }
+  
+  .btn-secondary {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--card-border);
+    color: var(--text-secondary);
+  }
+  
+  .btn-secondary:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+  }
+  
+  .btn-google {
+    background: #ffffff;
+    color: #1a1a1a;
+    font-weight: 600;
+    margin-top: 14px;
+  }
+  
+  .btn-google:hover {
+    background: #f1f1f1;
+    transform: translateY(-1px);
+  }
+  
+  .btn-google i {
+    font-size: 16px;
+  }
+  
+  /* ── DIVIDERS & LINKS ── */
+  .divider {
+    display: flex;
+    align-items: center;
+    text-align: center;
+    margin: 20px 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+  
+  .divider::before,
+  .divider::after {
+    content: '';
+    flex: 1;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+  
+  .divider:not(:empty)::before {
+    margin-right: 12px;
+  }
+  
+  .divider:not(:empty)::after {
+    margin-left: 12px;
+  }
+  
+  .footer-links {
+    margin-top: 24px;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .footer-links a {
+    color: var(--primary-accent);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+  
+  .footer-links a:hover {
+    text-decoration: underline;
+    color: #a78bfa;
+  }
+  
+  /* ── ALERTS AND ALERTS FEEDBACK ── */
+  .alert {
+    padding: 12px 16px;
+    border-radius: 12px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 20px;
+    display: none;
+    text-align: left;
+  }
+  
+  .alert-error {
+    background: rgba(239, 83, 80, 0.1);
+    border: 1px solid rgba(239, 83, 80, 0.25);
+    color: #ff8a80;
+  }
+  
+  .alert-success {
+    background: rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.25);
+    color: #a5d6a7;
+  }
+  
+  /* ── COMPONENT: ONBOARDING STEP WIZARD ── */
+  .step-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    padding-bottom: 15px;
+  }
+  
+  .step-indicator {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: color 0.3s;
+  }
+  
+  .step-indicator.active {
+    color: var(--primary-accent);
+  }
+  
+  .step-indicator.active span {
+    background: var(--primary-accent);
+    color: #fff;
+  }
+  
+  .step-indicator span {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+  }
+  
+  .onboard-step-view {
+    display: none; /* Controlled via JS */
+  }
+  
+  .onboard-step-view.active {
+    display: block;
+    animation: fadeIn 0.4s ease forwards;
+  }
+  
+  /* ── BUTTON GRIDS & MULTI-OPTION CARD SELECTION ── */
+  .option-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  
+  .option-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+  }
+  
+  .option-card:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+  }
+  
+  .option-card.active {
+    background: rgba(139, 92, 246, 0.06);
+    border-color: var(--primary-accent);
+    box-shadow: 0 0 15px var(--primary-accent-glow);
+  }
+  
+  .option-card i {
+    font-size: 22px;
+    color: var(--text-secondary);
+    transition: color 0.2s;
+  }
+  
+  .option-card.active i {
+    color: #a78bfa;
+  }
+  
+  .option-card-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text-primary);
+  }
+  
+  .option-card-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+  
+  .button-row {
+    display: flex;
+    gap: 12px;
+    margin-top: 30px;
+  }
+  
+  /* ── COMPONENT: DASHBOARD STYLING ── */
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 30px;
+    margin-top: 30px;
+  }
+  
+  @media(max-width: 800px) {
+    .dashboard-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  .welcome-header {
+    text-align: left;
+    margin-bottom: 20px;
+  }
+  
+  .welcome-title {
+    font-size: 28px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+  
+  .profile-summary-card {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: left;
+    height: 100%;
+  }
+  
+  .section-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .profile-meta-row {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .profile-meta-item {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.03);
+  }
+  
+  .profile-meta-item i {
+    font-size: 18px;
+    color: #a78bfa;
+    width: 24px;
+    text-align: center;
+  }
+  
+  .profile-meta-content {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .profile-meta-label {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+  }
+  
+  .profile-meta-val {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-top: 2px;
+  }
+  
+  /* ── SESSIONS CARD ── */
+  .sessions-completed-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(79, 195, 247, 0.05) 100%);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 20px;
+    padding: 24px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .sessions-count {
+    font-size: 48px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #4fc3f7, #c084fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: -0.04em;
+  }
+  
+  .sessions-label {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-secondary);
+  }
+  
+  /* ── START INTERVIEW MAIN BUTTON ── */
+  .btn-start-interview {
+    background: var(--primary-glow);
+    color: #ffffff;
+    font-size: 18px;
+    font-weight: 700;
+    padding: 20px;
+    border-radius: 20px;
+    margin-top: 24px;
+    box-shadow: 0 8px 30px rgba(126, 87, 194, 0.45);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .btn-start-interview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+    transition: 0.5s;
+  }
+  
+  .btn-start-interview:hover::before {
+    left: 100%;
+  }
+  
+  .btn-start-interview .phase-tag {
+    font-size: 10px;
+    font-weight: 700;
+    background: rgba(255, 255, 255, 0.15);
+    padding: 3px 8px;
+    border-radius: 100px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  /* ── PROGRESS CONTAINER ── */
+  .progress-section {
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 30px;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    min-height: 180px;
+  }
+  
+  .progress-section i {
+    font-size: 28px;
+    color: var(--text-muted);
+  }
+  
+  .progress-placeholder-text {
+    font-size: 13px;
+    color: var(--text-secondary);
+    max-width: 280px;
+    line-height: 1.6;
+  }
+  
+  /* ── TOAST NOTIFICATION ── */
+  .toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    z-index: 100;
+    background: rgba(26, 26, 30, 0.95);
+    border: 1px solid var(--primary-accent);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 10px var(--primary-accent-glow);
+    padding: 16px 24px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 600;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    pointer-events: none;
+  }
+  
+  .toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  
+  .toast i {
+    color: var(--primary-accent);
+    font-size: 18px;
+  }
+  
+  /* ── STATE LOADING SPINNER ── */
+  .router-loader {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-color);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    transition: opacity 0.3s ease;
+  }
+  
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 3px solid rgba(139, 92, 246, 0.1);
+    border-top: 3px solid var(--primary-accent);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<!-- Top Fixed Navigation Bar -->
+<header>
+  <div class="logo"><i class="fa-solid fa-cube" style="color: #4fc3f7;"></i> Interview<span>AI</span></div>
+  <div id="nav-user-info" class="user-badge" style="display: none;">
+    <span id="user-email-badge">user@example.com</span>
+    <button onclick="handleSignOut()" class="btn-signout" title="Sign Out">
+      <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+    </button>
+  </div>
+</header>
+
+<!-- Loader screen displayed during auth session verification routing -->
+<div id="app-loader" class="router-loader">
+  <div class="spinner"></div>
+  <p style="font-size: 13px; color: var(--text-secondary); font-weight: 500; letter-spacing: 0.05em;">Connecting to InterviewAI...</p>
+</div>
+
+<main>
+  
+  <!-- 1. SIGN UP CARD VIEW -->
+  <div id="signup-view" class="auth-card">
+    <h2>Create your <span>free account</span></h2>
+    <p class="subtitle">Join thousands of builders cracking behavioral, technical, and system design interviews.</p>
+    
+    <div id="signup-alert-error" class="alert alert-error"></div>
+    <div id="signup-alert-success" class="alert alert-success"></div>
+    
+    <form id="signup-form" onsubmit="handleSignUp(event)">
+      <div class="form-group">
+        <label for="signup-email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fa-regular fa-envelope"></i>
+          <input type="email" id="signup-email" placeholder="you@example.com" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="signup-password">Password (min 8 characters)</label>
+        <div class="input-wrapper">
+          <i class="fa-regular fa-lock"></i>
+          <input type="password" id="signup-password" placeholder="••••••••••••" minlength="8" required>
+        </div>
+      </div>
+      
+      <button type="submit" id="btn-signup" class="btn btn-primary">
+        Create account <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </form>
+    
+    <div class="footer-links">
+      <p>Already have an account? <a href="#" onclick="switchView('login')">Log In</a></p>
+    </div>
+  </div>
+  
+  <!-- 2. LOG IN CARD VIEW -->
+  <div id="login-view" class="auth-card">
+    <h2>Welcome <span>back</span></h2>
+    <p class="subtitle">Practice interviews that feel completely real, whenever you're ready.</p>
+    
+    <div id="login-alert-error" class="alert alert-error"></div>
+    <div id="login-alert-success" class="alert alert-success"></div>
+    
+    <form id="login-form" onsubmit="handleLogIn(event)">
+      <div class="form-group">
+        <label for="login-email">Email Address</label>
+        <div class="input-wrapper">
+          <i class="fa-regular fa-envelope"></i>
+          <input type="email" id="login-email" placeholder="you@example.com" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="login-password">Password</label>
+        <div class="input-wrapper">
+          <i class="fa-regular fa-lock"></i>
+          <input type="password" id="login-password" placeholder="••••••••••••" required>
+        </div>
+      </div>
+      
+      <button type="submit" id="btn-login" class="btn btn-primary">
+        Log in <i class="fa-solid fa-right-to-bracket"></i>
+      </button>
+    </form>
+    
+    <button onclick="handleGoogleSignIn()" class="btn btn-google">
+      <i class="fa-brands fa-google" style="color: #4285f4;"></i> Continue with Google
+    </button>
+    
+    <div class="footer-links">
+      <p><a href="#" onclick="handleForgotPassword()">Forgot password?</a></p>
+      <p>Don't have an account? <a href="#" onclick="switchView('signup')">Sign Up</a></p>
+    </div>
+  </div>
+  
+  <!-- 3. ONBOARDING CARD VIEW -->
+  <div id="onboarding-view" class="auth-card" style="max-width: 540px;">
+    <!-- Step Progress Header Indicators -->
+    <div class="step-header">
+      <div id="step-ind-1" class="step-indicator active"><span>1</span> About you</div>
+      <div id="step-ind-2" class="step-indicator"><span>2</span> Experience</div>
+      <div id="step-ind-3" class="step-indicator"><span>3</span> Goal</div>
+    </div>
+    
+    <div id="onboard-alert-error" class="alert alert-error"></div>
+    
+    <!-- STEP 1 VIEW — About You -->
+    <div id="onboard-step-1" class="onboard-step-view active">
+      <h2>Tell us <span>about yourself</span></h2>
+      <p class="subtitle">We personalize the questions, difficulty, and scenarios based on your background.</p>
+      
+      <div class="form-group">
+        <label for="onboard-name">Full Name</label>
+        <div class="input-wrapper">
+          <i class="fa-regular fa-user"></i>
+          <input type="text" id="onboard-name" placeholder="John Doe" required>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="onboard-role">Job role you are targeting</label>
+        <select id="onboard-role" required>
+          <option value="" disabled selected>Select your target role</option>
+          <option value="Software Engineer">Software Engineer</option>
+          <option value="Product Manager">Product Manager</option>
+          <option value="Data Scientist">Data Scientist</option>
+          <option value="Designer">Designer</option>
+          <option value="DevOps Engineer">DevOps Engineer</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+      
+      <button onclick="goToOnboardStep(2)" class="btn btn-primary">
+        Continue <i class="fa-solid fa-arrow-right"></i>
+      </button>
+    </div>
+    
+    <!-- STEP 2 VIEW — Your Experience -->
+    <div id="onboard-step-2" class="onboard-step-view">
+      <h2>Select your <span>experience level</span></h2>
+      <p class="subtitle">This adjusts the core technical difficulty and expectation guidelines during mock rounds.</p>
+      
+      <div class="option-grid">
+        <div class="option-card" onclick="selectExperience('entry')">
+          <i class="fa-solid fa-seedling"></i>
+          <div class="option-card-title">Entry level</div>
+          <div class="option-card-desc">0-2 years. Core DSA, basics, internships.</div>
+        </div>
+        
+        <div class="option-card active" onclick="selectExperience('mid')">
+          <i class="fa-solid fa-laptop-code"></i>
+          <div class="option-card-title">Mid level</div>
+          <div class="option-card-desc">2-5 years. Systems, design, autonomy.</div>
+        </div>
+        
+        <div class="option-card" onclick="selectExperience('senior')">
+          <i class="fa-solid fa-chart-line"></i>
+          <div class="option-card-title">Senior level</div>
+          <div class="option-card-desc">5+ years. Tech leadership, architecture.</div>
+        </div>
+        
+        <div class="option-card" onclick="selectExperience('staff')">
+          <i class="fa-solid fa-chess-knight"></i>
+          <div class="option-card-title">Staff / Principal</div>
+          <div class="option-card-desc">Organization scope, strategies.</div>
+        </div>
+      </div>
+      
+      <div class="button-row">
+        <button onclick="goToOnboardStep(1)" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button onclick="goToOnboardStep(3)" class="btn btn-primary">Continue <i class="fa-solid fa-arrow-right"></i></button>
+      </div>
+    </div>
+    
+    <!-- STEP 3 VIEW — Your Goal -->
+    <div id="onboard-step-3" class="onboard-step-view">
+      <h2>Complete your <span>onboarding</span></h2>
+      <p class="subtitle">Define target companies and what you want to achieve through practicing.</p>
+      
+      <div class="form-group">
+        <label for="onboard-companies">Target Companies (comma-separated)</label>
+        <div class="input-wrapper">
+          <i class="fa-regular fa-building"></i>
+          <input type="text" id="onboard-companies" placeholder="e.g. Google, Meta, Netflix" required>
+        </div>
+      </div>
+      
+      <label>Interview practice goal</label>
+      <div class="option-grid" style="margin-bottom: 24px;">
+        <div class="option-card active" onclick="selectGoal('Get my first job')">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <div class="option-card-title">First Job</div>
+        </div>
+        <div class="option-card" onclick="selectGoal('Switch to a new role')">
+          <i class="fa-solid fa-repeat"></i>
+          <div class="option-card-title">Switch Role</div>
+        </div>
+        <div class="option-card" onclick="selectGoal('Get promoted')">
+          <i class="fa-solid fa-arrow-trend-up"></i>
+          <div class="option-card-title">Get Promoted</div>
+        </div>
+        <div class="option-card" onclick="selectGoal('Crack FAANG')">
+          <i class="fa-solid fa-award"></i>
+          <div class="option-card-title">Crack FAANG</div>
+        </div>
+      </div>
+      
+      <div class="button-row">
+        <button onclick="goToOnboardStep(2)" class="btn btn-secondary"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <button onclick="submitOnboarding()" id="btn-complete-onboard" class="btn btn-primary">
+          Complete Onboarding <i class="fa-solid fa-check"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- 4. DASHBOARD PAGE VIEW -->
+  <div id="dashboard-view" class="dashboard-card">
+    <!-- Welcome Top Title Header -->
+    <div class="welcome-header">
+      <p style="font-size: 12px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">WORKSPACE DASHBOARD</p>
+      <h1 class="welcome-title">Welcome back, <span id="dash-fullname">[User Name]</span></h1>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Personalized mock coaching console connected successfully.</p>
+    </div>
+    
+    <!-- Split columns dashboard -->
+    <div class="dashboard-grid">
+      <!-- LEFT MAIN CONTAINER -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- Interactive Glowing Start Interview Button Card -->
+        <button onclick="triggerPhase2Toast()" class="btn btn-start-interview">
+          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+            <div style="display: flex; align-items: center; gap: 16px; text-align: left;">
+              <i class="fa-solid fa-circle-play" style="font-size: 32px;"></i>
+              <div>
+                <div style="font-weight: 800;">Start New Interview Session</div>
+                <div style="font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 2px;">Behavioral, technical, DSA or system design.</div>
+              </div>
+            </div>
+            <span class="phase-tag">Coming in Phase 2</span>
+          </div>
+        </button>
+        
+        <!-- Progress section display card -->
+        <div>
+          <div class="section-title"><i class="fa-solid fa-chart-simple" style="color: #c084fc;"></i> Your Progress</div>
+          <div class="progress-section">
+            <i class="fa-solid fa-chart-line"></i>
+            <p class="progress-placeholder-text">Complete your first session to see your progress insights, competency breakdown, and performance scoring charts.</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- RIGHT SUMMARY COMPONENT COLUMN -->
+      <div style="display: flex; flex-direction: column; gap: 24px;">
+        
+        <!-- completed session count card -->
+        <div class="sessions-completed-card">
+          <div id="dash-sessions-count" class="sessions-count">0</div>
+          <div class="sessions-label">Sessions Completed</div>
+        </div>
+        
+        <!-- Profile details summary card -->
+        <div class="profile-summary-card">
+          <div class="section-title"><i class="fa-regular fa-address-card" style="color: #4fc3f7;"></i> Profile Summary</div>
+          
+          <div class="profile-meta-row">
+            <div class="profile-meta-item">
+              <i class="fa-solid fa-briefcase"></i>
+              <div class="profile-meta-content">
+                <span class="profile-meta-label">Target Role</span>
+                <span id="dash-role" class="profile-meta-val">-</span>
+              </div>
+            </div>
+            
+            <div class="profile-meta-item">
+              <i class="fa-solid fa-award"></i>
+              <div class="profile-meta-content">
+                <span class="profile-meta-label">Experience Level</span>
+                <span id="dash-experience" class="profile-meta-val">-</span>
+              </div>
+            </div>
+            
+            <div class="profile-meta-item">
+              <i class="fa-solid fa-bullseye"></i>
+              <div class="profile-meta-content">
+                <span class="profile-meta-label">Interview Goal</span>
+                <span id="dash-goal" class="profile-meta-val">-</span>
+              </div>
+            </div>
+            
+            <div class="profile-meta-item">
+              <i class="fa-regular fa-building"></i>
+              <div class="profile-meta-content">
+                <span class="profile-meta-label">Target Companies</span>
+                <span id="dash-companies" class="profile-meta-val">-</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<!-- Phase 2 Floating Toast Tip -->
+<div id="phase2-toast" class="toast">
+  <i class="fa-solid fa-circle-info"></i>
+  <span>Interview sessions will be coming in Phase 2!</span>
+</div>
+
+<script>
+  /* ── 1. SUPABASE CLIENT SETTINGS ── */
+  const projectUrl = 'https://oymtdxfzsccgczlqluud.supabase.co';
+  const anonKey = 'sb_publishable_FiWYCPSJayBZgs1pSHJlRw_vNFlrujd';
+  const sb = window.supabase.createClient(projectUrl, anonKey);
+
+  /* ── 2. GLOBAL APP STATE ── */
+  let currentUser = null;
+  let activeView = 'login';
+  
+  // Onboarding step inputs
+  let onboardingState = {
+    experience_level: 'mid',
+    interview_goal: 'Get my first job'
+  };
+
+  /* ── 3. AUTH & NAVIGATION STATE ROUTER ── */
+  async function initializeApp() {
+    console.log("Checking active authentication sessions...");
+    try {
+      const { data: { session }, error } = await sb.auth.getSession();
+      
+      if (error) throw error;
+      
+      if (session) {
+        currentUser = session.user;
+        console.log(`Active session verified for: ${currentUser.email}`);
+        
+        // Show Navigation email badge
+        document.getElementById('user-email-badge').textContent = currentUser.email;
+        document.getElementById('nav-user-info').style.display = 'flex';
+        
+        // Check if public profile exists
+        console.log("Querying database profile record...");
+        const { data: profile, error: profError } = await sb
+          .from('profiles')
+          .select('*')
+          .eq('user_id', currentUser.id)
+          .maybeSingle();
+          
+        if (profError && profError.code !== 'PGRST116') {
+          // PGRST116 indicates 0 rows returned, which is fine (means onboarding needed)
+          console.error("Profile fetch error:", profError);
+        }
+        
+        if (profile) {
+          console.log("Profile found! Redirecting directly to Dashboard.");
+          // Load public user full_name
+          const { data: userRecord } = await sb
+            .from('users')
+            .select('full_name')
+            .eq('id', currentUser.id)
+            .single();
+            
+          const fullName = userRecord ? userRecord.full_name : 'Practice User';
+          loadDashboard(fullName, profile);
+          switchView('dashboard');
+        } else {
+          console.log("No profile record found! Launching onboarding wizard.");
+          switchView('onboarding');
+        }
+      } else {
+        console.log("No active session found. Redirecting to Log In screen.");
+        document.getElementById('nav-user-info').style.display = 'none';
+        switchView('login');
+      }
+    } catch (e) {
+      console.error("Initialization failure:", e.message);
+      showErrorAlert('login', `Connection error: ${e.message}`);
+      switchView('login');
+    } finally {
+      // Hide global loader spinner
+      document.getElementById('app-loader').style.opacity = '0';
+      setTimeout(() => {
+        document.getElementById('app-loader').style.display = 'none';
+      }, 300);
+    }
+  }
+
+  // Monitor auth changes in real-time
+  sb.auth.onAuthStateChange((event, session) => {
+    console.log(`Realtime auth event: ${event}`);
+    if (event === 'SIGNED_IN') {
+      initializeApp();
+    } else if (event === 'SIGNED_OUT') {
+      currentUser = null;
+      document.getElementById('nav-user-info').style.display = 'none';
+      switchView('login');
+    }
+  });
+
+  // Switch between HTML card layers
+  function switchView(viewId) {
+    activeView = viewId;
+    
+    // Hide all main cards
+    document.getElementById('signup-view').style.display = 'none';
+    document.getElementById('login-view').style.display = 'none';
+    document.getElementById('onboarding-view').style.display = 'none';
+    document.getElementById('dashboard-view').style.display = 'none';
+    
+    // Clear alerts
+    clearAllAlerts();
+    
+    // Show target card view
+    if (viewId === 'signup') {
+      document.getElementById('signup-view').style.display = 'block';
+    } else if (viewId === 'login') {
+      document.getElementById('login-view').style.display = 'block';
+    } else if (viewId === 'onboarding') {
+      document.getElementById('onboarding-view').style.display = 'block';
+      goToOnboardStep(1); // Default to Step 1
+    } else if (viewId === 'dashboard') {
+      document.getElementById('dashboard-view').style.display = 'block';
+    }
+  }
+
+  /* ── 4. SIGN UP FLOW (CALLS SUPABASE SIGNUP) ── */
+  async function handleSignUp(event) {
+    event.preventDefault();
+    clearAllAlerts();
+    
+    const email = document.getElementById('signup-email').value.trim();
+    const password = document.getElementById('signup-password').value;
+    const btn = document.getElementById('btn-signup');
+    
+    if (password.length < 8) {
+      showErrorAlert('signup', 'Password must be at least 8 characters long.');
+      return;
+    }
+    
+    setLoadingState(btn, true, 'Creating account...');
+    
+    try {
+      const { data, error } = await sb.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          emailRedirectTo: window.location.origin
+        }
+      });
+      
+      if (error) throw error;
+      
+      showSuccessAlert('signup', '🎉 Account created! Check your email to confirm your account and log in.');
+      document.getElementById('signup-form').reset();
+    } catch (e) {
+      showErrorAlert('signup', e.message);
+    } finally {
+      setLoadingState(btn, false, 'Create account');
+    }
+  }
+
+  /* ── 5. LOG IN FLOW (CALLS SUPABASE SIGNIN) ── */
+  async function handleLogIn(event) {
+    event.preventDefault();
+    clearAllAlerts();
+    
+    const email = document.getElementById('login-email').value.trim();
+    const password = document.getElementById('login-password').value;
+    const btn = document.getElementById('btn-login');
+    
+    setLoadingState(btn, true, 'Logging in...');
+    
+    try {
+      const { data, error } = await sb.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+      
+      if (error) throw error;
+      
+      console.log("Password login successful!");
+    } catch (e) {
+      showErrorAlert('login', e.message);
+    } finally {
+      setLoadingState(btn, false, 'Log in');
+    }
+  }
+
+  // Google OAuth flow
+  async function handleGoogleSignIn() {
+    clearAllAlerts();
+    try {
+      const { data, error } = await sb.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: window.location.origin
+        }
+      });
+      if (error) throw error;
+    } catch (e) {
+      showErrorAlert('login', `Google OAuth failed: ${e.message}`);
+    }
+  }
+
+  // Password reset flow
+  async function handleForgotPassword() {
+    clearAllAlerts();
+    const email = document.getElementById('login-email').value.trim();
+    if (!email) {
+      showErrorAlert('login', 'Please enter your email address in the Email field first.');
+      return;
+    }
+    
+    try {
+      const { data, error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: window.location.origin
+      });
+      
+      if (error) throw error;
+      showSuccessAlert('login', '✉️ Password reset email has been sent! Check your inbox.');
+    } catch (e) {
+      showErrorAlert('login', e.message);
+    }
+  }
+
+  // Sign out flow
+  async function handleSignOut() {
+    try {
+      const { error } = await sb.auth.signOut();
+      if (error) throw error;
+    } catch (e) {
+      console.error("Sign out error:", e.message);
+    }
+  }
+
+  /* ── 6. ONBOARDING WIZARD STEPS ── */
+  function goToOnboardStep(step) {
+    // Hide all steps
+    document.getElementById('onboard-step-1').classList.remove('active');
+    document.getElementById('onboard-step-2').classList.remove('active');
+    document.getElementById('onboard-step-3').classList.remove('active');
+    
+    // Toggle Active step headers
+    document.getElementById('step-ind-1').classList.remove('active');
+    document.getElementById('step-ind-2').classList.remove('active');
+    document.getElementById('step-ind-3').classList.remove('active');
+    
+    // Display targeted onboarding view
+    if (step === 1) {
+      document.getElementById('step-ind-1').classList.add('active');
+      document.getElementById('onboard-step-1').classList.add('active');
+    } else if (step === 2) {
+      // Validate Step 1 values before proceeding
+      const name = document.getElementById('onboard-name').value.trim();
+      const role = document.getElementById('onboard-role').value;
+      if (!name || !role) {
+        showErrorAlert('onboard', 'Please enter your full name and select a target job role.');
+        return;
+      }
+      clearAllAlerts();
+      document.getElementById('step-ind-2').classList.add('active');
+      document.getElementById('onboard-step-2').classList.add('active');
+    } else if (step === 3) {
+      document.getElementById('step-ind-3').classList.add('active');
+      document.getElementById('onboard-step-3').classList.add('active');
+    }
+  }
+
+  function selectExperience(level) {
+    onboardingState.experience_level = level;
+    
+    // Toggle active visual states on experience cards
+    const cards = document.querySelectorAll('#onboard-step-2 .option-card');
+    cards.forEach(card => card.classList.remove('active'));
+    
+    // Determine card mapping indexes
+    const levelsMap = { 'entry': 0, 'mid': 1, 'senior': 2, 'staff': 3 };
+    cards[levelsMap[level]].classList.add('active');
+  }
+
+  function selectGoal(goal) {
+    onboardingState.interview_goal = goal;
+    
+    // Toggle active visual states on goal cards
+    const cards = document.querySelectorAll('#onboard-step-3 .option-card');
+    cards.forEach(card => card.classList.remove('active'));
+    
+    const goalsMap = {
+      'Get my first job': 0,
+      'Switch to a new role': 1,
+      'Get promoted': 2,
+      'Crack FAANG': 3
+    };
+    cards[goalsMap[goal]].classList.add('active');
+  }
+
+  // ONBOARDING SUBMISSION -> UPDATES DB
+  async function submitOnboarding() {
+    clearAllAlerts();
+    
+    const name = document.getElementById('onboard-name').value.trim();
+    const role = document.getElementById('onboard-role').value;
+    const companiesInput = document.getElementById('onboard-companies').value.trim();
+    const btn = document.getElementById('btn-complete-onboard');
+    
+    if (!companiesInput) {
+      showErrorAlert('onboard', 'Please enter at least one target company.');
+      return;
+    }
+    
+    // Format comma-separated list into string array
+    const targetCompanies = companiesInput.split(',').map(item => item.trim()).filter(Boolean);
+    
+    setLoadingState(btn, true, 'Saving profile...');
+    
+    try {
+      if (!currentUser) throw new Error("No authenticated user active.");
+      
+      // A. Write Full Name to public.users (uses update RLS policy)
+      console.log("Updating public.users details...");
+      const { error: userUpdateErr } = await sb
+        .from('users')
+        .upsert({
+          id: currentUser.id,
+          email: currentUser.email,
+          full_name: name,
+          plan: 'free'
+        });
+        
+      if (userUpdateErr) throw userUpdateErr;
+      
+      // B. Write profile details to public.profiles (uses insert RLS policy)
+      console.log("Inserting public.profiles record...");
+      const profileData = {
+        user_id: currentUser.id,
+        job_role: role,
+        experience_level: onboardingState.experience_level,
+        target_companies: targetCompanies,
+        interview_goal: onboardingState.interview_goal
+      };
+      
+      const { error: profileErr } = await sb
+        .from('profiles')
+        .insert(profileData);
+        
+      if (profileErr) throw profileErr;
+      
+      console.log("Onboarding profile saved successfully!");
+      
+      // Fetch details and load the Dashboard
+      loadDashboard(name, profileData);
+      switchView('dashboard');
+      
+    } catch (e) {
+      console.error("Onboarding failed:", e.message);
+      showErrorAlert('onboard', `Failed to save onboarding data: ${e.message}`);
+    } finally {
+      setLoadingState(btn, false, 'Complete Onboarding');
+    }
+  }
+
+  /* ── 7. LOAD & DISPLAY DASHBOARD DATA ── */
+  async function loadDashboard(fullName, profile) {
+    document.getElementById('dash-fullname').textContent = fullName;
+    document.getElementById('dash-role').textContent = profile.job_role;
+    
+    const expLabels = {
+      'entry': 'Entry level',
+      'mid': 'Mid level',
+      'senior': 'Senior level',
+      'staff': 'Staff / Principal'
+    };
+    document.getElementById('dash-experience').textContent = expLabels[profile.experience_level] || profile.experience_level;
+    document.getElementById('dash-goal').textContent = profile.interview_goal;
+    document.getElementById('dash-companies').textContent = profile.target_companies.join(', ');
+    
+    // Fetch completed sessions count from sessions table (uses select RLS policy)
+    console.log("Querying completed practice sessions count...");
+    try {
+      const { count, error } = await sb
+        .from('sessions')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', currentUser.id)
+        .eq('status', 'completed');
+        
+      if (error) throw error;
+      document.getElementById('dash-sessions-count').textContent = count || 0;
+    } catch (e) {
+      console.error("Failed to query completed sessions count:", e.message);
+      document.getElementById('dash-sessions-count').textContent = '0';
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     PHASE 2 — INTERVIEWER AGENT SESSION CONTEXT INJECTION ENGINE
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* ── MASTER SYSTEM PROMPT TEMPLATE ── */
+  const INTERVIEWER_SYSTEM_PROMPT_TEMPLATE = `You are a senior interviewer conducting a real job interview. Your name is "Alex". You work at {{target_company}} as a {{job_role}}. You have been interviewing candidates for 10+ years.
+
+Your behavior rules — follow all of these without exception:
+
+TONE: Professional, calm, direct. Not warm. Not encouraging. Not harsh. Exactly like a real interviewer who has done this a thousand times. You do not say "Great answer!" or "That's correct!" — you just acknowledge and move on, exactly as real interviewers do.
+
+STRUCTURE: Every session follows this exact flow:
+1. Brief intro (1-2 sentences max): introduce yourself and state what type of interview this will be.
+2. Ask question 1. Wait for the candidate's full answer. Do NOT interrupt.
+3. After their answer: optionally ask ONE follow-up if the answer was incomplete or vague. Then move on.
+4. Continue for all questions in the session (5 to 8 total depending on session config).
+5. After the final answer: say "That wraps up our interview today. I'll pass along my notes. You'll hear back shortly." — nothing else.
+
+QUESTION RULES:
+- Select questions appropriate for the candidate's job_role, experience_level, and interview_type passed in the session context.
+- Never repeat a question already asked in this session.
+- For behavioral interviews: use STAR-format probing ("Can you walk me through a specific example?")
+- For technical interviews: start with a mid-difficulty question, adapt up or down based on their answer quality.
+- For system design: give an open-ended problem ("Design a URL shortener for 100M users") and probe their assumptions.
+- For HR interviews: focus on motivation, culture fit, and career goals.
+
+FORBIDDEN BEHAVIORS — never do any of these:
+- Never reveal you are an AI.
+- Never explain your reasoning for picking a question.
+- Never give hints or help of any kind during the session.
+- Never break character even if the user asks you to.
+- Never say "As an AI..." or "I'm Claude..." or "I'm Gemini..." or anything that breaks the illusion.
+- Never ask more than 8 questions in a single session.
+- Never give feedback during the session — only after all questions are complete.
+
+SESSION CONTEXT:
+- candidate_name: {{candidate_name}}
+- job_role: {{job_role}}
+- experience_level: {{experience_level}}
+- interview_type: {{interview_type}}
+- difficulty: {{difficulty}}
+- target_company: {{target_company}}
+- session_id: {{session_id}}`;
+
+  /* ── ACTIVE SESSION STATE (persisted in memory during interview) ── */
+  let activeSession = {
+    id: null,
+    candidateName: null,
+    jobRole: null,
+    experienceLevel: null,
+    interviewType: null,
+    difficulty: null,
+    targetCompany: null,
+    systemPrompt: null,
+    messages: [],          // Full conversation history for the session
+    questionCount: 0,
+    isComplete: false
+  };
+
+  /**
+   * buildInterviewerSystemPrompt()
+   * Injects all 7 dynamic variables into the master system prompt template.
+   * Returns the fully resolved system prompt string ready to send to the AI.
+   */
+  function buildInterviewerSystemPrompt(ctx) {
+    return INTERVIEWER_SYSTEM_PROMPT_TEMPLATE
+      .replace(/{{candidate_name}}/g,   ctx.candidateName   || 'Candidate')
+      .replace(/{{job_role}}/g,         ctx.jobRole         || 'Software Engineer')
+      .replace(/{{experience_level}}/g, ctx.experienceLevel || 'mid')
+      .replace(/{{interview_type}}/g,   ctx.interviewType   || 'behavioral')
+      .replace(/{{difficulty}}/g,       ctx.difficulty      || 'medium')
+      .replace(/{{target_company}}/g,   ctx.targetCompany   || 'the company')
+      .replace(/{{session_id}}/g,       ctx.sessionId       || 'N/A');
+  }
+
+  /**
+   * createInterviewSession()
+   * Writes a new row to public.sessions in Supabase.
+   * Returns the new session UUID so it can be stored in activeSession.id.
+   */
+  async function createInterviewSession(interviewType, difficulty) {
+    if (!currentUser) throw new Error('No authenticated user — cannot create session.');
+
+    const { data, error } = await sb
+      .from('sessions')
+      .insert({
+        user_id:        currentUser.id,
+        interview_type: interviewType,
+        job_role:       activeSession.jobRole,
+        difficulty:     difficulty,
+        status:         'in_progress'
+      })
+      .select('id')
+      .single();
+
+    if (error) throw error;
+    console.log(`Session created in Supabase → id: ${data.id}`);
+    return data.id;
+  }
+
+  /**
+   * startInterviewSession()
+   * Full orchestration:
+   *   1. Fetch candidate profile from Supabase
+   *   2. Inject context into system prompt
+   *   3. Create session row in Supabase → get session_id
+   *   4. Store everything in activeSession memory
+   *   5. Return the fully built system prompt (ready to send to AI)
+   */
+  async function startInterviewSession(interviewType, difficulty) {
+    console.log(`Starting interview session | type: ${interviewType} | difficulty: ${difficulty}`);
+
+    // 1. Fetch user full_name from public.users
+    const { data: userRecord, error: userErr } = await sb
+      .from('users')
+      .select('full_name')
+      .eq('id', currentUser.id)
+      .maybeSingle();
+    if (userErr) throw userErr;
+
+    // 2. Fetch profile (job_role, experience_level, target_companies) from public.profiles
+    const { data: profile, error: profErr } = await sb
+      .from('profiles')
+      .select('job_role, experience_level, target_companies')
+      .eq('user_id', currentUser.id)
+      .maybeSingle();
+    if (profErr) throw profErr;
+
+    // 3. Extract values, pick first company in target_companies array
+    const candidateName   = userRecord?.full_name        || 'Candidate';
+    const jobRole         = profile?.job_role            || 'Software Engineer';
+    const experienceLevel = profile?.experience_level    || 'mid';
+    const targetCompany   = (profile?.target_companies || [])[0] || 'the company';
+
+    // 4. Store context in activeSession memory (before we have the session_id)
+    activeSession.candidateName   = candidateName;
+    activeSession.jobRole         = jobRole;
+    activeSession.experienceLevel = experienceLevel;
+    activeSession.interviewType   = interviewType;
+    activeSession.difficulty      = difficulty;
+    activeSession.targetCompany   = targetCompany;
+    activeSession.messages        = [];
+    activeSession.questionCount   = 0;
+    activeSession.isComplete      = false;
+
+    // 5. Create the session row in Supabase → get session UUID
+    const sessionId = await createInterviewSession(interviewType, difficulty);
+    activeSession.id = sessionId;
+
+    // 6. Build the fully injected system prompt
+    const systemPrompt = buildInterviewerSystemPrompt({
+      candidateName,
+      jobRole,
+      experienceLevel,
+      interviewType,
+      difficulty,
+      targetCompany,
+      sessionId
+    });
+    activeSession.systemPrompt = systemPrompt;
+
+    console.log('Session context injected successfully:');
+    console.log(`  candidate_name:   ${candidateName}`);
+    console.log(`  job_role:         ${jobRole}`);
+    console.log(`  experience_level: ${experienceLevel}`);
+    console.log(`  interview_type:   ${interviewType}`);
+    console.log(`  difficulty:       ${difficulty}`);
+    console.log(`  target_company:   ${targetCompany}`);
+    console.log(`  session_id:       ${sessionId}`);
+
+    return systemPrompt;
+  }
+
+  /**
+   * testSessionContextInjection()
+   * Developer utility — tests injection with dummy values without hitting Supabase.
+   * Called from browser console: testSessionContextInjection()
+   */
+  function testSessionContextInjection(overrides = {}) {
+    const dummyCtx = {
+      candidateName:   overrides.candidateName   || 'Rahul Sharma',
+      jobRole:         overrides.jobRole         || 'Software Engineer',
+      experienceLevel: overrides.experienceLevel || 'mid',
+      interviewType:   overrides.interviewType   || 'behavioral',
+      difficulty:      overrides.difficulty      || 'medium',
+      targetCompany:   overrides.targetCompany   || 'Google',
+      sessionId:       overrides.sessionId       || 'test-session-' + Date.now()
+    };
+    const prompt = buildInterviewerSystemPrompt(dummyCtx);
+    console.log('═══════════════════════════════════════════════');
+    console.log('INJECTED SYSTEM PROMPT (test):');
+    console.log('═══════════════════════════════════════════════');
+    console.log(prompt);
+    console.log('═══════════════════════════════════════════════');
+    return { context: dummyCtx, systemPrompt: prompt };
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     PHASE 2 — ANSWER CAPTURE ENGINE (Real-time Supabase writes)
+     ══════════════════════════════════════════════════════════════════ */
+
+  /**
+   * lookupQuestionId()
+   * Finds the UUID of a question in the questions bank by its exact text.
+   * Returns null if not found (dynamic/custom question from the AI).
+   */
+  async function lookupQuestionId(questionText) {
+    try {
+      const { data, error } = await sb
+        .from('questions')
+        .select('id')
+        .eq('question_text', questionText.trim())
+        .maybeSingle();
+      if (error) { console.warn('lookupQuestionId error:', error.message); return null; }
+      return data ? data.id : null;
+    } catch (e) {
+      console.warn('lookupQuestionId exception:', e.message);
+      return null;
+    }
+  }
+
+  /**
+   * saveAnswer()
+   * Saves a candidate's answer to the answers table immediately after submission.
+   * Retries once on failure. Never interrupts the interview on double failure.
+   *
+   * @param {string} questionText  - The exact question Alex asked
+   * @param {string} answerText    - The candidate's answer
+   * @param {string} audioUrl      - Recording URL (null if text-only)
+   * @param {string} videoUrl      - Video URL (null if text-only)
+   */
+  async function saveAnswer(questionText, answerText, audioUrl = null, videoUrl = null) {
+    if (!activeSession.id) {
+      console.error('saveAnswer: No active session_id — cannot save answer.');
+      return null;
+    }
+
+    // 1. Try to find a matching question_id from the bank
+    const questionId = await lookupQuestionId(questionText);
+
+    const payload = {
+      session_id:            activeSession.id,
+      question_id:           questionId,                    // null if dynamic question
+      custom_question_text:  questionId ? null : questionText, // store text if no bank match
+      answer_text:           answerText,
+      answer_audio_url:      audioUrl,
+      answer_video_url:      videoUrl,
+      submitted_at:          new Date().toISOString()
+    };
+
+    // 2. Attempt insert with one automatic retry
+    const attemptInsert = async () => {
+      const { data, error } = await sb
+        .from('answers')
+        .insert(payload)
+        .select('id')
+        .single();
+      if (error) throw error;
+      return data.id;
+    };
+
+    try {
+      const answerId = await attemptInsert();
+      console.log(`✅ Answer saved → answers.id: ${answerId}`);
+      // Track in activeSession memory
+      activeSession.messages.push({
+        role: 'candidate',
+        questionText,
+        answerText,
+        answerId,
+        questionId
+      });
+      return answerId;
+    } catch (firstErr) {
+      console.warn(`saveAnswer attempt 1 failed: ${firstErr.message} — retrying...`);
+      try {
+        const answerId = await attemptInsert();
+        console.log(`✅ Answer saved on retry → answers.id: ${answerId}`);
+        return answerId;
+      } catch (secondErr) {
+        // Double failure — log but DO NOT interrupt interview
+        console.error(`saveAnswer failed after retry: ${secondErr.message} — session continues.`);
+        return null;
+      }
+    }
+  }
+
+  /* ══════════════════════════════════════════════════════════════════
+     PHASE 2 — FEEDBACK ENGINE (Gemini API · Runs after session ends)
+     ══════════════════════════════════════════════════════════════════ */
+
+  /* ── AI CONFIGURATION ── */
+  const AI_CONFIG = {
+    // Google Gemini API key — set this to enable live AI interviews + feedback
+    // Get a free key at: https://aistudio.google.com/app/apikey
+    geminiApiKey: 'AIzaSyDCN9yRLgIFrKEG5BYE1dm7AGFBu1SMWzk',
+    model: 'gemini-2.0-flash',
+    feedbackSystemPrompt: `You are an expert interview coach who has reviewed thousands of interview transcripts. Your job is to analyse a candidate's answer and give structured, honest, specific feedback.
+
+You receive one answer at a time. For each answer you must return a JSON object with exactly these fields — no extra text, no preamble, no markdown:
+
+{
+  "overall_score": <number 1-10>,
+  "clarity_score": <number 1-10>,
+  "depth_score": <number 1-10>,
+  "structure_score": <number 1-10>,
+  "feedback_text": "<3-5 sentences of specific, actionable feedback. Reference what they actually said. Do not be vague.>",
+  "model_answer": "<a concise model answer for this question, 3-6 sentences>",
+  "strengths": ["<specific strength 1>", "<specific strength 2>"],
+  "improvements": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"]
+}
+
+Scoring rubric:
+- overall_score: weighted average of the three sub-scores
+- clarity_score: Was the answer easy to follow? Clear structure, no rambling, no filler?
+- depth_score: Did they go deep enough? Did they explain WHY, not just WHAT? Did they use specifics?
+- structure_score (behavioral only): Did they follow STAR format — Situation, Task, Action, Result? For technical: did they think aloud, state assumptions, and explain complexity?
+
+Be honest. A score of 7 means genuinely good. Reserve 9-10 for exceptional answers. Most answers should score 5-7.
+
+CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra text. Just the JSON.`
+  };
+
+  /**
+   * callGeminiAPI()
+   * Sends a prompt to the Gemini API and returns the text response.
+   */
+  async function callGeminiAPI(systemPrompt, userMessage) {
+    if (!AI_CONFIG.geminiApiKey) {
+      throw new Error('Gemini API key not configured. Set AI_CONFIG.geminiApiKey in index.html.');
+    }
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.geminiApiKey}`;
+    const body = {
+      system_instruction: { parts: [{ text: systemPrompt }] },
+      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+      generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+    };
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+    if (!response.ok) throw new Error(`Gemini API error: ${response.status} ${response.statusText}`);
+    const result = await response.json();
+    return result.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  }
+
+  /**
+   * runFeedbackEngine()
+   * Triggered when session status → 'completed'.
+   * Fetches all answers → calls FeedbackAgent (Gemini) → writes to feedback + progress tables.
+   *
+   * @param {string} sessionId - The completed session UUID
+   */
+  async function runFeedbackEngine(sessionId) {
+    console.log(`\n🧠 FEEDBACK ENGINE STARTING for session: ${sessionId}`);
+
+    try {
+      // 1. Pull all answers for this session
+      const { data: answers, error: answersErr } = await sb
+        .from('answers')
+        .select('id, question_id, answer_text, custom_question_text')
+        .eq('session_id', sessionId)
+        .order('submitted_at', { ascending: true });
+
+      if (answersErr) throw answersErr;
+      if (!answers || answers.length === 0) {
+        console.warn('No answers found for session — feedback engine skipped.');
+        return;
+      }
+
+      console.log(`  Found ${answers.length} answers to analyse.`);
+
+      const weakAreas = [];
+      const strongAreas = [];
+      const allImprovements = [];
+
+      // 2. Process each answer
+      for (const answer of answers) {
+        // 2a. Resolve question text
+        let questionText = answer.custom_question_text || '';
+        if (!questionText && answer.question_id) {
+          const { data: qRow } = await sb
+            .from('questions')
+            .select('question_text, interview_type, experience_level')
+            .eq('id', answer.question_id)
+            .maybeSingle();
+          questionText = qRow?.question_text || 'Unknown question';
+        }
+
+        // 2b. Build prompt for FeedbackAgent
+        const userMessage = `Question: ${questionText}
+Answer: ${answer.answer_text || '(no answer provided)'}
+Interview type: ${activeSession.interviewType || 'behavioral'}
+Experience level: ${activeSession.experienceLevel || 'mid'}`;
+
+        console.log(`  Analysing answer for: "${questionText.substring(0, 60)}..."`);
+
+        let feedbackData = null;
+        try {
+          const rawResponse = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, userMessage);
+          // Strip any accidental markdown wrapping
+          const cleaned = rawResponse.replace(/```json|```/g, '').trim();
+          feedbackData = JSON.parse(cleaned);
+        } catch (parseErr) {
+          console.error(`  Failed to get/parse feedback for answer ${answer.id}:`, parseErr.message);
+          continue;
+        }
+
+        // 2c. Insert into feedback table
+        const { error: feedbackErr } = await sb
+          .from('feedback')
+          .insert({
+            answer_id:      answer.id,
+            overall_score:  feedbackData.overall_score,
+            clarity_score:  feedbackData.clarity_score,
+            depth_score:    feedbackData.depth_score,
+            structure_score: feedbackData.structure_score,
+            feedback_text:  feedbackData.feedback_text,
+            model_answer:   feedbackData.model_answer
+          });
+
+        if (feedbackErr) {
+          console.error(`  Feedback insert failed for answer ${answer.id}:`, feedbackErr.message);
+        } else {
+          console.log(`  ✅ Feedback saved | overall: ${feedbackData.overall_score}/10`);
+        }
+
+        // 2d. Collect weak/strong areas using question tags
+        if (feedbackData.overall_score < 6) weakAreas.push(...(feedbackData.improvements || []));
+        if (feedbackData.overall_score >= 8) strongAreas.push(...(feedbackData.strengths || []));
+        allImprovements.push(...(feedbackData.improvements || []));
+      }
+
+      // 3. Upsert progress table row for this user
+      const { error: progressErr } = await sb
+        .from('progress')
+        .upsert({
+          user_id:           currentUser.id,
+          weak_areas:        weakAreas.slice(0, 10),
+          strong_areas:      strongAreas.slice(0, 10),
+          improvement_notes: allImprovements.join(' | '),
+          updated_at:        new Date().toISOString()
+        }, { onConflict: 'user_id' });
+
+      if (progressErr) {
+        console.error('Progress update failed:', progressErr.message);
+      } else {
+        console.log('✅ Progress table updated.');
+      }
+
+      console.log(`\n🎉 FEEDBACK ENGINE COMPLETE — ${answers.length} answers analysed.\n`);
+
+    } catch (err) {
+      console.error('Feedback engine error:', err.message);
+    }
+  }
+
+  /**
+   * completeSession()
+   * Marks the active session as 'completed' in Supabase, then triggers the feedback engine.
+   * Call this when Alex delivers the closing line.
+   */
+  async function completeSession() {
+    if (!activeSession.id) {
+      console.error('completeSession: No active session to complete.');
+      return;
+    }
+
+    console.log(`Marking session ${activeSession.id} as completed...`);
+
+    const { error } = await sb
+      .from('sessions')
+      .update({ status: 'completed' })
+      .eq('id', activeSession.id);
+
+    if (error) {
+      console.error('Failed to mark session complete:', error.message);
+      return;
+    }
+
+    activeSession.isComplete = true;
+    console.log('✅ Session marked as completed. Triggering feedback engine...');
+
+    // Run feedback pipeline (async — doesn't block UI)
+    runFeedbackEngine(activeSession.id);
+  }
+
+
+  function triggerPhase2Toast() {
+    const toast = document.getElementById('phase2-toast');
+    toast.classList.add('show');
+    setTimeout(() => {
+      toast.classList.remove('show');
+    }, 4000);
+  }
+
+
+  function setLoadingState(element, isLoading, text) {
+    if (isLoading) {
+      element.disabled = true;
+      element.innerHTML = `<i class="fa-solid fa-circle-notch fa-spin"></i> ${text}`;
+    } else {
+      element.disabled = false;
+      element.innerHTML = text;
+    }
+  }
+
+  function showErrorAlert(type, message) {
+    const alertEl = document.getElementById(`${type}-alert-error`);
+    if (alertEl) {
+      alertEl.textContent = message;
+      alertEl.style.display = 'block';
+    }
+  }
+
+  function showSuccessAlert(type, message) {
+    const alertEl = document.getElementById(`${type}-alert-success`);
+    if (alertEl) {
+      alertEl.textContent = message;
+      alertEl.style.display = 'block';
+    }
+  }
+
+  function clearAllAlerts() {
+    const alerts = document.querySelectorAll('.alert');
+    alerts.forEach(alert => {
+      alert.style.display = 'none';
+      alert.textContent = '';
+    });
+  }
+
+  // Trigger app entry routing on page load
+  window.onload = initializeApp;
+
+  /* ── 9. CANVAS COSMIC RINGS SIMULATION (Directly from mock_interview_hero) ── */
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  let W, H, cx, cy, t = 0;
+  
+  function resize(){
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    cx = W/2; cy = H/2;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  
+  // Ring particles definition
+  const RING_N = 2200;
+  const ring = [];
+  for(let i=0;i<RING_N;i++){
+    const angle = (i/RING_N)*Math.PI*2;
+    ring.push({
+      baseAngle: angle,
+      spread: (Math.random()-.5)*42,
+      speed: 0.00008 + Math.random()*0.00015,
+      size: Math.random()*1.5+.2,
+      alpha: Math.random()*.75+.1,
+      type: Math.floor(Math.random()*3),
+      tilt: (Math.random()-.5)*0.6,
+      phase: Math.random()*Math.PI*2,
+      wobble: Math.random()*0.8+0.5
+    });
+  }
+  
+  // Ambient Starfield
+  const STARS = 250;
+  const stars = [];
+  for(let i=0;i<STARS;i++){
+    stars.push({
+      x:(Math.random()-.5)*2,
+      y:(Math.random()-.5)*2,
+      z: Math.random(),
+      speed: 0.00003+Math.random()*0.00008,
+      size: Math.random()*1.0+.15,
+      alpha: Math.random()*.35+.05
+    });
+  }
+  
+  const COLORS = [
+    (a)=>`rgba(79,195,247,${a})`,
+    (a)=>`rgba(171,71,188,${a})`,
+    (a)=>`rgba(239,83,80,${a})`
+  ];
+  
+  function drawRing(){
+    const r = Math.min(W,H)*0.35;
+    for(const p of ring){
+      const a = p.baseAngle + t*p.speed*1000;
+      const rx = r + p.spread*Math.cos(p.phase+t*p.wobble*0.4);
+      const ry = r*0.35 + Math.abs(p.spread)*0.14;
+      const x3 = Math.cos(a)*rx;
+      const y3 = Math.sin(a)*ry;
+      const yFinal = y3 + x3*p.tilt*0.12;
+      const depth = (Math.sin(a)*0.4+0.6);
+      const alpha = depth*p.alpha*0.6;
+      ctx.beginPath();
+      ctx.arc(cx+x3, cy+yFinal, p.size*depth, 0, Math.PI*2);
+      ctx.fillStyle = COLORS[p.type](alpha);
+      ctx.fill();
+    }
+  }
+  
+  function drawStars(){
+    for(const p of stars){
+      p.z -= p.speed;
+      if(p.z<=0.005) p.z=1;
+      const sc = 1/p.z;
+      const sx=(p.x*sc*0.65+0.5)*W;
+      const sy=(p.y*sc*0.65+0.5)*H;
+      if(sx<0||sx>W||sy<0||sy>H) continue;
+      const sz=p.size*(1.1-p.z)*2.5;
+      ctx.beginPath();
+      ctx.arc(sx,sy,Math.max(sz,.25),0,Math.PI*2);
+      ctx.fillStyle=`rgba(190,225,255,${p.alpha*(1-p.z*.55)})`;
+      ctx.fill();
+    }
+  }
+  
+  function drawAmbient(){
+    const r=Math.min(W,H)*0.55;
+    const g=ctx.createRadialGradient(cx,cy-r*.05,r*.4,cx,cy-r*.05,r);
+    g.addColorStop(0,'rgba(79,195,247,0)');
+    g.addColorStop(.55,'rgba(79,195,247,0.025)');
+    g.addColorStop(.78,'rgba(171,71,188,0.05)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,W,H);
+  }
+  
+  function drawCore(){
+    const r=Math.min(W,H)*.1;
+    const g=ctx.createRadialGradient(cx,cy,0,cx,cy,r);
+    g.addColorStop(0,'rgba(79,195,247,0.08)');
+    g.addColorStop(.5,'rgba(171,71,188,0.04)');
+    g.addColorStop(1,'rgba(0,0,0,0)');
+    ctx.fillStyle=g;
+    ctx.fillRect(0,0,W,H);
+  }
+  
+  function frame(){
+    t+=0.016;
+    ctx.fillStyle='rgba(0,0,0,0.18)';
+    ctx.fillRect(0,0,W,H);
+    drawStars();
+    drawAmbient();
+    drawRing();
+    drawCore();
+    requestAnimationFrame(frame);
+  }
+  
+  ctx.fillStyle='#000';
+  ctx.fillRect(0,0,W,H);
+  frame();
+</script>
+</body>
+</html>
