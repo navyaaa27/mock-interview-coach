@@ -19,6 +19,50 @@ e2e_priya.js
 run_t201.js
 sim_t201.js
 run_query.js
+apply_rls.js
+apply_trigger.js
+browser_test.js
+check_policies.js
+check_project_status.js
+check_tables.js
+click_google_provider.js
+click_sessions.js
+confirm_rls.js
+create_dashboard_users.js
+debug_dropdown.js
+debug_projects.js
+debug_signup.js
+enable_google.js
+extract_full_key.js
+find_google.js
+fix_users_rls.js
+get_api_keys.js
+get_auth_logs.js
+get_postgres_logs.js
+inspect_api_keys.js
+inspect_api_settings.js
+inspect_auth_settings.js
+inspect_jwt_settings.js
+inspect_sessions.js
+inspect_settings_menu.js
+interactive_login.js
+list_providers.js
+print_page_html.js
+rls_test.js
+run_rls_tests.js
+run_sql.js
+scroll_sessions.js
+seed_questions.js
+seed_users.js
+supabase_signup.js
+test_onboarding.js
+verify_and_alter.js
+
+# Supabase state
+supabase_state.json
+
+# Screenshots from dev/test
+*.png
 
 # Logs
 *.log
