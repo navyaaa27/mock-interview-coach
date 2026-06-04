@@ -1518,6 +1518,41 @@
           </div>
         </div>
         
+        <!-- P4.06: Practice Suggestion Card -->
+        <div id="suggestion-card" class="card" style="padding: 18px; display: none; background: linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(79,195,247,0.05) 100%); border: 1px solid rgba(167,139,250,0.15);">
+          <div style="display: flex; align-items: flex-start; gap: 14px;">
+            <div id="suggestion-icon" style="font-size: 28px; min-width: 36px; text-align: center;">💡</div>
+            <div style="flex: 1;">
+              <div style="font-size: 11px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 6px;">Smart Suggestion</div>
+              <div id="suggestion-text" style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">Loading suggestion...</div>
+              <button id="suggestion-start-btn" class="btn btn-primary" style="margin-top: 12px; padding: 8px 16px; font-size: 12px;" onclick="startSuggestedSession()">
+                Start this session <i class="fa-solid fa-arrow-right" style="margin-left: 4px;"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- P4.06: Quick Practice + Interview Countdown Row -->
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <!-- Quick 15-min Practice Button -->
+          <button id="quick-practice-btn" class="btn btn-secondary" onclick="startQuickPractice()" style="flex: 1; min-width: 200px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; text-align: left; border: 1px solid rgba(79,195,247,0.2); background: rgba(79,195,247,0.06);">
+            <i class="fa-solid fa-bolt" style="font-size: 20px; color: #4fc3f7;"></i>
+            <div>
+              <div style="font-weight: 700; font-size: 13px; color: white;">Quick 15-min Practice</div>
+              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Auto-targets your weakest area</div>
+            </div>
+          </button>
+          
+          <!-- Interview Countdown Widget -->
+          <div id="interview-countdown-widget" style="flex: 1; min-width: 200px; padding: 14px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); display: flex; align-items: center; gap: 12px;">
+            <i class="fa-solid fa-calendar-day" style="font-size: 20px; color: #a78bfa;"></i>
+            <div style="flex: 1;">
+              <div id="countdown-text" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">No interview date set</div>
+              <input type="date" id="interview-date-picker" style="margin-top: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: white; padding: 4px 8px; font-size: 12px; width: 100%;" onchange="saveInterviewDate(this.value)">
+            </div>
+          </div>
+        </div>
+
         <!-- Interactive Glowing Start Interview Button Card -->
         <button onclick="openSetupView()" class="btn btn-start-interview">
           <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
@@ -2544,8 +2579,245 @@
       console.error("Failed to query completed sessions count:", e.message);
       document.getElementById('dash-sessions-count').textContent = '0';
     }
+    
+    // P4.06: Smart Suggestion Engine
+    loadSmartSuggestion();
+    
+    // P4.06: Interview Countdown
+    loadInterviewCountdown(profile);
   }
 
+  /* ==========================================
+     P4.06: SMART PRACTICE REMINDERS ENGINE
+     ========================================== */
+  let smartSuggestionState = { type: 'behavioral', difficulty: 'medium' };
+
+  async function loadSmartSuggestion() {
+    const card = document.getElementById('suggestion-card');
+    try {
+      // Pull last 3 completed sessions with feedback
+      const { data: recentSessions } = await sb
+        .from('sessions')
+        .select('id, interview_type, answers(feedback(overall_score, strengths, improvements))')
+        .eq('user_id', currentUser.id)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false })
+        .limit(3);
+
+      if (!recentSessions || recentSessions.length === 0) {
+        // No sessions yet
+        document.getElementById('suggestion-icon').textContent = '💬';
+        document.getElementById('suggestion-text').textContent = "Start with a Behavioral interview — it's the most common first round at any company.";
+        smartSuggestionState = { type: 'behavioral', difficulty: 'medium' };
+        card.style.display = 'block';
+        return;
+      }
+
+      // Calculate average scores by interview_type
+      const typeScores = {};
+      recentSessions.forEach(session => {
+        const type = session.interview_type;
+        if (!typeScores[type]) typeScores[type] = { total: 0, count: 0 };
+        if (session.answers) {
+          session.answers.forEach(a => {
+            if (a.feedback) {
+              a.feedback.forEach(fb => {
+                if (fb.overall_score) {
+                  typeScores[type].total += fb.overall_score;
+                  typeScores[type].count++;
+                }
+              });
+            }
+          });
+        }
+      });
+
+      // Find weakest type
+      let weakestType = null;
+      let lowestAvg = Infinity;
+      for (const [type, data] of Object.entries(typeScores)) {
+        if (data.count > 0) {
+          const avg = data.total / data.count;
+          if (avg < lowestAvg) {
+            lowestAvg = avg;
+            weakestType = type;
+          }
+        }
+      }
+
+      // Find most common weak area from improvements
+      const weakAreas = {};
+      recentSessions.forEach(session => {
+        if (session.answers) {
+          session.answers.forEach(a => {
+            if (a.feedback) {
+              a.feedback.forEach(fb => {
+                if (fb.improvements) {
+                  fb.improvements.forEach(imp => {
+                    weakAreas[imp] = (weakAreas[imp] || 0) + 1;
+                  });
+                }
+              });
+            }
+          });
+        }
+      });
+      let mostCommonWeak = null;
+      let maxCount = 0;
+      for (const [area, count] of Object.entries(weakAreas)) {
+        if (count > maxCount) { maxCount = count; mostCommonWeak = area; }
+      }
+
+      // Generate suggestion
+      const typeIcons = { behavioral: '💬', technical: '💻', system_design: '🏗️', hr: '🤝', dsa: '🧮' };
+      let suggestionText = '';
+      let suggestedType = weakestType || 'behavioral';
+      let suggestedDiff = 'medium';
+
+      if (lowestAvg < 6.0 && weakestType) {
+        suggestionText = `Your ${weakestType.replace('_', ' ')} scores have been averaging ${lowestAvg.toFixed(1)}. Practice one ${weakestType.replace('_', ' ')} session today to improve.`;
+      } else if (mostCommonWeak) {
+        suggestionText = `You struggled with "${mostCommonWeak}" in your last ${recentSessions.length} sessions. Try a focused ${suggestedType.replace('_', ' ')} session today targeting that area.`;
+      } else if (lowestAvg >= 7.5) {
+        suggestionText = "You're performing well across the board. Try a Hard difficulty session to push your ceiling.";
+        suggestedDiff = 'hard';
+      } else {
+        suggestionText = `Focus on ${suggestedType.replace('_', ' ')} today — your recent average is ${lowestAvg.toFixed(1)}.`;
+      }
+
+      document.getElementById('suggestion-icon').textContent = typeIcons[suggestedType] || '💡';
+      document.getElementById('suggestion-text').textContent = suggestionText;
+      smartSuggestionState = { type: suggestedType, difficulty: suggestedDiff };
+      card.style.display = 'block';
+
+    } catch (e) {
+      console.error('Smart suggestion error:', e);
+      card.style.display = 'none';
+    }
+  }
+
+  async function startSuggestedSession() {
+    await openSetupView();
+    // Pre-fill the suggested type and difficulty
+    selectType(smartSuggestionState.type);
+    selectDifficulty(smartSuggestionState.difficulty);
+  }
+
+  async function startQuickPractice() {
+    const btn = document.getElementById('quick-practice-btn');
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    
+    try {
+      // Use smartSuggestionState which was already computed
+      setupState.type = smartSuggestionState.type || 'behavioral';
+      setupState.difficulty = smartSuggestionState.difficulty || 'medium';
+      setupState.mode = 'video';
+      
+      // Fetch company profile for session context
+      const companies = document.getElementById('dash-companies').textContent;
+      const targetCompany = companies ? companies.split(',')[0].trim() : 'Startup';
+      let { data: companyProfiles } = await sb.from('company_profiles').select('*').ilike('company_name', targetCompany);
+      if (!companyProfiles || companyProfiles.length === 0) {
+        const { data: startupProfile } = await sb.from('company_profiles').select('*').eq('company_name', 'Startup').single();
+        activeCompanyProfile = startupProfile;
+      } else {
+        activeCompanyProfile = companyProfiles[0];
+      }
+      
+      await startInterviewSession(setupState.type, setupState.difficulty);
+      
+      // Set up interview view with 15-min config (4 questions)
+      document.getElementById('int-type-chip').textContent = setupState.type.toUpperCase();
+      document.getElementById('int-diff-chip').textContent = setupState.difficulty.toUpperCase();
+      interviewState.totalQuestions = 4;
+      document.getElementById('total-q-num').textContent = interviewState.totalQuestions;
+      
+      const dotsContainer = document.getElementById('progress-dots');
+      dotsContainer.innerHTML = '';
+      for (let i = 0; i < interviewState.totalQuestions; i++) {
+        dotsContainer.innerHTML += `<div class="dot" id="dot-${i+1}"></div>`;
+      }
+      
+      switchView('interview-view');
+      initWebcam();
+      document.getElementById('voice-mode-ui').style.display = 'flex';
+      document.getElementById('text-mode-ui').style.display = 'none';
+      document.getElementById('toggle-input-mode').textContent = 'Switch to Text Chat';
+      startInterviewLoop();
+      
+    } catch (err) {
+      console.error("Quick practice failed:", err);
+      alert("Failed to start quick practice: " + (err.message || ''));
+    } finally {
+      btn.disabled = false;
+      btn.style.opacity = '1';
+    }
+  }
+
+  function loadInterviewCountdown(profile) {
+    const textEl = document.getElementById('countdown-text');
+    const pickerEl = document.getElementById('interview-date-picker');
+    
+    if (profile.interview_date) {
+      const interviewDate = new Date(profile.interview_date + 'T00:00:00');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diffTime = interviewDate - today;
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      
+      pickerEl.value = profile.interview_date;
+      
+      if (diffDays < 0) {
+        // Interview date passed — clear it
+        textEl.textContent = 'Interview date passed';
+        textEl.style.color = 'var(--text-secondary)';
+        sb.from('profiles').update({ interview_date: null }).eq('id', currentUser.id);
+      } else if (diffDays <= 3) {
+        textEl.innerHTML = `<span style="color: #f87171; font-weight: 700;">⚡ ${diffDays} day${diffDays !== 1 ? 's' : ''} left — practice today</span>`;
+      } else {
+        const companies = document.getElementById('dash-companies').textContent;
+        const firstCompany = companies ? companies.split(',')[0].trim() : 'your';
+        textEl.textContent = `${diffDays} days until your ${firstCompany} interview`;
+        textEl.style.color = '#a78bfa';
+      }
+    } else {
+      textEl.textContent = 'No interview date set';
+      textEl.style.color = 'var(--text-secondary)';
+    }
+  }
+
+  async function saveInterviewDate(dateValue) {
+    if (!currentUser) return;
+    const textEl = document.getElementById('countdown-text');
+    
+    if (!dateValue) {
+      await sb.from('profiles').update({ interview_date: null }).eq('id', currentUser.id);
+      textEl.textContent = 'No interview date set';
+      textEl.style.color = 'var(--text-secondary)';
+      return;
+    }
+    
+    await sb.from('profiles').update({ interview_date: dateValue }).eq('id', currentUser.id);
+    
+    // Re-render countdown
+    const interviewDate = new Date(dateValue + 'T00:00:00');
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const diffDays = Math.ceil((interviewDate - today) / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) {
+      textEl.textContent = 'Interview date has already passed';
+      textEl.style.color = 'var(--text-secondary)';
+    } else if (diffDays <= 3) {
+      textEl.innerHTML = `<span style="color: #f87171; font-weight: 700;">⚡ ${diffDays} day${diffDays !== 1 ? 's' : ''} left — practice today</span>`;
+    } else {
+      const companies = document.getElementById('dash-companies').textContent;
+      const firstCompany = companies ? companies.split(',')[0].trim() : 'your';
+      textEl.textContent = `${diffDays} days until your ${firstCompany} interview`;
+      textEl.style.color = '#a78bfa';
+    }
+  }
   /* ══════════════════════════════════════════════════════════════════
      PHASE 2 — INTERVIEWER AGENT SESSION CONTEXT INJECTION ENGINE
      ══════════════════════════════════════════════════════════════════ */
