@@ -12,6 +12,26 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Supabase JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<!-- MediaPipe Face Mesh for Eye Tracking (P3.06) -->
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/face_mesh.js" crossorigin="anonymous"></script>
+<!-- Chart.js for History Trends (P4.03) -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  window.onerror = function(msg, url, line, col, error) {
+    const err = document.createElement('div');
+    err.style = "position:absolute; top:0; left:0; z-index:999999; background:red; color:white; padding:20px; font-size:20px;";
+    err.innerText = msg + ' at ' + line + ':' + col;
+    if (error && error.stack) err.innerText += '\n' + error.stack;
+    document.body.appendChild(err);
+  };
+  window.addEventListener('unhandledrejection', function(event) {
+    const err = document.createElement('div');
+    err.style = "position:absolute; top:0; left:0; z-index:999999; background:red; color:white; padding:20px; font-size:20px;";
+    err.innerText = 'Unhandled Promise Rejection: ' + event.reason;
+    document.body.appendChild(err);
+  });
+</script>
 
 <style>
   /* ── CSS DESIGN SYSTEM (Slate/Violet palette matching mock_interview_hero) ── */
@@ -645,6 +665,363 @@
     letter-spacing: 0.05em;
   }
 
+  /* ── INTERVIEW VIEW (PHASE 2.07) ── */
+  .interview-layout {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--bg-color);
+    z-index: 1000;
+  }
+
+  .left-panel {
+    flex: 0 0 40%;
+    border-right: 1px solid var(--card-border);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    position: relative;
+    background: rgba(255,255,255,0.01);
+  }
+
+  .right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 40px;
+    position: relative;
+  }
+
+  .avatar-container {
+    position: relative;
+    width: 160px;
+    height: 160px;
+    margin-bottom: 24px;
+  }
+
+  .interviewer-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #1e1e2e, #2d2b42);
+    border: 3px solid rgba(139, 92, 246, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 64px;
+    color: #a78bfa;
+    position: relative;
+    z-index: 2;
+  }
+
+  .pulse-ring {
+    position: absolute;
+    top: -20px;
+    left: -20px;
+    right: -20px;
+    bottom: -20px;
+    border-radius: 50%;
+    border: 2px solid #a78bfa;
+    animation: speaking-pulse 2s infinite cubic-bezier(0.215, 0.61, 0.355, 1);
+    opacity: 0;
+    z-index: 1;
+    display: none;
+  }
+
+  .pulse-ring.active {
+    display: block;
+  }
+
+  @keyframes speaking-pulse {
+    0% { transform: scale(0.8); opacity: 0; }
+    50% { opacity: 0.5; }
+    100% { transform: scale(1.2); opacity: 0; }
+  }
+
+  .interview-timer {
+    position: absolute;
+    top: 40px;
+    left: 40px;
+    font-family: monospace;
+    font-size: 18px;
+    font-weight: 700;
+    color: #4fc3f7;
+    background: rgba(79, 195, 247, 0.1);
+    padding: 8px 16px;
+    border-radius: 100px;
+  }
+
+  .candidate-video-container {
+    position: absolute;
+    top: 40px;
+    right: 40px;
+    width: 240px;
+    height: 160px;
+    background: #000;
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid rgba(255,255,255,0.1);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  }
+
+  #candidate-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transform: scaleX(-1);
+  }
+
+  .mic-indicator {
+    position: absolute;
+    bottom: 8px;
+    right: 8px;
+    background: rgba(0,0,0,0.6);
+    padding: 4px 8px;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .mic-bar {
+    width: 3px;
+    height: 8px;
+    background: #4fc3f7;
+    border-radius: 3px;
+    animation: mic-pulse 1s infinite alternate;
+  }
+  .mic-bar:nth-child(2) { animation-delay: 0.2s; }
+  .mic-bar:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes mic-pulse {
+    0% { height: 4px; }
+    100% { height: 12px; }
+  }
+
+  .question-card {
+    margin: auto 0;
+    max-width: 800px;
+  }
+
+  .question-text {
+    font-size: 28px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-primary);
+    margin-bottom: 24px;
+  }
+
+  .input-area {
+    margin-top: auto;
+    background: rgba(255,255,255,0.02);
+    border-top: 1px solid rgba(255,255,255,0.05);
+    padding: 24px;
+    border-radius: 24px;
+  }
+
+  .voice-mode-ui {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .btn-record {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.1);
+    border: none;
+    color: white;
+    font-size: 28px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .btn-record.recording {
+    background: #ef4444;
+    box-shadow: 0 0 0 8px rgba(239, 68, 68, 0.2);
+    animation: record-pulse 1.5s infinite;
+  }
+
+  @keyframes record-pulse {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+  }
+
+  .text-mode-ui {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .answer-textarea {
+    width: 100%;
+    height: 120px;
+    background: rgba(0,0,0,0.2);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px;
+    color: white;
+    font-family: inherit;
+    font-size: 16px;
+    resize: none;
+  }
+
+  .answer-textarea:focus {
+    outline: none;
+    border-color: #a78bfa;
+  }
+
+  .progress-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    transition: all 0.3s;
+  }
+
+  .dot.filled {
+    background: #a78bfa;
+    box-shadow: 0 0 10px #a78bfa;
+  }
+
+  /* ── FEEDBACK SCREEN (PHASE 2.08) ── */
+  .feedback-layout {
+    max-width: 1000px;
+    margin: 40px auto;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  .score-card {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(79, 195, 247, 0.1));
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px;
+    padding: 40px;
+    text-align: center;
+  }
+
+  .overall-score-circle {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    border: 8px solid #a78bfa;
+    margin: 0 auto 24px auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 48px;
+    font-weight: 800;
+    color: white;
+    box-shadow: 0 0 30px rgba(139, 92, 246, 0.3);
+  }
+
+  .sub-scores {
+    display: flex;
+    justify-content: center;
+    gap: 32px;
+    margin-bottom: 24px;
+  }
+
+  .sub-score-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .sub-score-val {
+    font-size: 24px;
+    font-weight: 700;
+    color: #4fc3f7;
+  }
+
+  .sub-score-label {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+  }
+
+  .feedback-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+
+  .fb-card {
+    background: rgba(255,255,255,0.02);
+    border-radius: 16px;
+    padding: 24px;
+  }
+
+  .fb-green { border-top: 4px solid #4ade80; }
+  .fb-amber { border-top: 4px solid #fbbf24; }
+  
+  .q-breakdown-card {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.05);
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+  }
+
+  .q-header {
+    padding: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    background: rgba(255,255,255,0.01);
+  }
+  .q-header:hover { background: rgba(255,255,255,0.03); }
+
+  .q-content {
+    padding: 24px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    display: none;
+  }
+
+  .q-content.open { display: block; }
+
+  .model-answer {
+    background: rgba(79, 195, 247, 0.1);
+    border-left: 4px solid #4fc3f7;
+    padding: 16px;
+    border-radius: 0 8px 8px 0;
+    margin-top: 16px;
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    .interview-layout, .nav-container, .btn, .dashboard-card { display: none !important; }
+    .feedback-layout { display: block !important; margin: 0; }
+    .score-card { background: none; border: 1px solid #ccc; color: black; }
+    .overall-score-circle { border-color: #333; color: black; box-shadow: none; }
+    .sub-score-val { color: black; }
+    .q-content { display: block !important; }
+    .model-answer { background: #f0f8ff; color: black; }
+    .text-secondary { color: #666 !important; }
+  }
+
   /* ── SETUP SCREEN STYLES ── */
   .setup-container {
     max-width: 600px;
@@ -1100,10 +1477,20 @@
   <!-- 4. DASHBOARD PAGE VIEW -->
   <div id="dashboard-view" class="dashboard-card">
     <!-- Welcome Top Title Header -->
-    <div class="welcome-header">
-      <p style="font-size: 12px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">WORKSPACE DASHBOARD</p>
-      <h1 class="welcome-title">Welcome back, <span id="dash-fullname">[User Name]</span></h1>
-      <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Personalized mock coaching console connected successfully.</p>
+    <div class="welcome-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+      <div>
+        <p style="font-size: 12px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">WORKSPACE DASHBOARD</p>
+        <h1 class="welcome-title">Welcome back, <span id="dash-fullname">[User Name]</span></h1>
+        <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Personalized mock coaching console connected successfully.</p>
+      </div>
+      <button onclick="loadHistoryView()" class="btn btn-secondary" style="margin-top: 8px;">
+        <i class="fa-solid fa-clock-rotate-left" style="margin-right: 6px;"></i> View History
+      </button>
+    </div>
+    
+    <div id="storage-warning" style="display: none; background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.3); border-radius: 12px; padding: 12px 16px; margin-bottom: 24px; color: #fcd34d; font-size: 13px; display: none; align-items: center; gap: 12px;">
+      <i class="fa-solid fa-triangle-exclamation" style="font-size: 16px;"></i>
+      <span>Your storage is getting full. Older sessions may be automatically cleaned up.</span>
     </div>
     
     <!-- Split columns dashboard -->
@@ -1184,6 +1571,197 @@
       </div>
     </div>
   </div>
+  <!-- ==========================================
+       HISTORY VIEW (P4.03)
+       ========================================== -->
+  <div id="history-view" class="dashboard-card" style="display: none; padding-bottom: 60px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <h1 class="welcome-title"><i class="fa-solid fa-clock-rotate-left"></i> Session History</h1>
+      <button class="btn btn-secondary" onclick="switchView('dashboard-view')">Back to Dashboard</button>
+    </div>
+    
+    <!-- SECTION 1: Summary Bar -->
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px;">
+      <div class="card" style="padding: 16px; text-align: center;">
+        <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase;">Total Sessions</div>
+        <div id="hist-total" style="font-size: 32px; font-weight: 800; color: white; margin-top: 8px;">0</div>
+      </div>
+      <div class="card" style="padding: 16px; text-align: center;">
+        <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase;">Average Score</div>
+        <div id="hist-avg" style="font-size: 32px; font-weight: 800; color: #4fc3f7; margin-top: 8px;">0.0</div>
+      </div>
+      <div class="card" style="padding: 16px; text-align: center;">
+        <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase;">Best Score</div>
+        <div id="hist-best" style="font-size: 32px; font-weight: 800; color: #4ade80; margin-top: 8px;">0.0</div>
+      </div>
+      <div class="card" style="padding: 16px; text-align: center;">
+        <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase;">Current Streak</div>
+        <div id="hist-streak" style="font-size: 32px; font-weight: 800; color: #f59e0b; margin-top: 8px;">0 <i class="fa-solid fa-fire" style="font-size: 20px;"></i></div>
+      </div>
+    </div>
+    
+    <!-- SECTION 4: Score Trend Chart -->
+    <div class="card" style="padding: 24px; margin-bottom: 32px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
+        <h3 style="margin: 0; font-size: 16px;">Score Progression</h3>
+      </div>
+      <div id="hist-chart-container" style="position: relative; height: 250px; width: 100%;">
+        <canvas id="scoreTrendChart"></canvas>
+        <div id="hist-chart-empty" style="display: none; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-style: italic;">
+          Complete 3 sessions to see your trend
+        </div>
+      </div>
+    </div>
+    
+    <!-- SECTION 2: Filter Bar -->
+    <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+      <select id="hist-filter-type" class="modern-select" style="min-width: 150px; padding: 10px;" onchange="filterHistory()">
+        <option value="all">All Types</option>
+        <option value="behavioral">Behavioral</option>
+        <option value="technical">Technical</option>
+        <option value="system_design">System Design</option>
+        <option value="hr">HR</option>
+      </select>
+      <select id="hist-filter-diff" class="modern-select" style="min-width: 150px; padding: 10px;" onchange="filterHistory()">
+        <option value="all">All Difficulties</option>
+        <option value="easy">Easy</option>
+        <option value="medium">Medium</option>
+        <option value="hard">Hard</option>
+      </select>
+      <select id="hist-filter-date" class="modern-select" style="min-width: 150px; padding: 10px;" onchange="filterHistory()">
+        <option value="all">All Time</option>
+        <option value="week">This Week</option>
+        <option value="month">This Month</option>
+      </select>
+    </div>
+    
+    <!-- SECTION 3 & 5: Session List / Empty State -->
+    <div id="hist-list" style="display: flex; flex-direction: column; gap: 16px;">
+      <!-- Populated by JS -->
+    </div>
+    <div id="hist-empty" style="display: none; text-align: center; padding: 60px 20px;">
+      <i class="fa-solid fa-ghost" style="font-size: 64px; color: rgba(255,255,255,0.1); margin-bottom: 24px;"></i>
+      <h3 style="margin: 0 0 12px 0;">No interviews yet</h3>
+      <p style="color: var(--text-secondary); margin: 0 0 24px 0;">Your history will appear here after your first session.</p>
+      <button class="btn btn-primary" onclick="openSetupView()">Start your first interview <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       REPLAY VIEW (P4.04)
+       ========================================== -->
+  <div id="replay-view" style="display: none; padding-bottom: 80px; width: 100%; max-width: 1400px; margin: 0 auto;">
+    <!-- Header -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="btn btn-secondary" onclick="switchView('history-view')"><i class="fa-solid fa-arrow-left"></i> Back</button>
+        <h1 class="welcome-title" style="margin: 0; font-size: 20px;">Session Replay</h1>
+      </div>
+      <div id="replay-header-info" style="color: var(--text-secondary); font-size: 14px; display: flex; gap: 16px;">
+        <!-- Filled by JS -->
+      </div>
+    </div>
+
+    <!-- Main Split Layout -->
+    <div style="display: flex; gap: 24px; min-height: 600px; align-items: flex-start; flex-wrap: wrap;">
+      
+      <!-- LEFT PANEL (Video) -->
+      <div id="replay-left-panel" style="flex: 1 1 50%; min-width: 300px; display: flex; flex-direction: column; gap: 16px;">
+        
+        <div class="card" id="replay-video-card" style="padding: 16px; position: relative;">
+          <!-- Loader -->
+          <div id="replay-video-loader" style="position: absolute; inset: 0; background: rgba(10, 15, 30, 0.8); z-index: 10; display: flex; align-items: center; justify-content: center; flex-direction: column; border-radius: 16px;">
+            <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 32px; color: #4fc3f7; margin-bottom: 12px;"></i>
+            <div style="font-weight: 500; color: white;">Loading secure video...</div>
+          </div>
+          
+          <video id="replay-video" controls style="width: 100%; border-radius: 12px; background: #000; max-height: 400px; aspect-ratio: 16/9;"></video>
+          
+          <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+            <button class="btn btn-secondary replay-speed-btn" style="padding: 4px 10px; font-size: 12px;" onclick="setReplaySpeed(0.75, this)">0.75x</button>
+            <button class="btn btn-secondary replay-speed-btn" style="padding: 4px 10px; font-size: 12px; border-color: #4fc3f7; color: #4fc3f7;" onclick="setReplaySpeed(1, this)" id="btn-speed-1">1x</button>
+            <button class="btn btn-secondary replay-speed-btn" style="padding: 4px 10px; font-size: 12px;" onclick="setReplaySpeed(1.25, this)">1.25x</button>
+            <button class="btn btn-secondary replay-speed-btn" style="padding: 4px 10px; font-size: 12px;" onclick="setReplaySpeed(1.5, this)">1.5x</button>
+          </div>
+        </div>
+        
+        <div class="card" style="padding: 24px;">
+          <div style="font-size: 11px; color: #a78bfa; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Question</div>
+          <div id="replay-q-text" style="font-size: 18px; font-weight: 600; color: white; margin-bottom: 24px; line-height: 1.5;"></div>
+          
+          <div style="font-size: 11px; color: #4fc3f7; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Your Answer</div>
+          <div id="replay-a-text" style="font-size: 14px; color: rgba(255,255,255,0.9); line-height: 1.6; font-style: italic; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px;"></div>
+        </div>
+        
+      </div>
+      
+      <!-- RIGHT PANEL (Feedback) -->
+      <div id="replay-right-panel" style="flex: 1 1 40%; min-width: 300px; display: flex; flex-direction: column; gap: 16px; max-height: calc(100vh - 150px); overflow-y: auto; padding-right: 8px;">
+        <div class="card" style="padding: 24px; background: rgba(255,255,255,0.02);">
+          
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 24px; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 24px;">
+            <div>
+              <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase;">Overall Answer Score</div>
+              <div id="replay-fb-overall" style="font-size: 48px; font-weight: 800; color: white; line-height: 1;">0.0</div>
+            </div>
+            <div style="width: 200px; display: flex; flex-direction: column; gap: 8px;">
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">
+                  <span>Clarity</span><span id="replay-fb-c">0/10</span>
+                </div>
+                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div id="replay-fb-c-bar" style="height: 100%; background: #4fc3f7; border-radius: 2px; width: 0%;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">
+                  <span>Depth</span><span id="replay-fb-d">0/10</span>
+                </div>
+                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div id="replay-fb-d-bar" style="height: 100%; background: #a78bfa; border-radius: 2px; width: 0%;"></div></div>
+              </div>
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 11px; color: var(--text-secondary); margin-bottom: 4px;">
+                  <span>Structure</span><span id="replay-fb-s">0/10</span>
+                </div>
+                <div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div id="replay-fb-s-bar" style="height: 100%; background: #4ade80; border-radius: 2px; width: 0%;"></div></div>
+              </div>
+            </div>
+          </div>
+          
+          <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Delivery Metrics</div>
+          <div id="replay-delivery-badges" style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 24px;">
+            <!-- Rendered by JS -->
+          </div>
+          
+          <div style="font-size: 11px; color: var(--text-secondary); font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">Coach Feedback</div>
+          <div id="replay-fb-text" style="font-size: 14px; color: white; line-height: 1.6; margin-bottom: 24px;"></div>
+          
+          <div style="display: flex; gap: 16px; margin-bottom: 24px;">
+            <div style="flex: 1;">
+              <div style="font-size: 11px; color: #4ade80; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">Strengths</div>
+              <div id="replay-fb-strengths" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+            <div style="flex: 1;">
+              <div style="font-size: 11px; color: #f59e0b; font-weight: 700; text-transform: uppercase; margin-bottom: 8px;">To Improve</div>
+              <div id="replay-fb-improvements" style="display: flex; flex-direction: column; gap: 8px;"></div>
+            </div>
+          </div>
+          
+          <div class="model-answer" style="margin-top: 0;">
+            <p style="color: #4fc3f7; margin-top: 0; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">How a strong candidate might answer</p>
+            <p id="replay-fb-model" style="margin: 0; line-height: 1.6; color: rgba(255,255,255,0.9); font-size: 13px;"></p>
+          </div>
+          
+        </div>
+      </div>
+      
+    </div>
+    
+    <!-- FOOTER TABS -->
+    <div style="position: fixed; bottom: 0; left: 0; right: 0; background: rgba(10, 15, 30, 0.95); border-top: 1px solid rgba(255,255,255,0.1); padding: 16px; display: flex; justify-content: center; z-index: 100;">
+      <div id="replay-tabs" style="display: flex; gap: 8px;">
+        <!-- Generated by JS -->
+      </div>
+    </div>
+  </div>
 
   <!-- ==========================================
        SETUP VIEW (Pre-Interview Configuration)
@@ -1205,6 +1783,17 @@
             <strong id="setup-profile-company" style="color: white;">Company</strong>
           </div>
           <a href="#" style="color: #4fc3f7; text-decoration: none; font-size: 13px; font-weight: 600;" onclick="alert('Profile editing coming soon');">Change</a>
+        </div>
+        
+        <div id="setup-company-intel-card" style="display: none; background: rgba(79, 195, 247, 0.05); border: 1px solid rgba(79, 195, 247, 0.2); border-radius: 12px; padding: 16px; margin-top: 16px;">
+          <div style="font-size: 14px; font-weight: 600; color: #4fc3f7; margin-bottom: 8px;">
+            <i class="fa-solid fa-building" style="margin-right: 6px;"></i> Interviewing in <span id="intel-company-name"></span> style
+          </div>
+          <div id="intel-key-values" style="display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px;"></div>
+          <div style="background: rgba(255,255,255,0.05); padding: 10px 12px; border-radius: 8px; border-left: 3px solid #4fc3f7;">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text-secondary); margin-bottom: 4px; font-weight: 600;">Pro Tip</div>
+            <div id="intel-tip" style="font-size: 13px; color: rgba(255,255,255,0.9); line-height: 1.4;"></div>
+          </div>
         </div>
       </div>
 
@@ -1300,6 +1889,187 @@
       <button id="btn-begin-interview" class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 18px; margin-top: 16px;" onclick="beginInterview()" disabled>
         Start Interview <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
       </button>
+
+    </div>
+  </div>
+
+  <!-- ==========================================
+       LIVE INTERVIEW VIEW (Phase 2.07)
+       ========================================== -->
+  <div id="interview-view" class="interview-layout" style="display: none;">
+    <!-- LEFT PANEL: Interviewer -->
+    <div class="left-panel">
+      <div id="interview-timer" class="interview-timer">00:00</div>
+      
+      <div class="avatar-container">
+        <div id="pulse-ring" class="pulse-ring"></div>
+        <div class="interviewer-avatar">
+          <i class="fa-solid fa-user-tie"></i>
+        </div>
+        <div id="basic-voice-badge" style="display: none; position: absolute; bottom: -10px; background: #333; color: #fff; font-size: 10px; padding: 2px 6px; border-radius: 10px; border: 1px solid #444; z-index: 10;">
+          ⚡ Basic voice
+        </div>
+      </div>
+      
+      <div id="difficulty-up-badge" style="display: none; opacity: 0; transition: opacity 0.5s ease; margin-top: 16px; background: rgba(245, 158, 11, 0.2); color: #f59e0b; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; border: 1px solid rgba(245, 158, 11, 0.4); text-align: center;">
+        ↑ Stepping it up
+      </div>
+      
+      <h2 style="margin: 16px 0 0 0; font-size: 24px;">Alex</h2>
+      <p style="color: var(--text-secondary); margin-top: 4px; font-weight: 500;">Senior Interviewer</p>
+      
+      <div style="display: flex; gap: 8px; margin-top: 24px;">
+        <span id="int-type-chip" class="phase-tag" style="background: rgba(139, 92, 246, 0.2); color: #a78bfa;">Behavioral</span>
+        <span id="int-diff-chip" class="phase-tag" style="background: rgba(79, 195, 247, 0.2); color: #4fc3f7;">Medium</span>
+      </div>
+      
+      <div style="margin-top: 16px; font-size: 14px; font-weight: 600; color: white;">
+        Question <span id="current-q-num">1</span> of <span id="total-q-num">5</span>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL: Candidate -->
+    <div class="right-panel">
+      <!-- Top Right Actions & Webcam -->
+      <div style="display: flex; justify-content: flex-end; width: 100%;">
+        <button class="btn btn-secondary" style="position: absolute; top: 40px; right: 300px; padding: 8px 16px; font-size: 12px; background: rgba(239, 68, 68, 0.2); border-color: transparent; color: #ef4444;" onclick="endInterviewEarly()">
+          <i class="fa-solid fa-phone-slash"></i> End Early
+        </button>
+        
+        <div class="candidate-video-container">
+          <video id="candidate-video" autoplay muted playsinline></video>
+          <div style="position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,0.5); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: 700;">YOU</div>
+          <div class="mic-indicator">
+            <div class="mic-bar"></div>
+            <div class="mic-bar"></div>
+            <div class="mic-bar"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle: Question Card -->
+      <div class="question-card">
+        <div id="current-question-text" class="question-text">
+          Hello Priya, I'm Alex. I'll be conducting your behavioral interview today. Whenever you're ready, we'll get started.
+        </div>
+        <div style="color: var(--text-secondary); font-size: 14px;">
+          <i class="fa-solid fa-circle-info"></i> Take your time. Press record or submit when you are ready.
+        </div>
+      </div>
+
+      <!-- Bottom: Input Area -->
+      <div class="input-area">
+        <!-- Voice Mode UI -->
+        <div id="voice-mode-ui" class="voice-mode-ui" style="position: relative;">
+          <button id="btn-mic-record" class="btn-record" onclick="toggleRecording()">
+            <i class="fa-solid fa-microphone"></i>
+          </button>
+          <div id="silence-prompt" style="display: none; position: absolute; top: 80px; font-size: 13px; color: #f59e0b; background: rgba(245, 158, 11, 0.1); padding: 4px 12px; border-radius: 12px; font-weight: 500;">
+            Still there? Tap the mic when you're ready to continue.
+          </div>
+          <div id="transcription-preview" style="min-height: 40px; color: var(--text-primary); font-size: 15px; font-style: italic; max-width: 80%; text-align: center;">
+            Click the mic to start speaking...
+          </div>
+          <button id="btn-voice-submit" class="btn btn-primary" style="display: none; padding: 12px 32px;" onclick="submitVoiceAnswer()">Submit Answer</button>
+        </div>
+
+        <!-- Text Mode UI -->
+        <div id="text-mode-ui" class="text-mode-ui">
+          <textarea id="text-answer-input" class="answer-textarea" placeholder="Type your answer here..."></textarea>
+          <div style="display: flex; justify-content: flex-end;">
+            <button id="btn-text-submit" class="btn btn-primary" onclick="submitTextAnswer()">Submit Answer <i class="fa-solid fa-paper-plane" style="margin-left: 8px;"></i></button>
+          </div>
+        </div>
+
+        <div style="text-align: center; margin-top: 16px;">
+          <a href="#" id="toggle-input-mode" style="color: var(--text-muted); font-size: 12px; text-decoration: none;" onclick="toggleInputMode()">Switch to Text Chat</a>
+        </div>
+        
+        <div id="progress-dots" class="progress-dots">
+          <!-- Populated dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==========================================
+       FEEDBACK REPORT VIEW (Phase 2.08)
+       ========================================== -->
+  <div id="feedback-loading" style="display: none; height: 100vh; width: 100vw; position: fixed; top: 0; left: 0; background: var(--bg-color); z-index: 2000; flex-direction: column; justify-content: center; align-items: center; gap: 24px;">
+    <i class="fa-solid fa-circle-notch fa-spin" style="font-size: 48px; color: #a78bfa;"></i>
+    <h2 style="margin:0;">Alex is reviewing your interview...</h2>
+    <p style="color: var(--text-secondary);">This takes about 15-30 seconds. Generating deep analytics and feedback.</p>
+    <p id="feedback-loading-status" style="color: #4fc3f7; font-weight: bold; font-size: 14px; margin: -10px 0 10px 0;">Analysing...</p>
+    <div style="width: 300px; height: 4px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden;">
+      <div style="height: 100%; width: 50%; background: #a78bfa; animation: fb-load 2s infinite ease-in-out;"></div>
+    </div>
+    <style>@keyframes fb-load { 0% { transform: translateX(-100%); } 100% { transform: translateX(200%); } }</style>
+  </div>
+
+  <div id="feedback-view" class="container" style="display: none;">
+    <div class="feedback-layout">
+      
+      <!-- Top Score Card -->
+      <div class="score-card">
+        <div class="overall-score-circle"><span id="fb-overall">0.0</span><span style="font-size: 20px; color: rgba(255,255,255,0.5);">/10</span></div>
+        
+        <div class="sub-scores">
+          <div class="sub-score-item">
+            <span class="sub-score-label">Clarity</span>
+            <span id="fb-clarity" class="sub-score-val">0.0</span>
+          </div>
+          <div class="sub-score-item">
+            <span class="sub-score-label">Depth</span>
+            <span id="fb-depth" class="sub-score-val">0.0</span>
+          </div>
+          <div class="sub-score-item">
+            <span class="sub-score-label">Structure</span>
+            <span id="fb-structure" class="sub-score-val">0.0</span>
+          </div>
+        </div>
+
+        <div style="display: flex; justify-content: center; gap: 8px;">
+          <span class="phase-tag" style="background: rgba(255,255,255,0.1);" id="fb-chip-type">Type</span>
+          <span class="phase-tag" style="background: rgba(255,255,255,0.1);" id="fb-chip-diff">Diff</span>
+          <span class="phase-tag" style="background: rgba(255,255,255,0.1);" id="fb-chip-date">Date</span>
+        </div>
+
+        <div style="margin-top: 24px; display: flex; flex-direction: column; align-items: center;">
+          <span style="font-size: 13px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; margin-bottom: 8px;">Difficulty Progression</span>
+          <div id="fb-difficulty-history" style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center;">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Strengths / Improvements -->
+      <div class="feedback-grid">
+        <div class="fb-card fb-green">
+          <h3 style="margin-top:0; color: #4ade80;"><i class="fa-solid fa-arrow-trend-up"></i> Key Strengths</h3>
+          <ul id="fb-strengths-list" style="padding-left: 20px; color: var(--text-secondary); line-height: 1.6; font-size: 15px;">
+          </ul>
+        </div>
+        <div class="fb-card fb-amber">
+          <h3 style="margin-top:0; color: #fbbf24;"><i class="fa-solid fa-screwdriver-wrench"></i> Areas to Improve</h3>
+          <ul id="fb-improvements-list" style="padding-left: 20px; color: var(--text-secondary); line-height: 1.6; font-size: 15px;">
+          </ul>
+        </div>
+      </div>
+
+      <!-- Question Breakdown -->
+      <div>
+        <h2>Question Breakdown</h2>
+        <div id="fb-questions-container">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div style="display: flex; gap: 16px; margin-top: 24px;">
+        <button class="btn btn-primary" onclick="openSetupView()"><i class="fa-solid fa-rotate-right"></i> Practice Again</button>
+        <button class="btn btn-secondary" onclick="window.print()"><i class="fa-solid fa-download"></i> Download PDF</button>
+        <button class="btn btn-secondary" onclick="switchView('dashboard-view')">Back to Dashboard</button>
+      </div>
 
     </div>
   </div>
@@ -1407,25 +2177,29 @@
   function switchView(viewId) {
     activeView = viewId;
     
-    // Hide all main cards
-    document.getElementById('signup-view').style.display = 'none';
-    document.getElementById('login-view').style.display = 'none';
-    document.getElementById('onboarding-view').style.display = 'none';
-    document.getElementById('dashboard-view').style.display = 'none';
+    // Normalize viewId
+    const targetId = viewId.endsWith('-view') ? viewId : viewId + '-view';
     
-    // Clear alerts
+    const allViews = [
+      'signup-view', 'login-view', 'onboarding-view', 
+      'dashboard-view', 'setup-view', 'interview-view', 'feedback-view', 'history-view', 'replay-view'
+    ];
+    
+    allViews.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        if (id === targetId) {
+          el.style.display = id === 'interview-view' ? 'flex' : 'block';
+        } else {
+          el.style.display = 'none';
+        }
+      }
+    });
+    
     clearAllAlerts();
     
-    // Show target card view
-    if (viewId === 'signup') {
-      document.getElementById('signup-view').style.display = 'block';
-    } else if (viewId === 'login') {
-      document.getElementById('login-view').style.display = 'block';
-    } else if (viewId === 'onboarding') {
-      document.getElementById('onboarding-view').style.display = 'block';
+    if (targetId === 'onboarding-view') {
       goToOnboardStep(1); // Default to Step 1
-    } else if (viewId === 'dashboard') {
-      document.getElementById('dashboard-view').style.display = 'block';
     }
   }
 
@@ -1691,6 +2465,13 @@
         
       if (error) throw error;
       document.getElementById('dash-sessions-count').textContent = count || 0;
+      
+      // Storage Warning logic (Phase 3.03)
+      if (count >= 15) {
+        document.getElementById('storage-warning').style.display = 'flex';
+      } else {
+        document.getElementById('storage-warning').style.display = 'none';
+      }
     } catch (e) {
       console.error("Failed to query completed sessions count:", e.message);
       document.getElementById('dash-sessions-count').textContent = '0';
@@ -1732,13 +2513,26 @@ FORBIDDEN BEHAVIORS — never do any of these:
 - Never ask more than 8 questions in a single session.
 - Never give feedback during the session — only after all questions are complete.
 
+ADAPTIVE DIFFICULTY RULES:
+- When current_difficulty is 'hard': ask more nuanced follow-ups, probe for failure cases, ask about scale and edge cases.
+- When current_difficulty is 'easy': ask broader, more foundational questions. Accept high-level answers without deep probing.
+- When current_difficulty is 'medium': standard interview depth.
+
+COMPANY INTELLIGENCE:
+You are interviewing this candidate AS IF you work at their target company. Your question themes, follow-up depth, and evaluation lens must reflect that company's culture exactly as described in target_company_style. Probe for the themes in target_company_themes. Watch for the red_flags — if you detect one, probe deeper on it.
+
 SESSION CONTEXT:
 - candidate_name: {{candidate_name}}
 - job_role: {{job_role}}
 - experience_level: {{experience_level}}
 - interview_type: {{interview_type}}
 - difficulty: {{difficulty}}
+- current_difficulty: {{current_difficulty}}
 - target_company: {{target_company}}
+- target_company_style: {{target_company_style}}
+- target_company_values: {{target_company_values}}
+- target_company_themes: {{target_company_themes}}
+- target_company_red_flags: {{target_company_red_flags}}
 - session_id: {{session_id}}`;
 
   /* ── ACTIVE SESSION STATE (persisted in memory during interview) ── */
@@ -1768,7 +2562,12 @@ SESSION CONTEXT:
       .replace(/{{experience_level}}/g, ctx.experienceLevel || 'mid')
       .replace(/{{interview_type}}/g,   ctx.interviewType   || 'behavioral')
       .replace(/{{difficulty}}/g,       ctx.difficulty      || 'medium')
+      .replace(/{{current_difficulty}}/g, ctx.currentDifficulty || 'medium')
       .replace(/{{target_company}}/g,   ctx.targetCompany   || 'the company')
+      .replace(/{{target_company_style}}/g, ctx.targetCompanyStyle || 'standard tech interview')
+      .replace(/{{target_company_values}}/g, ctx.targetCompanyValues || 'standard values')
+      .replace(/{{target_company_themes}}/g, ctx.targetCompanyThemes || 'general questions')
+      .replace(/{{target_company_red_flags}}/g, ctx.targetCompanyRedFlags || 'general red flags')
       .replace(/{{session_id}}/g,       ctx.sessionId       || 'N/A');
   }
 
@@ -1787,7 +2586,9 @@ SESSION CONTEXT:
         interview_type: interviewType,
         job_role:       activeSession.jobRole,
         difficulty:     difficulty,
-        status:         'in_progress'
+        current_difficulty: difficulty,
+        difficulty_history: [difficulty],
+        status:         'active'
       })
       .select('id')
       .single();
@@ -1837,6 +2638,8 @@ SESSION CONTEXT:
     activeSession.experienceLevel = experienceLevel;
     activeSession.interviewType   = interviewType;
     activeSession.difficulty      = difficulty;
+    activeSession.currentDifficulty = difficulty;
+    activeSession.difficultyHistory = [difficulty];
     activeSession.targetCompany   = targetCompany;
     activeSession.messages        = [];
     activeSession.questionCount   = 0;
@@ -1853,6 +2656,7 @@ SESSION CONTEXT:
       experienceLevel,
       interviewType,
       difficulty,
+      currentDifficulty: difficulty,
       targetCompany,
       sessionId
     });
@@ -1902,12 +2706,38 @@ SESSION CONTEXT:
     difficulty: 'medium',
     mode: 'video'
   };
+  let activeCompanyProfile = null;
 
-  function openSetupView() {
+  async function openSetupView() {
     // Populate profile summary
     document.getElementById('setup-profile-role').textContent = document.getElementById('dash-role').textContent || 'Software Engineer';
     const companies = document.getElementById('dash-companies').textContent;
-    document.getElementById('setup-profile-company').textContent = companies ? companies.split(',')[0].trim() : 'a top tech company';
+    const targetCompany = companies ? companies.split(',')[0].trim() : 'a top tech company';
+    document.getElementById('setup-profile-company').textContent = targetCompany;
+    
+    // Fetch Company Profile
+    let { data: companyProfiles } = await sb.from('company_profiles').select('*').ilike('company_name', targetCompany);
+    if (!companyProfiles || companyProfiles.length === 0) {
+      const { data: startupProfile } = await sb.from('company_profiles').select('*').eq('company_name', 'Startup').single();
+      activeCompanyProfile = startupProfile;
+    } else {
+      activeCompanyProfile = companyProfiles[0];
+    }
+    
+    // Render Company Intel Card
+    if (activeCompanyProfile) {
+      document.getElementById('setup-company-intel-card').style.display = 'block';
+      document.getElementById('intel-company-name').textContent = activeCompanyProfile.company_name;
+      document.getElementById('intel-tip').textContent = activeCompanyProfile.tip_for_candidate;
+      
+      const kvContainer = document.getElementById('intel-key-values');
+      kvContainer.innerHTML = '';
+      if (activeCompanyProfile.key_values) {
+        activeCompanyProfile.key_values.forEach(kv => {
+          kvContainer.innerHTML += `<span style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">${kv}</span>`;
+        });
+      }
+    }
     
     switchView('setup-view');
     validateSetupForm();
@@ -1966,22 +2796,989 @@ SESSION CONTEXT:
     setLoadingState(btn, true, 'Preparing Session...');
     
     try {
-      // Create session in Supabase and inject context (from Phase 2.02 logic)
-      // Note: we are passing setupState values to the orchestrator
       await startInterviewSession(setupState.type, setupState.difficulty);
       
-      // Navigate to the live interview screen (Phase 2.07 - coming next)
-      // For now, we just alert since the view isn't built yet
-      alert(`Session Created! ID: ${activeSession.id}\nRouting to Interview Chat Screen...`);
-      // switchView('interview-view'); 
+      // Navigate to the live interview screen
+      document.getElementById('int-type-chip').textContent = setupState.type.toUpperCase();
+      document.getElementById('int-diff-chip').textContent = setupState.difficulty.toUpperCase();
+      
+      // Determine duration details
+      const dur = parseInt(document.getElementById('setup-duration').value);
+      interviewState.totalQuestions = dur === 15 ? 4 : (dur === 25 ? 6 : 8);
+      document.getElementById('total-q-num').textContent = interviewState.totalQuestions;
+      
+      // Initialize dots
+      const dotsContainer = document.getElementById('progress-dots');
+      dotsContainer.innerHTML = '';
+      for (let i=0; i<interviewState.totalQuestions; i++) {
+        dotsContainer.innerHTML += `<div class="dot" id="dot-${i+1}"></div>`;
+      }
+      
+      switchView('interview-view'); 
+      
+      // Kick off WebRTC and Interview Loop
+      if (setupState.mode === 'video') {
+        initWebcam();
+        document.getElementById('voice-mode-ui').style.display = 'flex';
+        document.getElementById('text-mode-ui').style.display = 'none';
+        document.getElementById('toggle-input-mode').textContent = 'Switch to Text Chat';
+      } else {
+        document.getElementById('voice-mode-ui').style.display = 'none';
+        document.getElementById('text-mode-ui').style.display = 'flex';
+        document.getElementById('toggle-input-mode').textContent = 'Switch to Voice Chat';
+      }
+      
+      startInterviewLoop();
       
     } catch (err) {
       console.error("Failed to start session:", err);
-      alert("Failed to create session. Check console.");
+      alert("Failed to create session: " + (err.message || JSON.stringify(err)));
     } finally {
       setLoadingState(btn, false, 'Start Interview <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>');
     }
   }
+
+  /* ══════════════════════════════════════════════════════════════════
+     PHASE 2.07 — LIVE INTERVIEW ORCHESTRATION
+     ══════════════════════════════════════════════════════════════════ */
+  let interviewState = {
+    currentQ: 1,
+    totalQuestions: 4,
+    timerInterval: null,
+    startTime: null,
+    chatHistory: [],
+    currentAIQuestionText: '',
+    recognition: null,
+    isRecording: false,
+    transcript: ''
+  };
+
+  // --- Analytics State (P3.05, P3.06) ---
+  const FILLERS = [
+    'um', 'uh', 'like', 'you know', 'basically', 'literally',
+    'actually', 'so', 'right', 'okay', 'kind of', 'sort of',
+    'i mean', 'you see', 'well', 'hmm', 'er', 'ah'
+  ];
+
+  function analyzeFillers(text) {
+    const lower = text.toLowerCase();
+    const found = [];
+    let count = 0;
+    for (const filler of FILLERS) {
+      const regex = new RegExp(`\\b${filler}\\b`, 'gi');
+      const matches = lower.match(regex);
+      if (matches) {
+        count += matches.length;
+        found.push(`${filler} (×${matches.length})`);
+      }
+    }
+    return { count, found };
+  }
+
+  function analyzePace(wordCount, durationSeconds) {
+    if (durationSeconds <= 0) return { wpm: 0, rating: 'too_slow' };
+    const wpm = Math.round((wordCount / durationSeconds) * 60);
+    let rating;
+    if (wpm < 100) rating = 'too_slow';
+    else if (wpm < 130) rating = 'slow';
+    else if (wpm <= 170) rating = 'normal'; // ideal interview pace
+    else if (wpm <= 200) rating = 'fast';
+    else rating = 'too_fast';
+    return { wpm, rating };
+  }
+
+  let answerStartTs = 0;
+  const deliveryMetricsMap = {}; // Keyed by answerId
+  
+  let faceMesh = null;
+  let totalFrames = 0;
+  let lookingAtCameraFrames = 0;
+  let isEyeTrackingDisabled = false;
+  let frameProcessingWarningCount = 0;
+
+  let webcamStream = null;
+
+  async function initWebcam() {
+    try {
+      webcamStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { width: 1280, height: 720, facingMode: 'user' }, 
+        audio: true 
+      });
+      document.getElementById('candidate-video').srcObject = webcamStream;
+    } catch (err) {
+      console.warn("Webcam access denied or unavailable:", err);
+      // Check if it's mic or video that failed specifically (browser dependent, but we can do basic checks)
+      if (err.name === 'NotAllowedError' || err.name === 'NotFoundError') {
+        const msg = err.message.toLowerCase();
+        if (msg.includes('microphone') || msg.includes('audio')) {
+          alert("Microphone is required. Please allow microphone access and refresh.");
+        } else {
+          document.querySelector('.candidate-video-container').innerHTML = 
+            '<div style="width:100%; height:100%; display:flex; flex-direction:column; align-items:center; justify-content:center; color:#9ca3af; font-size:13px; text-align:center; padding:16px;">' +
+            '<i class="fa-solid fa-video-slash" style="font-size:24px; margin-bottom:8px;"></i>' +
+            'Video recording disabled — camera permission not granted</div>';
+          
+          // Try to get audio only if video failed
+          try {
+            webcamStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+          } catch(audioErr) {
+            alert("Microphone is required. Please allow microphone access and refresh.");
+          }
+        }
+      }
+    }
+    
+    // Set up eye tracking
+    try {
+      if (typeof FaceMesh !== 'undefined' && webcamStream) {
+        faceMesh = new FaceMesh({ locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh@0.4.1633559619/${file}` });
+        faceMesh.setOptions({
+          maxNumFaces: 1,
+          refineLandmarks: true,
+          minDetectionConfidence: 0.5,
+          minTrackingConfidence: 0.5
+        });
+        
+        await faceMesh.initialize();
+
+        faceMesh.onResults((results) => {
+          if (!interviewState.isRecording || isEyeTrackingDisabled) return;
+          
+          if (!results.multiFaceLandmarks?.length) return;
+          totalFrames++;
+          const landmarks = results.multiFaceLandmarks[0];
+
+          const leftIris  = landmarks[473];
+          const rightIris = landmarks[468];
+          const leftOuter = landmarks[33];
+          const leftInner = landmarks[133];
+          const rightOuter = landmarks[362];
+          const rightInner = landmarks[263];
+
+          const leftCenterX  = (leftOuter.x + leftInner.x) / 2;
+          const rightCenterX = (rightOuter.x + rightInner.x) / 2;
+          const leftOffset   = Math.abs(leftIris.x  - leftCenterX);
+          const rightOffset  = Math.abs(rightIris.x - rightCenterX);
+
+          if (leftOffset < 0.025 && rightOffset < 0.025) lookingAtCameraFrames++;
+        });
+
+        const videoEl = document.getElementById('candidate-video');
+        let sampleInterval = 500;
+        
+        const processFrame = async () => {
+          if (!faceMesh || isEyeTrackingDisabled) return;
+          if (videoEl.readyState >= 2 && interviewState.isRecording) {
+            const start = performance.now();
+            await faceMesh.send({image: videoEl});
+            const elapsed = performance.now() - start;
+            
+            if (elapsed > 100) {
+              frameProcessingWarningCount++;
+              if (frameProcessingWarningCount > 3) {
+                if (elapsed > 300) {
+                  console.warn("Device too slow for eye tracking. Disabling.");
+                  isEyeTrackingDisabled = true;
+                  return;
+                }
+                sampleInterval = 1000;
+              }
+            } else {
+              frameProcessingWarningCount = Math.max(0, frameProcessingWarningCount - 1);
+            }
+          }
+          setTimeout(processFrame, sampleInterval);
+        };
+        setTimeout(processFrame, sampleInterval);
+      }
+    } catch (err) {
+      console.warn("FaceMesh init failed:", err);
+    }
+  }
+
+  // --- Video Recording Logic (P3.04) ---
+  let videoRecorder = null;
+  let videoChunks = [];
+  let isVideoRecording = false;
+
+  function startVideoRecording() {
+    if (isVideoRecording || !webcamStream) return;
+    
+    // Only record if we actually have video tracks
+    if (webcamStream.getVideoTracks().length === 0) return;
+    
+    videoChunks = [];
+    try {
+      videoRecorder = new MediaRecorder(webcamStream, { mimeType: 'video/webm' });
+      videoRecorder.ondataavailable = e => videoChunks.push(e.data);
+      videoRecorder.start();
+      isVideoRecording = true;
+      console.log("Started per-answer video recording...");
+    } catch(e) {
+      console.error("Failed to start video recorder:", e);
+    }
+  }
+
+  async function stopAndUploadVideo(answerId, answerIndex) {
+    if (!isVideoRecording || !videoRecorder) return;
+    isVideoRecording = false;
+    console.log("Stopping video recording for upload...");
+
+    return new Promise((resolve) => {
+      videoRecorder.onstop = async () => {
+        const videoBlob = new Blob(videoChunks, { type: 'video/webm' });
+        videoChunks.length = 0; // memory management
+        
+        const filePath = `${currentUser.id}/${activeSession.id}/${answerIndex}_video.webm`;
+        
+        const qBox = document.getElementById('current-question-text');
+        const uploadStatusHtml = `<span id="upload-status" style="display:inline-block; font-size:12px; color:#a78bfa; margin-left:12px; font-weight:normal;">Saving recording... <i class="fa-solid fa-circle fa-fade" style="font-size:8px;"></i></span>`;
+        qBox.innerHTML += uploadStatusHtml;
+
+        try {
+          const { error } = await sb.storage
+            .from('interview-videos')
+            .upload(filePath, videoBlob, { contentType: 'video/webm', upsert: false });
+
+          if (!error) {
+            const { data: urlData } = await sb.storage
+              .from('interview-videos')
+              .createSignedUrl(filePath, 604800);
+
+            await sb.from('answers')
+              .update({ answer_video_url: urlData.signedUrl })
+              .eq('id', answerId);
+              
+            const statusEl = document.getElementById('upload-status');
+            if (statusEl) statusEl.innerHTML = `<span style="color: #4ade80;">✓ Saved</span>`;
+          } else {
+            throw error;
+          }
+        } catch (err) {
+          console.error("Video upload failed:", err);
+          const statusEl = document.getElementById('upload-status');
+          if (statusEl) statusEl.innerHTML = `<span style="color: #f87171;">⚠ Recording not saved</span>`;
+        }
+        resolve();
+      };
+      videoRecorder.stop();
+    });
+  }
+
+  function toggleInputMode() {
+    const isText = document.getElementById('text-mode-ui').style.display === 'flex';
+    if (isText) {
+      document.getElementById('text-mode-ui').style.display = 'none';
+      document.getElementById('voice-mode-ui').style.display = 'flex';
+      document.getElementById('toggle-input-mode').textContent = 'Switch to Text Chat';
+    } else {
+      document.getElementById('voice-mode-ui').style.display = 'none';
+      document.getElementById('text-mode-ui').style.display = 'flex';
+      document.getElementById('toggle-input-mode').textContent = 'Switch to Voice Chat';
+    }
+  }
+
+  function startTimer() {
+    interviewState.startTime = Date.now();
+    interviewState.timerInterval = setInterval(() => {
+      const elapsed = Math.floor((Date.now() - interviewState.startTime) / 1000);
+      const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+      const secs = String(elapsed % 60).padStart(2, '0');
+      document.getElementById('interview-timer').textContent = `${mins}:${secs}`;
+    }, 1000);
+  }
+
+  async function playAlexSpeech(text) {
+    const cleanText = text.replace(/[*_~`]/g, '');
+    const ring = document.getElementById('pulse-ring');
+    const basicBadge = document.getElementById('basic-voice-badge');
+    
+    // Fallback logic
+    const playFallback = () => {
+      if (basicBadge) basicBadge.style.display = 'block';
+      if (!window.speechSynthesis) return;
+      window.speechSynthesis.cancel();
+      
+      const msg = new SpeechSynthesisUtterance(cleanText);
+      msg.rate = 1.0;
+      msg.pitch = 1.0;
+      
+      msg.onstart = () => ring.classList.add('active');
+      msg.onend = () => ring.classList.remove('active');
+      msg.onerror = () => ring.classList.remove('active');
+      
+      window.speechSynthesis.speak(msg);
+    };
+
+    if (!AI_CONFIG.elevenLabsApiKey || !AI_CONFIG.elevenLabsVoiceId) {
+      return playFallback();
+    }
+
+    try {
+      // Check char limits
+      const { data: profile } = await sb
+        .from('profiles')
+        .select('elevenlabs_chars_used')
+        .eq('id', currentUser.id)
+        .single();
+        
+      const charsUsed = (profile && profile.elevenlabs_chars_used) ? profile.elevenlabs_chars_used : 0;
+      
+      if (charsUsed + cleanText.length > 9500) {
+        console.warn("ElevenLabs char limit approaching, falling back to basic voice.");
+        return playFallback();
+      }
+
+      // Start pulse animation just before we fetch so user knows it's loading/speaking
+      ring.classList.add('active');
+
+      const response = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${AI_CONFIG.elevenLabsVoiceId}/stream`,
+        {
+          method: 'POST',
+          headers: {
+            'xi-api-key': AI_CONFIG.elevenLabsApiKey,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text: cleanText,
+            model_id: 'eleven_monolingual_v1',
+            voice_settings: {
+              stability: 0.55,
+              similarity_boost: 0.75,
+              style: 0.10,
+              use_speaker_boost: true
+            }
+          })
+        }
+      );
+      
+      if (!response.ok) throw new Error(`ElevenLabs API returned ${response.status}`);
+
+      const audioBlob = await response.blob();
+      const audioUrl = URL.createObjectURL(audioBlob);
+      const audio = new Audio(audioUrl);
+      
+      audio.onended = () => {
+        ring.classList.remove('active');
+        URL.revokeObjectURL(audioUrl);
+      };
+      
+      audio.onerror = () => {
+        ring.classList.remove('active');
+        playFallback();
+      };
+
+      await audio.play();
+      
+      // Increment char limit in DB
+      await sb
+        .from('profiles')
+        .update({ elevenlabs_chars_used: charsUsed + cleanText.length })
+        .eq('id', currentUser.id);
+
+      return new Promise(resolve => { audio.onended = () => { ring.classList.remove('active'); resolve(); } });
+    } catch (err) {
+      console.error("ElevenLabs TTS Error:", err);
+      ring.classList.remove('active');
+      playFallback();
+    }
+  }
+
+  async function startInterviewLoop() {
+    startTimer();
+    document.getElementById('current-question-text').textContent = "Connecting to Alex...";
+    
+    // System instruction for the intro
+    const prompt = `The interview has started. Introduce yourself as Alex, say exactly 1-2 sentences of introduction, and then immediately ask the first question for a ${setupState.difficulty}-level ${document.getElementById('dash-role').textContent}. Do not break character.`;
+    
+    try {
+      const aiResponse = await callGeminiAPI(activeSession.systemPrompt, prompt);
+      interviewState.currentAIQuestionText = aiResponse;
+      document.getElementById('current-question-text').textContent = aiResponse;
+      interviewState.chatHistory.push({ role: 'user', parts: [{ text: prompt }] });
+      interviewState.chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] });
+      
+      playAlexSpeech(aiResponse);
+    } catch (e) {
+      console.error(e);
+      document.getElementById('current-question-text').textContent = "AI Error: " + (e.message || "Failed to connect to AI");
+    }
+  }
+
+  // --- Speech Recognition ---
+  let deepgramClient = null;
+  let silenceTimer = null;
+
+  async function startDeepgramTranscription(onTranscript) {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    const mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+
+    const socket = new WebSocket(
+      `wss://api.deepgram.com/v1/listen?language=en-IN&model=nova-2&interim_results=true&punctuate=true`,
+      ['token', AI_CONFIG.deepgramApiKey]
+    );
+
+    socket.onopen = () => {
+      mediaRecorder.ondataavailable = (e) => {
+        if (socket.readyState === WebSocket.OPEN) socket.send(e.data);
+      };
+      mediaRecorder.start(250);
+    };
+
+    socket.onmessage = (msg) => {
+      const data = JSON.parse(msg.data);
+      const transcript = data.channel?.alternatives?.[0]?.transcript;
+      const isFinal = data.is_final;
+      if (transcript) onTranscript(transcript, isFinal);
+    };
+    
+    socket.onerror = (err) => {
+      console.error("Deepgram WS error:", err);
+      onTranscript(null, false, true);
+    };
+
+    return {
+      stop: () => {
+        if (mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+        if (socket.readyState === WebSocket.OPEN) socket.close();
+        stream.getTracks().forEach(t => t.stop());
+      }
+    };
+  }
+
+  function initSpeechRecognition() {
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRec) {
+      alert("Speech Recognition is not supported in this browser. Please use Chrome or switch to text mode.");
+      return null;
+    }
+    const rec = new SpeechRec();
+    rec.continuous = true;
+    rec.interimResults = true;
+    rec.lang = 'en-US';
+    
+    rec.onresult = (event) => {
+      let interim = '';
+      let final = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          final += event.results[i][0].transcript;
+        } else {
+          interim += event.results[i][0].transcript;
+        }
+      }
+      if (final) interviewState.transcript += final + ' ';
+      document.getElementById('transcription-preview').innerHTML = 
+        `<span style="color:#fff">${interviewState.transcript}</span> <span style="color:#888">${interim}</span>`;
+      
+      // Reset silence timer on fallback as well
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        document.getElementById('silence-prompt').style.display = 'none';
+        silenceTimer = setTimeout(() => {
+          document.getElementById('silence-prompt').style.display = 'block';
+        }, 8000);
+      }
+    };
+    return rec;
+  }
+
+  async function toggleRecording() {
+    const btn = document.getElementById('btn-mic-record');
+    
+    if (interviewState.isRecording) {
+      // STOP
+      interviewState.isRecording = false;
+      btn.classList.remove('recording');
+      btn.innerHTML = '<i class="fa-solid fa-microphone"></i>';
+      
+      if (deepgramClient) {
+        deepgramClient.stop();
+        deepgramClient = null;
+      } else if (interviewState.recognition) {
+        interviewState.recognition.stop();
+      }
+      
+      clearTimeout(silenceTimer);
+      document.getElementById('silence-prompt').style.display = 'none';
+      document.getElementById('btn-voice-submit').style.display = 'block';
+      
+    } else {
+      // START
+      interviewState.isRecording = true;
+      interviewState.transcript = '';
+      let interimTranscript = '';
+      btn.classList.add('recording');
+      btn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+      
+      startVideoRecording(); // Trigger video recording on mic tap
+      answerStartTs = performance.now();
+      totalFrames = 0;
+      lookingAtCameraFrames = 0;
+      
+      const renderTranscript = (final, interim) => {
+        document.getElementById('transcription-preview').innerHTML = 
+          `<span style="color: #fff;">${final}</span> <span style="color: #888;">${interim}</span>`;
+      };
+      
+      renderTranscript('', 'Connecting to audio...');
+      document.getElementById('btn-voice-submit').style.display = 'none';
+      document.getElementById('silence-prompt').style.display = 'none';
+
+      const resetSilenceTimer = () => {
+        clearTimeout(silenceTimer);
+        document.getElementById('silence-prompt').style.display = 'none';
+        silenceTimer = setTimeout(() => {
+          document.getElementById('silence-prompt').style.display = 'block';
+        }, 8000);
+      };
+
+      try {
+        if (!AI_CONFIG.deepgramApiKey) throw new Error("No Deepgram API key set");
+        
+        deepgramClient = await startDeepgramTranscription((text, isFinal, isError) => {
+          if (isError) {
+             console.warn("Deepgram error, falling back...");
+             if (deepgramClient) deepgramClient.stop();
+             deepgramClient = null;
+             startFallbackRec();
+             return;
+          }
+          
+          resetSilenceTimer();
+          
+          if (isFinal) {
+            interviewState.transcript += text + ' ';
+            interimTranscript = '';
+          } else {
+            interimTranscript = text;
+          }
+          renderTranscript(interviewState.transcript, interimTranscript);
+        });
+        
+        resetSilenceTimer();
+        renderTranscript('', 'Listening...');
+      } catch (err) {
+        console.warn("Deepgram unavailable, falling back to browser SpeechRecognition:", err);
+        startFallbackRec();
+      }
+      
+      function startFallbackRec() {
+        if (!interviewState.recognition) {
+          interviewState.recognition = initSpeechRecognition();
+        }
+        if (interviewState.recognition) {
+          interviewState.recognition.start();
+          resetSilenceTimer();
+          renderTranscript('', 'Listening (Fallback)...');
+        }
+      }
+    }
+  }
+
+  async function submitVoiceAnswer() {
+    const ans = interviewState.transcript.trim();
+    if (!ans) { alert("Recording empty. Please record again."); return; }
+    await handleAnswerSubmission(ans);
+    // Reset
+    document.getElementById('transcription-preview').textContent = 'Click the mic to start speaking...';
+    document.getElementById('btn-voice-submit').style.display = 'none';
+  }
+
+  async function submitTextAnswer() {
+    const ta = document.getElementById('text-answer-input');
+    const ans = ta.value.trim();
+    if (!ans) return;
+    textInputStarted = false; // reset for next Q
+    await handleAnswerSubmission(ans);
+    ta.value = '';
+  }
+
+  // Ensure typing also starts video recording
+  let textInputStarted = false;
+  document.getElementById('text-answer-input').addEventListener('input', () => {
+    startVideoRecording();
+    if (!textInputStarted) {
+      textInputStarted = true;
+      answerStartTs = performance.now();
+      totalFrames = 0;
+      lookingAtCameraFrames = 0;
+      interviewState.isRecording = true; // For eye tracking
+    }
+  });
+
+  async function handleAnswerSubmission(answerText) {
+    const qBox = document.getElementById('current-question-text');
+    qBox.textContent = "Alex is processing your answer...";
+    
+    // Update dot
+    document.getElementById(`dot-${interviewState.currentQ}`).classList.add('filled');
+    
+    // Save to DB
+    const answerId = await saveAnswer(interviewState.currentAIQuestionText, answerText);
+    
+    if (answerId) {
+      // Calculate P3.05 & P3.06 delivery metrics
+      const durationSeconds = Math.max(1, Math.round((performance.now() - answerStartTs) / 1000));
+      const wordCount = answerText.split(/\\s+/).filter(w => w.length > 0).length;
+      
+      const paceResult = analyzePace(wordCount, durationSeconds);
+      const fillerResult = analyzeFillers(answerText);
+      
+      const eyeContactPercent = totalFrames > 0 ? Math.round((lookingAtCameraFrames / totalFrames) * 100) : 0;
+      let eyeContactRating = 'not_measured';
+      if (!isEyeTrackingDisabled && totalFrames > 0) {
+        if (eyeContactPercent >= 70) eyeContactRating = 'strong';
+        else if (eyeContactPercent >= 45) eyeContactRating = 'moderate';
+        else eyeContactRating = 'weak';
+      }
+
+      deliveryMetricsMap[answerId] = {
+        filler_word_count: fillerResult.count,
+        filler_words_found: fillerResult.found,
+        words_per_minute: paceResult.wpm,
+        answer_duration_seconds: durationSeconds,
+        pace_rating: paceResult.rating,
+        eye_contact_percent: eyeContactPercent,
+        eye_contact_rating: eyeContactRating
+      };
+      
+      stopAndUploadVideo(answerId, interviewState.currentQ);
+    }
+    
+    // Evaluate answer and adjust difficulty
+    let score = null;
+    if (answerId) {
+      qBox.textContent = "Alex is analyzing your answer...";
+      score = await generateSingleAnswerFeedback(answerId, interviewState.currentAIQuestionText, answerText);
+    }
+    
+    if (score !== null && interviewState.currentQ < interviewState.totalQuestions) {
+      let currentDiff = activeSession.currentDifficulty;
+      let newDiff = currentDiff;
+      if (score >= 8) {
+        if (currentDiff === 'easy') newDiff = 'medium';
+        else if (currentDiff === 'medium') newDiff = 'hard';
+      } else if (score <= 4) {
+        if (currentDiff === 'hard') newDiff = 'medium';
+        else if (currentDiff === 'medium') newDiff = 'easy';
+      }
+      
+      if (newDiff !== currentDiff) {
+        activeSession.currentDifficulty = newDiff;
+        activeSession.difficultyHistory.push(newDiff);
+        
+        // Fire-and-forget DB update
+        sb.from('sessions').update({
+          current_difficulty: newDiff,
+          difficulty_history: activeSession.difficultyHistory
+        }).eq('id', activeSession.id).then();
+        
+        // Update prompt
+        activeSession.systemPrompt = buildInterviewerSystemPrompt({
+          candidateName: activeSession.candidateName,
+          jobRole: activeSession.jobRole,
+          experienceLevel: activeSession.experienceLevel,
+          interviewType: activeSession.interviewType,
+          difficulty: activeSession.difficulty,
+          currentDifficulty: newDiff,
+          targetCompany: activeSession.targetCompany,
+          sessionId: activeSession.id
+        });
+        
+        // Update UI chip
+        document.getElementById('int-diff-chip').textContent = newDiff.charAt(0).toUpperCase() + newDiff.slice(1);
+        
+        // Show Badge if difficulty increased
+        if ((currentDiff === 'easy' && newDiff === 'medium') || (currentDiff === 'medium' && newDiff === 'hard')) {
+          const badge = document.getElementById('difficulty-up-badge');
+          if (badge) {
+            badge.style.display = 'block';
+            badge.style.opacity = '1';
+            setTimeout(() => {
+              badge.style.opacity = '0';
+              setTimeout(() => badge.style.display = 'none', 500);
+            }, 3000);
+          }
+        }
+      }
+    }
+    
+    if (interviewState.currentQ >= interviewState.totalQuestions) {
+      // END
+      qBox.textContent = "Wrapping up...";
+      const endPrompt = `Candidate answered: "${answerText}". The session time is up. Give your exact closing line ending the interview. Do not ask any more questions.`;
+      
+      const aiResponse = await callGeminiAPI(activeSession.systemPrompt, endPrompt);
+      qBox.textContent = aiResponse;
+      playAlexSpeech(aiResponse);
+      
+      setTimeout(async () => {
+        await endInterviewSession('completed');
+      }, 5000);
+      
+    } else {
+      // NEXT Q
+      interviewState.currentQ++;
+      document.getElementById('current-q-num').textContent = interviewState.currentQ;
+      
+      const nextPrompt = `Candidate answered: "${answerText}". Acknowledge briefly and ask the next interview question. Keep it professional.`;
+      interviewState.chatHistory.push({ role: 'user', parts: [{ text: nextPrompt }] });
+      
+      try {
+        const aiResponse = await callGeminiAPI(activeSession.systemPrompt, nextPrompt);
+        interviewState.currentAIQuestionText = aiResponse;
+        qBox.textContent = aiResponse;
+        interviewState.chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] });
+        playAlexSpeech(aiResponse);
+      } catch (e) {
+        console.error(e);
+        qBox.textContent = "Error getting next question.";
+      }
+    }
+  }
+
+  async function endInterviewEarly() {
+    if (confirm("Are you sure? This will end the session early and generate feedback for what you've done so far.")) {
+      await endInterviewSession('abandoned');
+    }
+  }
+
+  async function endInterviewSession(finalStatus) {
+    clearInterval(interviewState.timerInterval);
+    window.speechSynthesis.cancel();
+    if (interviewState.recognition) interviewState.recognition.stop();
+    if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
+    
+    // Update DB Session Status
+    await sb.from('sessions').update({ status: finalStatus }).eq('id', activeSession.id);
+    activeSession.status = finalStatus;
+    
+    // Trigger Feedback pipeline
+    document.getElementById('interview-view').style.display = 'none';
+    document.getElementById('feedback-loading').style.display = 'flex';
+    
+    // completeSession triggers runFeedbackEngine automatically via the state machine logic built in P2.04
+    await completeSession();
+  }
+
+  // Hook into the end of runFeedbackEngine (from Phase 2.05) to render the UI
+  // We will override or extend the polling function to transition to the feedback UI
+  
+  async function displayFeedbackReport() {
+    document.getElementById('feedback-loading').style.display = 'none';
+    const fView = document.getElementById('feedback-view');
+    fView.style.display = 'block';
+    
+    // Fetch all feedback data
+    const { data: answersData } = await sb.from('answers').select('id, question_text, answer_text').eq('session_id', activeSession.id);
+    
+    if (!answersData || answersData.length === 0) {
+       alert("No feedback was generated because no questions were answered.");
+       return;
+    }
+
+    const answerIds = answersData.map(a => a.id);
+    const { data: feedbackData } = await sb.from('feedback').select('*').in('answer_id', answerIds);
+    
+    if (!feedbackData || feedbackData.length === 0) {
+       alert("No feedback was generated.");
+       return;
+    }
+    
+    // Calculate Overall Averages
+    let sumO = 0, sumC = 0, sumD = 0, sumS = 0;
+    feedbackData.forEach(f => {
+      sumO += f.overall_score;
+      sumC += f.clarity_score;
+      sumD += f.depth_score;
+      sumS += f.structure_score;
+    });
+    const len = feedbackData.length;
+    
+    document.getElementById('fb-overall').textContent = (sumO / len).toFixed(1);
+    document.getElementById('fb-clarity').textContent = (sumC / len).toFixed(1);
+    document.getElementById('fb-depth').textContent = (sumD / len).toFixed(1);
+    document.getElementById('fb-structure').textContent = (sumS / len).toFixed(1);
+    
+    // Chips
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    document.getElementById('fb-chip-type').textContent = setupState.type.toUpperCase();
+    document.getElementById('fb-chip-diff').textContent = setupState.difficulty.toUpperCase();
+    document.getElementById('fb-chip-date').textContent = dateStr;
+    
+    // Difficulty Progression
+    const { data: sessionData } = await sb.from('sessions').select('difficulty_history').eq('id', activeSession.id).single();
+    if (sessionData && sessionData.difficulty_history && sessionData.difficulty_history.length > 0) {
+      const histContainer = document.getElementById('fb-difficulty-history');
+      histContainer.innerHTML = '';
+      sessionData.difficulty_history.forEach((diff, idx) => {
+        let color = '#4ade80'; // easy (green)
+        let bg = 'rgba(74, 222, 128, 0.2)';
+        if (diff === 'medium') { color = '#4fc3f7'; bg = 'rgba(79, 195, 247, 0.2)'; }
+        if (diff === 'hard') { color = '#f59e0b'; bg = 'rgba(245, 158, 11, 0.2)'; }
+        
+        histContainer.innerHTML += `<span style="background: ${bg}; color: ${color}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; border: 1px solid ${color}44;">${diff}</span>`;
+        if (idx < sessionData.difficulty_history.length - 1) {
+          histContainer.innerHTML += `<i class="fa-solid fa-arrow-right" style="color: var(--text-secondary); font-size: 10px;"></i>`;
+        }
+      });
+    }
+    
+    // Pull Strengths & Weaknesses from Progress table
+    const { data: prog } = await sb.from('progress').select('*').eq('user_id', currentUser.id).single();
+    if (prog) {
+      const sList = document.getElementById('fb-strengths-list');
+      const wList = document.getElementById('fb-improvements-list');
+      sList.innerHTML = ''; wList.innerHTML = '';
+      
+      (prog.strong_areas || []).forEach(s => sList.innerHTML += `<li>${s}</li>`);
+      (prog.weak_areas || []).forEach(w => wList.innerHTML += `<li>${w}</li>`);
+    }
+    
+    // Question Breakdown
+    const container = document.getElementById('fb-questions-container');
+    container.innerHTML = '';
+    
+    const renderPaceBadge = (fb) => {
+      if (!fb.words_per_minute) return '';
+      let color = fb.pace_rating === 'normal' ? '#4ade80' : (fb.pace_rating === 'fast' || fb.pace_rating === 'slow' ? '#f59e0b' : '#ef4444');
+      return `<div style="background: ${color}22; border: 1px solid ${color}44; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 11px; color: ${color}; font-weight: bold; text-transform: uppercase;">Speaking Pace</span>
+        <span style="font-size: 14px; color: white;">${fb.words_per_minute} wpm</span>
+      </div>`;
+    };
+
+    const renderEyeContactBadge = (fb) => {
+      if (fb.eye_contact_rating === 'not_measured') return '';
+      let color = fb.eye_contact_rating === 'strong' ? '#4ade80' : (fb.eye_contact_rating === 'moderate' ? '#f59e0b' : '#ef4444');
+      let tip = fb.eye_contact_rating === 'weak' ? `<div style="font-size: 10px; color: ${color}; margin-top: 4px; max-width: 140px;">Tip: Look directly at the camera.</div>` : '';
+      return `<div style="background: ${color}22; border: 1px solid ${color}44; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 11px; color: ${color}; font-weight: bold; text-transform: uppercase;">Eye Contact</span>
+        <span style="font-size: 14px; color: white;">${fb.eye_contact_percent}%</span>
+        ${tip}
+      </div>`;
+    };
+
+    const renderFillerBadge = (fb) => {
+      if (fb.filler_word_count === undefined) return '';
+      if (fb.filler_word_count === 0) {
+        return `<div style="background: #4ade8022; border: 1px solid #4ade8044; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center;">
+          <span style="font-size: 12px; color: #4ade80; font-weight: bold;">No filler words detected ✓</span>
+        </div>`;
+      }
+      const foundStr = fb.filler_words_found && fb.filler_words_found.length > 0 ? fb.filler_words_found.join(', ') : '';
+      return `<div style="background: #f59e0b22; border: 1px solid #f59e0b44; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px;">
+        <span style="font-size: 11px; color: #f59e0b; font-weight: bold; text-transform: uppercase;">Filler Words: ${fb.filler_word_count}</span>
+        <span style="font-size: 12px; color: rgba(255,255,255,0.8); max-width: 200px; line-height: 1.4;">${foundStr}</span>
+      </div>`;
+    };
+
+    answersData.forEach((ans, i) => {
+      const fb = feedbackData.find(f => f.answer_id === ans.id);
+      if(!fb) return;
+      
+      // Color coding
+      let bColor = '#ef4444'; // red
+      if (fb.overall_score >= 8) bColor = '#4ade80'; // green
+      else if (fb.overall_score >= 5) bColor = '#fbbf24'; // amber
+      
+      const qTextShort = ans.question_text ? ans.question_text.substring(0, 60) + '...' : 'Custom Question...';
+      
+      const card = document.createElement('div');
+      card.className = 'q-breakdown-card';
+      card.innerHTML = `
+        <div class="q-header" onclick="this.nextElementSibling.classList.toggle('open')">
+          <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="background: rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">${i+1}</div>
+            <div style="font-weight: 600; color: var(--text-primary);">${qTextShort}</div>
+          </div>
+          <div style="background: ${bColor}22; color: ${bColor}; padding: 4px 12px; border-radius: 100px; font-weight: 700;">${fb.overall_score.toFixed(1)}</div>
+        </div>
+        <div class="q-content">
+          <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Your Answer</p>
+          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; color: white; margin-bottom: 24px;">
+            <div style="font-style: italic; margin-bottom: ${ans.answer_video_url ? '16px' : '0'};">"${ans.answer_text}"</div>
+            ${ans.answer_video_url ? `<video src="${ans.answer_video_url}" controls style="width: 100%; max-width: 480px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #000;"></video>` : ''}
+          </div>
+          
+          <div style="display: flex; gap: 24px; margin-bottom: 24px;">
+            <div style="flex: 1;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Clarity ${fb.clarity_score}/10</div><div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div style="width: ${fb.clarity_score*10}%; height: 100%; background: #4fc3f7; border-radius: 2px;"></div></div></div>
+            <div style="flex: 1;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Depth ${fb.depth_score}/10</div><div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div style="width: ${fb.depth_score*10}%; height: 100%; background: #a78bfa; border-radius: 2px;"></div></div></div>
+            <div style="flex: 1;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Structure ${fb.structure_score}/10</div><div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div style="width: ${fb.structure_score*10}%; height: 100%; background: #4ade80; border-radius: 2px;"></div></div></div>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Coach Feedback</p>
+          <p style="color: white; line-height: 1.6;">${fb.feedback_text}</p>
+          
+          <div class="model-answer">
+            <p style="color: #4fc3f7; margin-top: 0; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">How a strong candidate might answer</p>
+            <p style="margin: 0; line-height: 1.6; color: rgba(255,255,255,0.9);">${fb.model_answer}</p>
+          </div>
+          
+          <p style="color: var(--text-secondary); margin-top: 24px; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Delivery & Pacing</p>
+          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
+            ${renderPaceBadge(fb)}
+            ${renderEyeContactBadge(fb)}
+            ${renderFillerBadge(fb)}
+          </div>
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    // Aggregate company_fit
+    const companyFitMap = {};
+    if (activeCompanyProfile && activeCompanyProfile.key_values) {
+      activeCompanyProfile.key_values.forEach(kv => companyFitMap[kv.toLowerCase()] = false);
+    }
+    
+    feedbackData.forEach(f => {
+      if (f.company_fit) {
+        Object.keys(f.company_fit).forEach(key => {
+          const lowerKey = key.toLowerCase();
+          if (f.company_fit[key] === true || f.company_fit[key] === "true") {
+             companyFitMap[lowerKey] = true;
+          }
+        });
+      }
+    });
+
+    const fitListContainer = document.getElementById('fb-company-fit-list');
+    if (fitListContainer) {
+      fitListContainer.innerHTML = '';
+      const allKeys = Object.keys(companyFitMap);
+      
+      if (allKeys.length > 0 && activeCompanyProfile) {
+        document.getElementById('fb-company-fit-name').textContent = `(${activeCompanyProfile.company_name})`;
+        document.getElementById('fb-company-tip').innerHTML = activeCompanyProfile.tip_for_candidate || "Keep these values in mind during all interviews.";
+        
+        allKeys.forEach(key => {
+          const demonstrated = companyFitMap[key];
+          const icon = demonstrated ? '<i class="fa-solid fa-check" style="color: #4ade80;"></i>' : '<i class="fa-solid fa-xmark" style="color: #ef4444;"></i>';
+          const textColor = demonstrated ? 'rgba(255,255,255,0.9)' : 'var(--text-secondary)';
+          const bg = demonstrated ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255,255,255,0.05)';
+          const badgeText = demonstrated ? '<span style="font-size: 10px; color: #4ade80; background: rgba(74,222,128,0.2); padding: 2px 8px; border-radius: 12px; font-weight: bold; text-transform: uppercase;">Demonstrated</span>' : '<span style="font-size: 10px; color: #ef4444; background: rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 12px; font-weight: bold; text-transform: uppercase;">Missing</span>';
+          
+          fitListContainer.innerHTML += `
+            <div style="display: flex; align-items: center; justify-content: space-between; background: ${bg}; padding: 12px 16px; border-radius: 8px;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                ${icon}
+                <span style="color: ${textColor}; font-weight: 500; text-transform: capitalize;">${key}</span>
+              </div>
+              ${badgeText}
+            </div>
+          `;
+        });
+      } else {
+        document.getElementById('fb-company-fit-name').textContent = '';
+        fitListContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">No specific company values tracked for this session.</div>';
+      }
+    }
+  }
+
+  // The polling code was removed. We will call displayFeedbackReport directly when runFeedbackEngine finishes.
 
   /* ══════════════════════════════════════════════════════════════════
      PHASE 2 — ANSWER CAPTURE ENGINE (Real-time Supabase writes)
@@ -2079,10 +3876,17 @@ SESSION CONTEXT:
 
   /* ── AI CONFIGURATION ── */
   const AI_CONFIG = {
-    // Google Gemini API key — set this to enable live AI interviews + feedback
-    // Get a free key at: https://aistudio.google.com/app/apikey
-    geminiApiKey: 'AIzaSyDCN9yRLgIFrKEG5BYE1dm7AGFBu1SMWzk',
-    model: 'gemini-2.0-flash',
+    // Google Gemini API key
+    geminiApiKey: localStorage.getItem('geminiApiKey') || '',
+    model: 'gemini-2.5-flash',
+    
+    // ElevenLabs API key and Voice ID for premium TTS
+    elevenLabsApiKey: 'sk_77c241749ff10fc46e263139a9ec5c280be1b99dcaa30f17',
+    elevenLabsVoiceId: 'SXuKWBhKoIoAHKlf6Gt3',
+    
+    // Deepgram API key for real-time transcription
+    deepgramApiKey: '6d5424789599338257300e134a1622f9f3ab2283',
+    
     feedbackSystemPrompt: `You are an expert interview coach who has reviewed thousands of interview transcripts. Your job is to analyse a candidate's answer and give structured, honest, specific feedback.
 
 You receive one answer at a time. For each answer you must return a JSON object with exactly these fields — no extra text, no preamble, no markdown:
@@ -2095,7 +3899,11 @@ You receive one answer at a time. For each answer you must return a JSON object 
   "feedback_text": "<3-5 sentences of specific, actionable feedback. Reference what they actually said. Do not be vague.>",
   "model_answer": "<a concise model answer for this question, 3-6 sentences>",
   "strengths": ["<specific strength 1>", "<specific strength 2>"],
-  "improvements": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"]
+  "improvements": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"],
+  "company_fit": {
+    "<key_value_1>": <true if demonstrated, false if not>,
+    "<key_value_2>": <true if demonstrated, false if not>
+  }
 }
 
 Scoring rubric:
@@ -2115,7 +3923,13 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
    */
   async function callGeminiAPI(systemPrompt, userMessage) {
     if (!AI_CONFIG.geminiApiKey) {
-      throw new Error('Gemini API key not configured. Set AI_CONFIG.geminiApiKey in index.html.');
+      const key = prompt("Please enter your Gemini API key (it will be securely saved in your browser's local storage):");
+      if (key) {
+        localStorage.setItem('geminiApiKey', key.trim());
+        AI_CONFIG.geminiApiKey = key.trim();
+      } else {
+        throw new Error('Gemini API key is required to use the AI features.');
+      }
     }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.geminiApiKey}`;
     const body = {
@@ -2133,10 +3947,84 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     return result.candidates?.[0]?.content?.parts?.[0]?.text || '';
   }
 
+  async function generateSingleAnswerFeedback(answerId, questionText, answerText) {
+    console.log(`  Analysing answer for: "${questionText.substring(0, 60)}..."`);
+    
+    let kvString = activeCompanyProfile?.key_values ? activeCompanyProfile.key_values.join(', ') : 'standard tech values';
+    const userMessage = `Question: ${questionText}\nAnswer: ${answerText || '(no answer provided)'}\nInterview type: ${activeSession.interviewType || 'behavioral'}\nExperience level: ${activeSession.experienceLevel || 'mid'}\nEvaluate the answer against these company key values for the company_fit object: ${kvString}`;
+    let feedbackData = null;
+    
+    const parseFeedback = (raw) => {
+      let cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const firstBrace = cleaned.indexOf('{');
+      const lastBrace = cleaned.lastIndexOf('}');
+      if (firstBrace !== -1 && lastBrace !== -1) {
+        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
+      }
+      return JSON.parse(cleaned);
+    };
+    
+    try {
+      const rawResponse = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, userMessage);
+      feedbackData = parseFeedback(rawResponse);
+    } catch (parseErr) {
+      console.warn(`  First parse failed for answer ${answerId}:`, parseErr.message);
+      try {
+        const retryMessage = `You must respond with ONLY a valid JSON object. No markdown. No explanation. Start your response with { and end with }. Here is the answer to evaluate:\n\n${userMessage}`;
+        const rawRetry = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, retryMessage);
+        feedbackData = parseFeedback(rawRetry);
+      } catch (retryErr) {
+        console.error(`  Second parse failed. Using safe defaults.`);
+      }
+    }
+    
+    if (!feedbackData) feedbackData = {};
+    const safeInt = (val) => (typeof val === 'number' && val >= 1 && val <= 10) ? val : 5;
+    const safeStr = (val, fallback) => (typeof val === 'string' && val.trim().length > 0) ? val : fallback;
+    
+    feedbackData.overall_score = safeInt(feedbackData.overall_score);
+    feedbackData.clarity_score = safeInt(feedbackData.clarity_score);
+    feedbackData.depth_score = safeInt(feedbackData.depth_score);
+    feedbackData.structure_score = safeInt(feedbackData.structure_score);
+    feedbackData.feedback_text = safeStr(feedbackData.feedback_text, "Feedback could not be generated for this answer.");
+    feedbackData.model_answer = safeStr(feedbackData.model_answer, "Model answer unavailable.");
+    if (!feedbackData.company_fit) feedbackData.company_fit = {};
+    
+    const { error: feedbackErr } = await sb.from('feedback').insert({
+      answer_id:      answerId,
+      overall_score:  feedbackData.overall_score,
+      clarity_score:  feedbackData.clarity_score,
+      depth_score:    feedbackData.depth_score,
+      structure_score: feedbackData.structure_score,
+      feedback_text:  feedbackData.feedback_text,
+      model_answer:   feedbackData.model_answer,
+      company_fit:    feedbackData.company_fit
+    });
+
+    if (feedbackErr) {
+      console.error(`  Feedback insert failed for answer ${answerId}:`, feedbackErr.message);
+    } else {
+      console.log(`  ✅ Feedback saved | overall: ${feedbackData.overall_score}/10`);
+      const metrics = deliveryMetricsMap[answerId];
+      if (metrics) {
+        await sb.from('feedback').update({
+          filler_word_count: metrics.filler_word_count,
+          filler_words_found: metrics.filler_words_found,
+          words_per_minute: metrics.words_per_minute,
+          answer_duration_seconds: metrics.answer_duration_seconds,
+          pace_rating: metrics.pace_rating,
+          eye_contact_percent: metrics.eye_contact_percent,
+          eye_contact_rating: metrics.eye_contact_rating
+        }).eq('answer_id', answerId);
+      }
+    }
+    return feedbackData.overall_score;
+  }
+
   /**
    * runFeedbackEngine()
    * Triggered when session status → 'completed'.
-   * Fetches all answers → calls FeedbackAgent (Gemini) → writes to feedback + progress tables.
+   * Fetches all answers → aggregates feedback + progress tables.
    *
    * @param {string} sessionId - The completed session UUID
    */
@@ -2144,80 +4032,24 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     console.log(`\n🧠 FEEDBACK ENGINE STARTING for session: ${sessionId}`);
 
     try {
-      // 1. Pull all answers for this session
-      const { data: answers, error: answersErr } = await sb
-        .from('answers')
-        .select('id, question_id, answer_text, custom_question_text')
-        .eq('session_id', sessionId)
-        .order('submitted_at', { ascending: true });
-
-      if (answersErr) throw answersErr;
-      if (!answers || answers.length === 0) {
-        console.warn('No answers found for session — feedback engine skipped.');
-        return;
-      }
-
-      console.log(`  Found ${answers.length} answers to analyse.`);
-
+      // Fetch all feedback for this session
+      const { data: feedbackRows, error: feedbackErr } = await sb
+        .from('feedback')
+        .select('*, answers!inner(session_id)')
+        .eq('answers.session_id', sessionId);
+        
+      if (feedbackErr) throw feedbackErr;
+      
       const weakAreas = [];
       const strongAreas = [];
       const allImprovements = [];
-
-      // 2. Process each answer
-      for (const answer of answers) {
-        // 2a. Resolve question text
-        let questionText = answer.custom_question_text || '';
-        if (!questionText && answer.question_id) {
-          const { data: qRow } = await sb
-            .from('questions')
-            .select('question_text, interview_type, experience_level')
-            .eq('id', answer.question_id)
-            .maybeSingle();
-          questionText = qRow?.question_text || 'Unknown question';
+      
+      if (feedbackRows && feedbackRows.length > 0) {
+        for (const f of feedbackRows) {
+          if (f.overall_score < 6 && Array.isArray(f.improvements)) weakAreas.push(...f.improvements);
+          if (f.overall_score >= 8 && Array.isArray(f.strengths)) strongAreas.push(...f.strengths);
+          if (Array.isArray(f.improvements)) allImprovements.push(...f.improvements);
         }
-
-        // 2b. Build prompt for FeedbackAgent
-        const userMessage = `Question: ${questionText}
-Answer: ${answer.answer_text || '(no answer provided)'}
-Interview type: ${activeSession.interviewType || 'behavioral'}
-Experience level: ${activeSession.experienceLevel || 'mid'}`;
-
-        console.log(`  Analysing answer for: "${questionText.substring(0, 60)}..."`);
-
-        let feedbackData = null;
-        try {
-          const rawResponse = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, userMessage);
-          // Strip any accidental markdown wrapping
-          const cleaned = rawResponse.replace(/```json|```/g, '').trim();
-          feedbackData = JSON.parse(cleaned);
-        } catch (parseErr) {
-          console.error(`  Failed to get/parse feedback for answer ${answer.id}:`, parseErr.message);
-          continue;
-        }
-
-        // 2c. Insert into feedback table
-        const { error: feedbackErr } = await sb
-          .from('feedback')
-          .insert({
-            answer_id:      answer.id,
-            overall_score:  feedbackData.overall_score,
-            clarity_score:  feedbackData.clarity_score,
-            depth_score:    feedbackData.depth_score,
-            structure_score: feedbackData.structure_score,
-            feedback_text:  feedbackData.feedback_text,
-            model_answer:   feedbackData.model_answer
-          });
-
-        if (feedbackErr) {
-          console.error(`  Feedback insert failed for answer ${answer.id}:`, feedbackErr.message);
-        } else {
-          console.log(`  ✅ Feedback saved | overall: ${feedbackData.overall_score}/10`);
-        }
-
-        // 2d. Collect weak/strong areas using question tags
-        if (feedbackData.overall_score < 6) weakAreas.push(...(feedbackData.improvements || []));
-        if (feedbackData.overall_score >= 8) strongAreas.push(...(feedbackData.strengths || []));
-        allImprovements.push(...(feedbackData.improvements || []));
       }
 
       // 3. Upsert progress table row for this user
@@ -2237,10 +4069,13 @@ Experience level: ${activeSession.experienceLevel || 'mid'}`;
         console.log('✅ Progress table updated.');
       }
 
-      console.log(`\n🎉 FEEDBACK ENGINE COMPLETE — ${answers.length} answers analysed.\n`);
-
+      console.log(`\n🎉 FEEDBACK ENGINE COMPLETE.\n`);
+      
     } catch (err) {
       console.error('Feedback engine error:', err.message);
+    } finally {
+      // Directly trigger the UI transition to show the report (or empty report if skipped/failed)
+      await displayFeedbackReport();
     }
   }
 
@@ -2318,9 +4153,526 @@ Experience level: ${activeSession.experienceLevel || 'mid'}`;
     });
   }
 
-  // Trigger app entry routing on page load
-  window.onload = initializeApp;
+  // Trigger app entry routing immediately
+  initializeApp();
 
+  /* ==========================================
+     P4.03: HISTORY ENGINE
+     ========================================== */
+  let globalHistoryData = [];
+  let scoreTrendChartInstance = null;
+
+  async function loadHistoryView() {
+    switchView('history-view');
+    document.getElementById('hist-list').innerHTML = '<div style="color:var(--text-secondary); text-align:center;">Loading history...</div>';
+    
+    // Fetch all completed sessions for this user
+    const { data: sessions, error } = await sb
+      .from('sessions')
+      .select('*, answers(id, submitted_at, feedback(overall_score, clarity_score, depth_score, structure_score, company_fit))')
+      .eq('user_id', currentUser.id)
+      .eq('status', 'completed')
+      .order('created_at', { ascending: false });
+      
+    if (error) {
+      console.error("History fetch error", error);
+      document.getElementById('hist-list').innerHTML = '<div style="color:red; text-align:center;">Error loading history.</div>';
+      return;
+    }
+
+    if (!sessions || sessions.length === 0) {
+      document.getElementById('hist-empty').style.display = 'block';
+      document.getElementById('hist-list').style.display = 'none';
+      document.getElementById('hist-total').textContent = '0';
+      document.getElementById('hist-avg').textContent = '0.0';
+      document.getElementById('hist-best').textContent = '0.0';
+      if (document.getElementById('hist-chart-container')) document.getElementById('hist-chart-container').style.display = 'none';
+      return;
+    }
+    
+    document.getElementById('hist-empty').style.display = 'none';
+    document.getElementById('hist-list').style.display = 'flex';
+    if (document.getElementById('hist-chart-container')) document.getElementById('hist-chart-container').style.display = 'block';
+    
+    // Process sessions to add computed scores and duration
+    globalHistoryData = sessions.map(session => {
+      let durationStr = "Unknown";
+      if (session.created_at && session.completed_at) {
+        const diffMs = new Date(session.completed_at) - new Date(session.created_at);
+        const diffMins = Math.round(diffMs / 60000);
+        durationStr = `${diffMins} min`;
+      }
+      
+      let totalOverall = 0, totalClarity = 0, totalDepth = 0, totalStructure = 0;
+      let validFeedbackCount = 0;
+      
+      if (session.answers) {
+        session.answers.forEach(ans => {
+          if (ans.feedback && ans.feedback.length > 0) {
+            ans.feedback.forEach(fb => {
+              totalOverall += fb.overall_score || 0;
+              totalClarity += fb.clarity_score || 0;
+              totalDepth += fb.depth_score || 0;
+              totalStructure += fb.structure_score || 0;
+              validFeedbackCount++;
+            });
+          }
+        });
+      }
+      
+      session.avgOverall = validFeedbackCount > 0 ? (totalOverall / validFeedbackCount) : 0;
+      session.avgClarity = validFeedbackCount > 0 ? (totalClarity / validFeedbackCount) : 0;
+      session.avgDepth = validFeedbackCount > 0 ? (totalDepth / validFeedbackCount) : 0;
+      session.avgStructure = validFeedbackCount > 0 ? (totalStructure / validFeedbackCount) : 0;
+      session.durationStr = durationStr;
+      
+      return session;
+    });
+    
+    // Update Summary Stats
+    const totalSessions = globalHistoryData.length;
+    const avgScore = globalHistoryData.reduce((acc, s) => acc + s.avgOverall, 0) / totalSessions;
+    const bestScore = Math.max(...globalHistoryData.map(s => s.avgOverall));
+    
+    document.getElementById('hist-total').textContent = totalSessions;
+    document.getElementById('hist-avg').textContent = avgScore.toFixed(1);
+    document.getElementById('hist-best').textContent = bestScore.toFixed(1);
+    
+    // Default filters
+    document.getElementById('hist-filter-type').value = 'all';
+    document.getElementById('hist-filter-diff').value = 'all';
+    document.getElementById('hist-filter-date').value = 'all';
+    
+    filterHistory();
+  }
+
+  function filterHistory() {
+    const typeFilter = document.getElementById('hist-filter-type').value;
+    const diffFilter = document.getElementById('hist-filter-diff').value;
+    const dateFilter = document.getElementById('hist-filter-date').value;
+    
+    let filtered = [...globalHistoryData];
+    
+    if (typeFilter !== 'all') filtered = filtered.filter(s => s.interview_type === typeFilter);
+    if (diffFilter !== 'all') filtered = filtered.filter(s => s.difficulty === diffFilter);
+    
+    if (dateFilter !== 'all') {
+      const now = new Date();
+      filtered = filtered.filter(s => {
+        const d = new Date(s.created_at);
+        if (dateFilter === 'week') {
+          return (now - d) < (7 * 24 * 60 * 60 * 1000);
+        } else if (dateFilter === 'month') {
+          return (now - d) < (30 * 24 * 60 * 60 * 1000);
+        }
+        return true;
+      });
+    }
+    
+    renderHistoryCards(filtered);
+    renderTrendChart(filtered);
+  }
+
+  function renderHistoryCards(sessions) {
+    const list = document.getElementById('hist-list');
+    list.innerHTML = '';
+    
+    if (sessions.length === 0) {
+      list.innerHTML = '<div style="color:var(--text-secondary); text-align:center; padding: 20px;">No sessions match your filters.</div>';
+      return;
+    }
+    
+    sessions.forEach(session => {
+      const dateObj = new Date(session.created_at);
+      const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+      
+      let diffColor = '#4ade80';
+      if (session.difficulty === 'medium') diffColor = '#f59e0b';
+      if (session.difficulty === 'hard') diffColor = '#ef4444';
+      
+      let typeColor = '#4fc3f7';
+      if (session.interview_type === 'technical') typeColor = '#a78bfa';
+      if (session.interview_type === 'system_design') typeColor = '#f59e0b';
+      if (session.interview_type === 'hr') typeColor = '#4ade80';
+
+      let scoreColor = '#ef4444';
+      if (session.avgOverall >= 7.5) scoreColor = '#4ade80';
+      else if (session.avgOverall >= 5) scoreColor = '#f59e0b';
+      
+      // Determine company
+      let company = 'General';
+      if (session.target_company) company = session.target_company;
+      else if (setupState && setupState.target_company) company = setupState.target_company;
+      
+      const card = document.createElement('div');
+      card.className = 'dashboard-card';
+      card.style.display = 'flex';
+      card.style.justifyContent = 'space-between';
+      card.style.alignItems = 'center';
+      card.style.padding = '20px';
+      card.style.marginBottom = '0';
+      card.style.background = 'rgba(255,255,255,0.03)';
+      
+      let difficultyChips = '';
+      if (session.difficulty_history && session.difficulty_history.length > 0) {
+         difficultyChips = session.difficulty_history.map((d, i) => {
+           let dc = d === 'easy' ? '#4ade80' : (d === 'medium' ? '#4fc3f7' : '#f59e0b');
+           let bg = d === 'easy' ? 'rgba(74, 222, 128, 0.2)' : (d === 'medium' ? 'rgba(79, 195, 247, 0.2)' : 'rgba(245, 158, 11, 0.2)');
+           return `<span style="background: ${bg}; color: ${dc}; padding: 2px 6px; border-radius: 8px; font-size: 9px; font-weight: bold; text-transform: uppercase;">${d}</span>`;
+         }).join(' <i class="fa-solid fa-caret-right" style="font-size:10px; color:rgba(255,255,255,0.3);"></i> ');
+      }
+
+      card.innerHTML = `
+        <div style="display: flex; gap: 24px; align-items: center; flex: 1;">
+          <div style="min-width: 140px; display: flex; flex-direction: column; gap: 8px; border-right: 1px solid rgba(255,255,255,0.1); padding-right: 16px;">
+            <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600;">${dateStr}</div>
+            <div style="font-size: 12px; color: rgba(255,255,255,0.7);"><i class="fa-regular fa-clock"></i> ${session.durationStr}</div>
+            <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px;">
+              <span style="color: ${typeColor}; background: ${typeColor}22; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${session.interview_type}</span>
+              <span style="color: ${diffColor}; background: ${diffColor}22; padding: 2px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase;">${session.difficulty}</span>
+            </div>
+          </div>
+          
+          <div style="flex: 1;">
+            <div style="font-size: 18px; font-weight: 700; color: white;">${company}</div>
+            <div style="font-size: 14px; color: #4fc3f7; margin-bottom: 8px;">${session.job_role || 'Software Engineer'}</div>
+            <div style="display: flex; gap: 16px; font-size: 12px; color: var(--text-secondary);">
+              <div><strong style="color:white;">C</strong> ${session.avgClarity.toFixed(1)}</div>
+              <div><strong style="color:white;">D</strong> ${session.avgDepth.toFixed(1)}</div>
+              <div><strong style="color:white;">S</strong> ${session.avgStructure.toFixed(1)}</div>
+            </div>
+          </div>
+          
+          <div style="display: flex; align-items: center; justify-content: center; width: 80px;">
+            <div style="width: 56px; height: 56px; border-radius: 50%; border: 3px solid ${scoreColor}44; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: ${scoreColor}; position: relative;">
+               ${session.avgOverall.toFixed(1)}
+            </div>
+          </div>
+        </div>
+        
+        <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end; min-width: 180px; padding-left: 24px; border-left: 1px solid rgba(255,255,255,0.1);">
+           <button class="btn btn-secondary" style="width: 100%; padding: 6px 12px; font-size: 12px;" onclick="viewPastReport('${session.id}')">View Report <i class="fa-solid fa-arrow-right"></i></button>
+           <button class="btn btn-secondary" style="width: 100%; padding: 6px 12px; font-size: 12px; color: #4fc3f7; border-color: rgba(79,195,247,0.3);" onclick="loadReplayView('${session.id}')"><i class="fa-solid fa-play" style="margin-right: 4px;"></i> Replay</button>
+           <div style="display: flex; align-items: center; gap: 4px; margin-top: 4px;">
+              ${difficultyChips}
+           </div>
+        </div>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function renderTrendChart(sessions) {
+    const ctxElement = document.getElementById('scoreTrendChart');
+    if (!ctxElement) return;
+    
+    if (sessions.length < 3) {
+      document.getElementById('hist-chart-empty').style.display = 'flex';
+      ctxElement.style.display = 'none';
+      return;
+    } else {
+      document.getElementById('hist-chart-empty').style.display = 'none';
+      ctxElement.style.display = 'block';
+    }
+
+    const chronological = [...sessions].reverse();
+    const labels = chronological.map(s => {
+      const d = new Date(s.created_at);
+      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    });
+    const dataPts = chronological.map(s => s.avgOverall);
+    
+    if (scoreTrendChartInstance) {
+      scoreTrendChartInstance.destroy();
+    }
+    
+    const targetLinePlugin = {
+      id: 'targetLine',
+      beforeDraw: chart => {
+        const ctx = chart.ctx;
+        const yAxis = chart.scales.y;
+        const xAxis = chart.scales.x;
+        const yPos = yAxis.getPixelForValue(8.0);
+        
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(xAxis.left, yPos);
+        ctx.lineTo(xAxis.right, yPos);
+        ctx.lineWidth = 1;
+        ctx.strokeStyle = 'rgba(74, 222, 128, 0.5)';
+        ctx.setLineDash([5, 5]);
+        ctx.stroke();
+        
+        ctx.fillStyle = 'rgba(74, 222, 128, 0.8)';
+        ctx.font = '10px Plus Jakarta Sans';
+        ctx.fillText('Target (8.0)', xAxis.left + 5, yPos - 5);
+        ctx.restore();
+      }
+    };
+
+    scoreTrendChartInstance = new Chart(ctxElement, {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'Overall Score',
+          data: dataPts,
+          borderColor: '#4fc3f7',
+          backgroundColor: 'rgba(79, 195, 247, 0.1)',
+          borderWidth: 2,
+          pointBackgroundColor: '#fff',
+          pointBorderColor: '#4fc3f7',
+          pointBorderWidth: 2,
+          pointRadius: 4,
+          pointHoverRadius: 6,
+          fill: true,
+          tension: 0.3
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { min: 0, max: 10, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
+          x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)' } }
+        },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.8)',
+            titleColor: 'rgba(255,255,255,0.8)',
+            bodyColor: '#4fc3f7',
+            padding: 10,
+            displayColors: false,
+            callbacks: {
+              label: function(context) { return 'Score: ' + context.parsed.y.toFixed(1); }
+            }
+          }
+        }
+      },
+      plugins: [targetLinePlugin]
+    });
+  }
+
+  async function viewPastReport(sessionId) {
+    const session = globalHistoryData.find(s => s.id === sessionId);
+    if (!session) return;
+    
+    activeSession = session;
+    setupState = { type: session.interview_type, difficulty: session.difficulty };
+    
+    document.getElementById('history-view').style.display = 'none';
+    document.getElementById('feedback-loading').style.display = 'flex';
+    
+    await displayFeedbackReport();
+  }
+  /* ==========================================
+     P4.04: REPLAY ENGINE
+     ========================================== */
+  let currentReplayData = null;
+  let currentReplayIndex = 0;
+
+  async function loadReplayView(sessionId) {
+    switchView('replay-view');
+    document.getElementById('replay-video-loader').style.display = 'flex';
+    document.getElementById('replay-tabs').innerHTML = '';
+    
+    // Fetch session data
+    const { data: sessionData, error } = await sb
+      .from('sessions')
+      .select('*, answers(*, feedback(*))')
+      .eq('id', sessionId)
+      .single();
+      
+    if (error || !sessionData) {
+      console.error("Failed to load replay session", error);
+      return;
+    }
+    
+    // Sort answers by created_at (assuming we have one or use id fallback)
+    const answers = sessionData.answers.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+    
+    // Refresh signed URLs for all answers that have a video
+    for (let i = 0; i < answers.length; i++) {
+      const ans = answers[i];
+      if (ans.answer_video_url) {
+        try {
+          const urlObj = new URL(ans.answer_video_url);
+          const pathSegments = urlObj.pathname.split('interview-videos/');
+          if (pathSegments.length > 1) {
+            const filePath = pathSegments[1];
+            const { data: newUrlData } = await sb.storage.from('interview-videos').createSignedUrl(filePath, 604800);
+            if (newUrlData && newUrlData.signedUrl) {
+              ans.fresh_video_url = newUrlData.signedUrl;
+            } else {
+              ans.fresh_video_url = null;
+            }
+          }
+        } catch (e) {
+          console.error("Error refreshing URL", e);
+          ans.fresh_video_url = null;
+        }
+      }
+    }
+    
+    currentReplayData = {
+      session: sessionData,
+      answers: answers
+    };
+    
+    // Populate header
+    let company = sessionData.target_company || 'General';
+    const dateObj = new Date(sessionData.created_at);
+    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+    
+    document.getElementById('replay-header-info').innerHTML = `
+      <span><i class="fa-solid fa-building" style="margin-right: 6px;"></i>${company}</span>
+      <span>•</span>
+      <span style="text-transform: uppercase;">${sessionData.interview_type}</span>
+      <span>•</span>
+      <span>${dateStr}</span>
+    `;
+    
+    // Build tabs
+    const tabsContainer = document.getElementById('replay-tabs');
+    tabsContainer.innerHTML = '';
+    for (let i = 0; i < answers.length; i++) {
+      const btn = document.createElement('button');
+      btn.className = 'btn btn-secondary';
+      btn.style.padding = '8px 16px';
+      btn.textContent = `Q${i + 1}`;
+      btn.onclick = () => renderReplayQuestion(i);
+      tabsContainer.appendChild(btn);
+    }
+    
+    // Load first question
+    renderReplayQuestion(0);
+  }
+
+  function renderReplayQuestion(index) {
+    if (!currentReplayData || !currentReplayData.answers[index]) return;
+    currentReplayIndex = index;
+    
+    const ans = currentReplayData.answers[index];
+    const fb = ans.feedback && ans.feedback.length > 0 ? ans.feedback[0] : null;
+    
+    // Update tabs UI
+    const tabs = document.getElementById('replay-tabs').children;
+    for (let i = 0; i < tabs.length; i++) {
+      if (i === index) {
+        tabs[i].classList.remove('btn-secondary');
+        tabs[i].classList.add('btn-primary');
+      } else {
+        tabs[i].classList.remove('btn-primary');
+        tabs[i].classList.add('btn-secondary');
+      }
+    }
+    
+    // Update Video & Text
+    const videoEl = document.getElementById('replay-video');
+    const loader = document.getElementById('replay-video-loader');
+    
+    document.getElementById('replay-q-text').textContent = ans.question_text || 'No question text available.';
+    document.getElementById('replay-a-text').textContent = ans.answer_text || 'No transcribed answer available.';
+    
+    if (ans.fresh_video_url) {
+      document.getElementById('replay-left-panel').style.display = 'flex';
+      videoEl.style.display = 'block';
+      loader.style.display = 'flex'; // show loader while loading
+      videoEl.src = ans.fresh_video_url;
+      videoEl.onloadeddata = () => { loader.style.display = 'none'; };
+      videoEl.onerror = () => { loader.style.display = 'none'; }; // hide loader if error
+      
+      // Reset speed
+      setReplaySpeed(1, document.getElementById('btn-speed-1'));
+    } else {
+      videoEl.style.display = 'none';
+      loader.style.display = 'none';
+      videoEl.src = '';
+    }
+    
+    // Update Feedback Panel
+    if (fb) {
+      document.getElementById('replay-fb-overall').textContent = (fb.overall_score || 0).toFixed(1);
+      
+      const c = fb.clarity_score || 0;
+      const d = fb.depth_score || 0;
+      const s = fb.structure_score || 0;
+      
+      document.getElementById('replay-fb-c').textContent = c + '/10';
+      document.getElementById('replay-fb-d').textContent = d + '/10';
+      document.getElementById('replay-fb-s').textContent = s + '/10';
+      
+      document.getElementById('replay-fb-c-bar').style.width = (c * 10) + '%';
+      document.getElementById('replay-fb-d-bar').style.width = (d * 10) + '%';
+      document.getElementById('replay-fb-s-bar').style.width = (s * 10) + '%';
+      
+      // Delivery metrics
+      let badgesHtml = '';
+      if (fb.words_per_minute) {
+        let paceColor = fb.words_per_minute > 160 ? '#f59e0b' : (fb.words_per_minute < 110 ? '#a78bfa' : '#4ade80');
+        badgesHtml += `<div style="background: ${paceColor}22; color: ${paceColor}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-gauge" style="margin-right: 4px;"></i>${fb.words_per_minute} WPM</div>`;
+      }
+      if (fb.filler_words_used && fb.filler_words_used.length > 0) {
+        badgesHtml += `<div style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-comment-dots" style="margin-right: 4px;"></i>Filler: ${fb.filler_words_used.join(', ')}</div>`;
+      }
+      if (fb.eye_contact_percentage) {
+        badgesHtml += `<div style="background: rgba(79, 195, 247, 0.1); color: #4fc3f7; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600;"><i class="fa-solid fa-eye" style="margin-right: 4px;"></i>${fb.eye_contact_percentage}% Eye Contact</div>`;
+      }
+      document.getElementById('replay-delivery-badges').innerHTML = badgesHtml;
+      
+      document.getElementById('replay-fb-text').textContent = fb.feedback_text || '';
+      
+      // Strengths & Improvements
+      const stContainer = document.getElementById('replay-fb-strengths');
+      stContainer.innerHTML = '';
+      if (fb.strengths) {
+        fb.strengths.forEach(st => {
+          stContainer.innerHTML += `<div style="background: rgba(74, 222, 128, 0.1); color: #4ade80; padding: 6px 10px; border-radius: 6px; font-size: 12px;"><i class="fa-solid fa-check" style="margin-right: 6px;"></i>${st}</div>`;
+        });
+      }
+      
+      const impContainer = document.getElementById('replay-fb-improvements');
+      impContainer.innerHTML = '';
+      if (fb.improvements) {
+        fb.improvements.forEach(imp => {
+          impContainer.innerHTML += `<div style="background: rgba(245, 158, 11, 0.1); color: #f59e0b; padding: 6px 10px; border-radius: 6px; font-size: 12px;"><i class="fa-solid fa-arrow-up" style="margin-right: 6px;"></i>${imp}</div>`;
+        });
+      }
+      
+      document.getElementById('replay-fb-model').textContent = fb.model_answer || 'No model answer provided.';
+    } else {
+      document.getElementById('replay-fb-overall').textContent = 'N/A';
+      document.getElementById('replay-fb-c').textContent = '0/10';
+      document.getElementById('replay-fb-d').textContent = '0/10';
+      document.getElementById('replay-fb-s').textContent = '0/10';
+      document.getElementById('replay-fb-c-bar').style.width = '0%';
+      document.getElementById('replay-fb-d-bar').style.width = '0%';
+      document.getElementById('replay-fb-s-bar').style.width = '0%';
+      document.getElementById('replay-delivery-badges').innerHTML = '';
+      document.getElementById('replay-fb-text').textContent = 'Feedback is still processing or unavailable.';
+      document.getElementById('replay-fb-strengths').innerHTML = '';
+      document.getElementById('replay-fb-improvements').innerHTML = '';
+      document.getElementById('replay-fb-model').textContent = '';
+    }
+  }
+
+  function setReplaySpeed(speed, btnEl) {
+    const videoEl = document.getElementById('replay-video');
+    if (videoEl) {
+      videoEl.playbackRate = speed;
+    }
+    
+    // Update active button styling
+    document.querySelectorAll('.replay-speed-btn').forEach(b => {
+      b.style.borderColor = 'transparent';
+      b.style.color = 'white';
+    });
+    if (btnEl) {
+      btnEl.style.borderColor = '#4fc3f7';
+      btnEl.style.color = '#4fc3f7';
+    }
+  }
   /* ── 9. CANVAS COSMIC RINGS SIMULATION (Directly from mock_interview_hero) ── */
   const canvas = document.getElementById('c');
   const ctx = canvas.getContext('2d');
