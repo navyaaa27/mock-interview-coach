@@ -1253,11 +1253,433 @@
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
   }
+
+  /* ══════════════════════════════════════════
+     P4.07: NAVIGATION BAR
+     ══════════════════════════════════════════ */
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 220px;
+    background: rgba(8, 8, 12, 0.92);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-right: 1px solid rgba(255,255,255,0.06);
+    z-index: 35;
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    transition: transform 0.3s ease;
+  }
+  .app-sidebar .sidebar-logo {
+    padding: 0 24px 28px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--text-primary);
+    letter-spacing: -.02em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+    margin-bottom: 12px;
+  }
+  .app-sidebar .sidebar-logo span {
+    background: linear-gradient(135deg, #4fc3f7, #ab47bc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    font-weight: 900;
+  }
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 0 12px;
+    flex: 1;
+  }
+  .sidebar-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    background: transparent;
+    text-align: left;
+    width: 100%;
+  }
+  .sidebar-nav-item:hover {
+    background: rgba(255,255,255,0.05);
+    color: var(--text-primary);
+  }
+  .sidebar-nav-item.active {
+    background: rgba(139, 92, 246, 0.12);
+    color: #c4b5fd;
+  }
+  .sidebar-nav-item i {
+    width: 20px;
+    text-align: center;
+    font-size: 15px;
+  }
+  .sidebar-bottom {
+    padding: 16px 12px;
+    border-top: 1px solid rgba(255,255,255,0.05);
+    margin-top: auto;
+  }
+  .sidebar-user-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .sidebar-user-card:hover { background: rgba(255,255,255,0.05); }
+
+  /* Avatar */
+  .user-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #7c3aed, #4fc3f7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 800;
+    color: white;
+    flex-shrink: 0;
+  }
+  .user-avatar.sm { width: 28px; height: 28px; font-size: 10px; }
+  .user-avatar.lg { width: 44px; height: 44px; font-size: 16px; }
+
+  /* Avatar Dropdown */
+  .avatar-dropdown {
+    position: absolute;
+    bottom: 70px;
+    left: 12px;
+    right: 12px;
+    background: rgba(20, 20, 26, 0.98);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 6px;
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+    display: none;
+    z-index: 50;
+  }
+  .avatar-dropdown.open { display: block; }
+  .avatar-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--text-secondary);
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .avatar-dropdown-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: var(--text-primary);
+  }
+  .avatar-dropdown-item.danger:hover { color: #f87171; }
+  .avatar-dropdown-item i { width: 16px; text-align: center; }
+
+  /* Mobile Bottom Nav */
+  .mobile-bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(8, 8, 12, 0.96);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.06);
+    z-index: 35;
+    padding: 8px 0 max(8px, env(safe-area-inset-bottom));
+    justify-content: space-around;
+  }
+  .mobile-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 12px;
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: color 0.2s;
+  }
+  .mobile-nav-item.active { color: #c4b5fd; }
+  .mobile-nav-item i { font-size: 18px; }
+
+  /* Layout adjustment when sidebar visible */
+  .app-with-sidebar {
+    margin-left: 220px;
+  }
+  .app-with-sidebar header {
+    left: 220px;
+  }
+
+  @media (max-width: 767px) {
+    .app-sidebar { display: none !important; }
+    .mobile-bottom-nav { display: flex !important; }
+    .app-with-sidebar { margin-left: 0; }
+    .app-with-sidebar header { left: 0; }
+    main { padding-bottom: 80px !important; }
+  }
+
+  /* ══════════════════════════════════════════
+     P4.07: LOADING SKELETONS
+     ══════════════════════════════════════════ */
+  @keyframes shimmer {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+  }
+  .skeleton {
+    background: linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+    border-radius: 8px;
+  }
+  .skeleton-text { height: 14px; width: 60%; margin-bottom: 8px; }
+  .skeleton-text.sm { height: 10px; width: 40%; }
+  .skeleton-text.lg { height: 20px; width: 80%; }
+  .skeleton-card {
+    height: 88px;
+    border-radius: 16px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.03) 25%, rgba(255,255,255,0.06) 50%, rgba(255,255,255,0.03) 75%);
+    background-size: 800px 100%;
+    animation: shimmer 1.5s ease-in-out infinite;
+  }
+  .skeleton-circle { width: 56px; height: 56px; border-radius: 50%; }
+
+  /* ══════════════════════════════════════════
+     P4.07: STATS ROW
+     ══════════════════════════════════════════ */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 767px) {
+    .stats-row { grid-template-columns: repeat(2, 1fr); }
+  }
+  .stat-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 18px;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .stat-card:hover {
+    border-color: rgba(139, 92, 246, 0.25);
+    transform: translateY(-2px);
+  }
+  .stat-card .stat-value {
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--text-primary);
+    line-height: 1;
+  }
+  .stat-card .stat-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-top: 8px;
+  }
+
+  /* ══════════════════════════════════════════
+     P4.07: DASHBOARD CHART CONTAINER
+     ══════════════════════════════════════════ */
+  .dash-chart-container {
+    background: rgba(255,255,255,0.02);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 20px;
+    padding: 24px;
+    margin-bottom: 24px;
+    position: relative;
+  }
+  .dash-chart-container .chart-title {
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .dash-chart-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    color: var(--text-muted);
+    font-size: 13px;
+    gap: 8px;
+  }
+  .dash-chart-empty i { font-size: 32px; opacity: 0.3; }
+
+  /* ══════════════════════════════════════════
+     P4.07: LAST SESSION SUMMARY
+     ══════════════════════════════════════════ */
+  .last-session-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 16px;
+    padding: 20px;
+    transition: border-color 0.2s;
+  }
+  .last-session-card:hover { border-color: rgba(79, 195, 247, 0.2); }
+  .last-session-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+  .last-session-score {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+  }
+
+  /* ══════════════════════════════════════════
+     P4.07: QUICK-START CHIPS
+     ══════════════════════════════════════════ */
+  .quickstart-chips {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-top: 14px;
+  }
+  .quickstart-chip {
+    padding: 6px 14px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    color: var(--text-secondary);
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .quickstart-chip:hover {
+    background: rgba(139, 92, 246, 0.12);
+    border-color: rgba(139, 92, 246, 0.3);
+    color: #c4b5fd;
+  }
+
+  /* ══════════════════════════════════════════
+     P4.07: TWO-COLUMN ZONE 5
+     ══════════════════════════════════════════ */
+  .dash-two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  @media (max-width: 767px) {
+    .dash-two-col { grid-template-columns: 1fr; }
+  }
+
+  /* ══════════════════════════════════════════
+     P4.07: DASHBOARD WIDER LAYOUT
+     ══════════════════════════════════════════ */
+  .dashboard-card.full-width {
+    max-width: 1100px;
+  }
 </style>
 </head>
 <body>
 
 <canvas id="c"></canvas>
+
+<!-- ══════════════════════════════════════════
+     P4.07: SIDEBAR NAVIGATION (Desktop)
+     ══════════════════════════════════════════ -->
+<nav id="app-sidebar" class="app-sidebar" style="display: none;">
+  <div class="sidebar-logo"><i class="fa-solid fa-cube" style="color: #4fc3f7;"></i> Interview<span>AI</span></div>
+  <div class="sidebar-nav">
+    <button class="sidebar-nav-item active" onclick="navigateTo('dashboard')" data-nav="dashboard">
+      <i class="fa-solid fa-grip"></i> Dashboard
+    </button>
+    <button class="sidebar-nav-item" onclick="navigateTo('history')" data-nav="history">
+      <i class="fa-solid fa-clock-rotate-left"></i> History
+    </button>
+    <button class="sidebar-nav-item" onclick="navigateTo('progress')" data-nav="progress">
+      <i class="fa-solid fa-chart-line"></i> Progress
+    </button>
+    <button class="sidebar-nav-item" onclick="navigateTo('profile')" data-nav="profile">
+      <i class="fa-solid fa-user-gear"></i> Profile
+    </button>
+  </div>
+  <div class="sidebar-bottom" style="position: relative;">
+    <div class="avatar-dropdown" id="avatar-dropdown">
+      <button class="avatar-dropdown-item" onclick="navigateTo('profile')">
+        <i class="fa-solid fa-user-gear"></i> Profile Settings
+      </button>
+      <button class="avatar-dropdown-item danger" onclick="handleSignOut()">
+        <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+      </button>
+    </div>
+    <div class="sidebar-user-card" onclick="toggleAvatarDropdown()">
+      <div class="user-avatar" id="sidebar-avatar">U</div>
+      <div style="flex: 1; min-width: 0;">
+        <div id="sidebar-user-name" style="font-size: 13px; font-weight: 700; color: var(--text-primary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">User</div>
+        <div id="sidebar-user-email" style="font-size: 11px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">user@example.com</div>
+      </div>
+      <i class="fa-solid fa-ellipsis-vertical" style="color: var(--text-muted); font-size: 12px;"></i>
+    </div>
+  </div>
+</nav>
+
+<!-- P4.07: MOBILE BOTTOM NAVIGATION -->
+<nav id="mobile-bottom-nav" class="mobile-bottom-nav">
+  <button class="mobile-nav-item active" onclick="navigateTo('dashboard')" data-nav="dashboard">
+    <i class="fa-solid fa-grip"></i> Dashboard
+  </button>
+  <button class="mobile-nav-item" onclick="navigateTo('history')" data-nav="history">
+    <i class="fa-solid fa-clock-rotate-left"></i> History
+  </button>
+  <button class="mobile-nav-item" onclick="navigateTo('progress')" data-nav="progress">
+    <i class="fa-solid fa-chart-line"></i> Progress
+  </button>
+  <button class="mobile-nav-item" onclick="navigateTo('profile')" data-nav="profile">
+    <i class="fa-solid fa-user-gear"></i> Profile
+  </button>
+</nav>
 
 <!-- Top Fixed Navigation Bar -->
 <header>
@@ -1474,20 +1896,30 @@
     </div>
   </div>
   
-  <!-- 4. DASHBOARD PAGE VIEW -->
-  <div id="dashboard-view" class="dashboard-card">
-    <!-- Welcome Top Title Header -->
-    <div class="welcome-header" style="display: flex; justify-content: space-between; align-items: flex-start;">
+  <!-- 4. DASHBOARD PAGE VIEW (P4.07 Full Rebuild) -->
+  <div id="dashboard-view" class="dashboard-card full-width">
+
+    <!-- ZONE 1: Header Bar -->
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px;">
       <div>
         <p style="font-size: 12px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">WORKSPACE DASHBOARD</p>
-        <h1 class="welcome-title">Welcome back, <span id="dash-fullname">[User Name]</span></h1>
-        <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Personalized mock coaching console connected successfully.</p>
+        <h1 class="welcome-title" id="dash-greeting">Good evening, <span id="dash-fullname">User</span></h1>
+        <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Here's your practice overview for today.</p>
       </div>
-      <button onclick="loadHistoryView()" class="btn btn-secondary" style="margin-top: 8px;">
-        <i class="fa-solid fa-clock-rotate-left" style="margin-right: 6px;"></i> View History
-      </button>
+      <div style="position: relative;">
+        <div class="user-avatar lg" id="dash-avatar" style="cursor: pointer;" onclick="toggleHeaderDropdown()">U</div>
+        <div class="avatar-dropdown" id="header-dropdown" style="position: absolute; top: 52px; right: 0; left: auto; width: 180px;">
+          <button class="avatar-dropdown-item" onclick="navigateTo('profile')">
+            <i class="fa-solid fa-user-gear"></i> Profile Settings
+          </button>
+          <button class="avatar-dropdown-item danger" onclick="handleSignOut()">
+            <i class="fa-solid fa-right-from-bracket"></i> Sign Out
+          </button>
+        </div>
+      </div>
     </div>
-    
+
+    <!-- ZONE 2: Streak + Interview Countdown -->
     <div id="streak-warning" style="display: none; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); border-radius: 12px; padding: 12px 16px; margin-bottom: 24px; color: #fca5a5; font-size: 13px; align-items: center; gap: 12px;">
       <i class="fa-solid fa-bolt" style="font-size: 16px; color: #f87171;"></i>
       <span id="streak-warning-text">⚡ Your streak ends at midnight. Practice now to keep it alive.</span>
@@ -1497,29 +1929,76 @@
       <i class="fa-solid fa-triangle-exclamation" style="font-size: 16px;"></i>
       <span>Your storage is getting full. Older sessions may be automatically cleaned up.</span>
     </div>
-    
-    <!-- Split columns dashboard -->
-    <div class="dashboard-grid">
-      <!-- LEFT MAIN CONTAINER -->
-      <div style="display: flex; flex-direction: column; gap: 24px;">
-        
-        <!-- Streak Widget -->
-        <div id="streak-widget" class="card" style="padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="font-size: 40px; text-shadow: 0 0 20px rgba(245,158,11,0.5);">🔥</div>
-            <div>
-              <div id="streak-count-text" style="font-size: 20px; font-weight: 800; color: white;">0 day streak</div>
-              <div id="streak-sub-text" style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Start your streak today &rarr;</div>
-              <div id="streak-freeze-badge" style="display: none; margin-top: 8px; font-size: 11px; font-weight: 700; color: #60a5fa; background: rgba(96, 165, 250, 0.15); padding: 2px 8px; border-radius: 12px; width: fit-content;"><i class="fa-solid fa-snowflake" style="margin-right: 4px;"></i> Freeze available</div>
-            </div>
-          </div>
-          <div id="streak-pb-badge" style="display: none; background: rgba(74, 222, 128, 0.15); color: #4ade80; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; animation: pulse 2s infinite;">
-            🎉 New personal best!
+
+    <div style="display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap;">
+      <!-- Streak Widget -->
+      <div id="streak-widget" class="card" style="flex: 1; min-width: 260px; padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="font-size: 40px; text-shadow: 0 0 20px rgba(245,158,11,0.5);">🔥</div>
+          <div>
+            <div id="streak-count-text" style="font-size: 20px; font-weight: 800; color: white;">0 day streak</div>
+            <div id="streak-sub-text" style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">Start your streak today &rarr;</div>
+            <div id="streak-freeze-badge" style="display: none; margin-top: 8px; font-size: 11px; font-weight: 700; color: #60a5fa; background: rgba(96, 165, 250, 0.15); padding: 2px 8px; border-radius: 12px; width: fit-content;"><i class="fa-solid fa-snowflake" style="margin-right: 4px;"></i> Freeze available</div>
           </div>
         </div>
-        
-        <!-- P4.06: Practice Suggestion Card -->
-        <div id="suggestion-card" class="card" style="padding: 18px; display: none; background: linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(79,195,247,0.05) 100%); border: 1px solid rgba(167,139,250,0.15);">
+        <div id="streak-pb-badge" style="display: none; background: rgba(74, 222, 128, 0.15); color: #4ade80; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 700; animation: pulse 2s infinite;">
+          🎉 New personal best!
+        </div>
+      </div>
+
+      <!-- Interview Countdown Widget -->
+      <div id="interview-countdown-widget" style="flex: 1; min-width: 240px; padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); display: flex; align-items: center; gap: 14px;">
+        <i class="fa-solid fa-calendar-day" style="font-size: 24px; color: #a78bfa;"></i>
+        <div style="flex: 1;">
+          <div id="countdown-text" style="font-size: 13px; font-weight: 600; color: var(--text-secondary);">No interview date set</div>
+          <input type="date" id="interview-date-picker" style="margin-top: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: white; padding: 4px 8px; font-size: 12px; width: 100%;" onchange="saveInterviewDate(this.value)">
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 3: Stats Row (4 cards) -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" id="dash-sessions-count">
+          <div class="skeleton skeleton-text lg" style="width: 40px; margin: 0 auto;"></div>
+        </div>
+        <div class="stat-label">Sessions Completed</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="dash-avg-score" style="color: #4fc3f7;">
+          <div class="skeleton skeleton-text lg" style="width: 40px; margin: 0 auto;"></div>
+        </div>
+        <div class="stat-label">Average Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="dash-best-score" style="color: #4ade80;">
+          <div class="skeleton skeleton-text lg" style="width: 40px; margin: 0 auto;"></div>
+        </div>
+        <div class="stat-label">Best Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="dash-hours-practiced">
+          <div class="skeleton skeleton-text lg" style="width: 40px; margin: 0 auto;"></div>
+        </div>
+        <div class="stat-label">Hours Practiced</div>
+      </div>
+    </div>
+
+    <!-- ZONE 4: Score Trend Chart -->
+    <div class="dash-chart-container">
+      <div class="chart-title"><i class="fa-solid fa-chart-line" style="color: #4fc3f7;"></i> Score Trend</div>
+      <div id="dash-chart-empty" class="dash-chart-empty">
+        <i class="fa-solid fa-chart-line"></i>
+        <div>Complete at least 3 sessions to see your score trend</div>
+      </div>
+      <canvas id="dashScoreTrendChart" style="display: none; max-height: 240px;"></canvas>
+    </div>
+
+    <!-- ZONE 5: Two-column — Suggestion + Last Session -->
+    <div class="dash-two-col">
+      <!-- Left: Smart Suggestion Card -->
+      <div>
+        <div id="suggestion-card" class="card" style="padding: 18px; display: none; background: linear-gradient(135deg, rgba(167,139,250,0.08) 0%, rgba(79,195,247,0.05) 100%); border: 1px solid rgba(167,139,250,0.15); height: 100%;">
           <div style="display: flex; align-items: flex-start; gap: 14px;">
             <div id="suggestion-icon" style="font-size: 28px; min-width: 36px; text-align: center;">💡</div>
             <div style="flex: 1;">
@@ -1531,101 +2010,189 @@
             </div>
           </div>
         </div>
-
-        <!-- P4.06: Quick Practice + Interview Countdown Row -->
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-          <!-- Quick 15-min Practice Button -->
-          <button id="quick-practice-btn" class="btn btn-secondary" onclick="startQuickPractice()" style="flex: 1; min-width: 200px; padding: 14px 18px; display: flex; align-items: center; gap: 12px; text-align: left; border: 1px solid rgba(79,195,247,0.2); background: rgba(79,195,247,0.06);">
-            <i class="fa-solid fa-bolt" style="font-size: 20px; color: #4fc3f7;"></i>
+      </div>
+      <!-- Right: Last Session Summary -->
+      <div>
+        <div id="last-session-card" class="last-session-card" style="display: none; height: 100%;">
+          <div class="last-session-header">
             <div>
-              <div style="font-weight: 700; font-size: 13px; color: white;">Quick 15-min Practice</div>
-              <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Auto-targets your weakest area</div>
+              <div style="font-size: 11px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px;">Last Session</div>
+              <div id="ls-type" style="font-size: 14px; font-weight: 700; color: white;"></div>
+              <div id="ls-date" style="font-size: 12px; color: var(--text-secondary); margin-top: 2px;"></div>
             </div>
-          </button>
-          
-          <!-- Interview Countdown Widget -->
-          <div id="interview-countdown-widget" style="flex: 1; min-width: 200px; padding: 14px 18px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.08); background: rgba(255,255,255,0.03); display: flex; align-items: center; gap: 12px;">
-            <i class="fa-solid fa-calendar-day" style="font-size: 20px; color: #a78bfa;"></i>
-            <div style="flex: 1;">
-              <div id="countdown-text" style="font-size: 12px; font-weight: 600; color: var(--text-secondary);">No interview date set</div>
-              <input type="date" id="interview-date-picker" style="margin-top: 6px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); border-radius: 8px; color: white; padding: 4px 8px; font-size: 12px; width: 100%;" onchange="saveInterviewDate(this.value)">
+            <div id="ls-score" class="last-session-score"></div>
+          </div>
+          <div id="ls-improvements" style="font-size: 12px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 14px;"></div>
+          <div style="display: flex; gap: 8px;">
+            <button id="ls-report-btn" class="btn btn-secondary" style="flex: 1; padding: 8px; font-size: 12px;" onclick="viewLastSessionReport()">View Report <i class="fa-solid fa-arrow-right"></i></button>
+            <button id="ls-replay-btn" class="btn btn-secondary" style="flex: 1; padding: 8px; font-size: 12px; color: #4fc3f7; border-color: rgba(79,195,247,0.3);" onclick="replayLastSession()"><i class="fa-solid fa-play" style="margin-right: 4px;"></i> Replay</button>
+          </div>
+        </div>
+        <div id="last-session-empty" class="last-session-card" style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 140px; text-align: center;">
+          <i class="fa-solid fa-folder-open" style="font-size: 24px; color: var(--text-muted); margin-bottom: 8px;"></i>
+          <div style="font-size: 13px; color: var(--text-muted);">No sessions yet — start your first one below!</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ZONE 6: Start Interview + Quick Practice -->
+    <div style="display: flex; gap: 12px; flex-wrap: wrap; margin-bottom: 16px;">
+      <button id="quick-practice-btn" class="btn btn-secondary" onclick="startQuickPractice()" style="flex: 0 0 auto; padding: 14px 20px; display: flex; align-items: center; gap: 12px; text-align: left; border: 1px solid rgba(79,195,247,0.2); background: rgba(79,195,247,0.06);">
+        <i class="fa-solid fa-bolt" style="font-size: 20px; color: #4fc3f7;"></i>
+        <div>
+          <div style="font-weight: 700; font-size: 13px; color: white;">Quick 15-min</div>
+          <div style="font-size: 11px; color: var(--text-secondary); margin-top: 2px;">Targets your weakest area</div>
+        </div>
+      </button>
+      <button onclick="openSetupView()" class="btn btn-start-interview" style="flex: 1;">
+        <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+          <div style="display: flex; align-items: center; gap: 16px; text-align: left;">
+            <i class="fa-solid fa-circle-play" style="font-size: 32px;"></i>
+            <div>
+              <div style="font-weight: 800;">Start New Interview Session</div>
+              <div style="font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 2px;">Behavioral, technical, DSA or system design.</div>
             </div>
           </div>
         </div>
+      </button>
+    </div>
 
-        <!-- Interactive Glowing Start Interview Button Card -->
-        <button onclick="openSetupView()" class="btn btn-start-interview">
-          <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-            <div style="display: flex; align-items: center; gap: 16px; text-align: left;">
-              <i class="fa-solid fa-circle-play" style="font-size: 32px;"></i>
-              <div>
-                <div style="font-weight: 800;">Start New Interview Session</div>
-                <div style="font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7); margin-top: 2px;">Behavioral, technical, DSA or system design.</div>
-              </div>
+    <!-- Quick-Start Chips -->
+    <div class="quickstart-chips">
+      <button class="quickstart-chip" onclick="quickStartType('behavioral')">💬 Behavioral</button>
+      <button class="quickstart-chip" onclick="quickStartType('technical')">💻 Technical</button>
+      <button class="quickstart-chip" onclick="quickStartType('system_design')">🏗️ System Design</button>
+      <button class="quickstart-chip" onclick="quickStartType('hr')">🤝 HR</button>
+    </div>
+
+    <!-- Hidden fields for backward compatibility -->
+    <span id="dash-role" style="display:none;"></span>
+    <span id="dash-experience" style="display:none;"></span>
+    <span id="dash-goal" style="display:none;"></span>
+    <span id="dash-companies" style="display:none;"></span>
+  </div>
+
+  <!-- ══════════════════════════════════════════
+       P4.07: PROFILE VIEW
+       ══════════════════════════════════════════ -->
+  <div id="profile-view" class="dashboard-card full-width" style="display: none;">
+    <div style="margin-bottom: 28px;">
+      <p style="font-size: 12px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">PROFILE SETTINGS</p>
+      <h1 class="welcome-title">Your Profile</h1>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Manage your interview preparation settings.</p>
+    </div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+      <div class="profile-summary-card">
+        <div class="section-title"><i class="fa-solid fa-user" style="color: #4fc3f7;"></i> Account</div>
+        <div class="profile-meta-row">
+          <div class="profile-meta-item">
+            <i class="fa-regular fa-envelope"></i>
+            <div class="profile-meta-content">
+              <span class="profile-meta-label">Email</span>
+              <span id="prof-email" class="profile-meta-val">-</span>
             </div>
           </div>
-        </button>
-        
-        <!-- Progress section display card -->
-        <div>
-          <div class="section-title"><i class="fa-solid fa-chart-simple" style="color: #c084fc;"></i> Your Progress</div>
-          <div class="progress-section">
-            <i class="fa-solid fa-chart-line"></i>
-            <p class="progress-placeholder-text">Complete your first session to see your progress insights, competency breakdown, and performance scoring charts.</p>
+          <div class="profile-meta-item">
+            <i class="fa-solid fa-fire"></i>
+            <div class="profile-meta-content">
+              <span class="profile-meta-label">Current Streak</span>
+              <span id="prof-streak" class="profile-meta-val">0 days</span>
+            </div>
+          </div>
+          <div class="profile-meta-item">
+            <i class="fa-solid fa-trophy"></i>
+            <div class="profile-meta-content">
+              <span class="profile-meta-label">Longest Streak</span>
+              <span id="prof-longest-streak" class="profile-meta-val">0 days</span>
+            </div>
           </div>
         </div>
       </div>
-      
-      <!-- RIGHT SUMMARY COMPONENT COLUMN -->
-      <div style="display: flex; flex-direction: column; gap: 24px;">
-        
-        <!-- completed session count card -->
-        <div class="sessions-completed-card">
-          <div id="dash-sessions-count" class="sessions-count">0</div>
-          <div class="sessions-label">Sessions Completed</div>
-        </div>
-        
-        <!-- Profile details summary card -->
-        <div class="profile-summary-card">
-          <div class="section-title"><i class="fa-regular fa-address-card" style="color: #4fc3f7;"></i> Profile Summary</div>
-          
-          <div class="profile-meta-row">
-            <div class="profile-meta-item">
-              <i class="fa-solid fa-briefcase"></i>
-              <div class="profile-meta-content">
-                <span class="profile-meta-label">Target Role</span>
-                <span id="dash-role" class="profile-meta-val">-</span>
-              </div>
+      <div class="profile-summary-card">
+        <div class="section-title"><i class="fa-solid fa-bullseye" style="color: #a78bfa;"></i> Interview Profile</div>
+        <div class="profile-meta-row">
+          <div class="profile-meta-item">
+            <i class="fa-solid fa-briefcase"></i>
+            <div class="profile-meta-content">
+              <span class="profile-meta-label">Target Role</span>
+              <span id="prof-role" class="profile-meta-val">-</span>
             </div>
-            
-            <div class="profile-meta-item">
-              <i class="fa-solid fa-award"></i>
-              <div class="profile-meta-content">
-                <span class="profile-meta-label">Experience Level</span>
-                <span id="dash-experience" class="profile-meta-val">-</span>
-              </div>
+          </div>
+          <div class="profile-meta-item">
+            <i class="fa-solid fa-award"></i>
+            <div class="profile-meta-content">
+              <span class="profile-meta-label">Experience Level</span>
+              <span id="prof-experience" class="profile-meta-val">-</span>
             </div>
-            
-            <div class="profile-meta-item">
-              <i class="fa-solid fa-bullseye"></i>
-              <div class="profile-meta-content">
-                <span class="profile-meta-label">Interview Goal</span>
-                <span id="dash-goal" class="profile-meta-val">-</span>
-              </div>
+          </div>
+          <div class="profile-meta-item">
+            <i class="fa-regular fa-building"></i>
+            <div class="profile-meta-content">
+              <span class="profile-meta-label">Target Companies</span>
+              <span id="prof-companies" class="profile-meta-val">-</span>
             </div>
-            
-            <div class="profile-meta-item">
-              <i class="fa-regular fa-building"></i>
-              <div class="profile-meta-content">
-                <span class="profile-meta-label">Target Companies</span>
-                <span id="dash-companies" class="profile-meta-val">-</span>
-              </div>
+          </div>
+          <div class="profile-meta-item">
+            <i class="fa-solid fa-flag-checkered"></i>
+            <div class="profile-meta-content">
+              <span class="profile-meta-label">Interview Goal</span>
+              <span id="prof-goal" class="profile-meta-val">-</span>
             </div>
           </div>
         </div>
       </div>
     </div>
+    <div style="margin-top: 20px; text-align: center;">
+      <button class="btn btn-secondary" onclick="navigateTo('dashboard')" style="padding: 10px 24px;"><i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i> Back to Dashboard</button>
+    </div>
   </div>
+
+  <!-- ══════════════════════════════════════════
+       P4.07: PROGRESS VIEW
+       ══════════════════════════════════════════ -->
+  <div id="progress-view" class="dashboard-card full-width" style="display: none;">
+    <div style="margin-bottom: 28px;">
+      <p style="font-size: 12px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 4px;">PROGRESS ANALYTICS</p>
+      <h1 class="welcome-title"><i class="fa-solid fa-chart-line"></i> Your Progress</h1>
+      <p style="font-size: 14px; color: var(--text-secondary); margin-top: 4px;">Detailed analytics from all your practice sessions.</p>
+    </div>
+    <!-- Stats summary -->
+    <div class="stats-row" style="margin-bottom: 28px;">
+      <div class="stat-card">
+        <div class="stat-value" id="prog-total-sessions">0</div>
+        <div class="stat-label">Total Sessions</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="prog-avg-score" style="color: #4fc3f7;">0.0</div>
+        <div class="stat-label">Overall Average</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="prog-best-score" style="color: #4ade80;">0.0</div>
+        <div class="stat-label">Best Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" id="prog-total-hours">0</div>
+        <div class="stat-label">Hours Practiced</div>
+      </div>
+    </div>
+    <!-- Category breakdown -->
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+      <div class="dash-chart-container" style="margin-bottom: 0;">
+        <div class="chart-title"><i class="fa-solid fa-layer-group" style="color: #a78bfa;"></i> Scores by Type</div>
+        <div id="prog-type-breakdown" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        <div id="prog-type-empty" style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No session data yet</div>
+      </div>
+      <div class="dash-chart-container" style="margin-bottom: 0;">
+        <div class="chart-title"><i class="fa-solid fa-chart-bar" style="color: #4fc3f7;"></i> Skill Averages</div>
+        <div id="prog-skill-breakdown" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        <div id="prog-skill-empty" style="color: var(--text-muted); font-size: 13px; text-align: center; padding: 20px;">No feedback data yet</div>
+      </div>
+    </div>
+    <div style="text-align: center;">
+      <button class="btn btn-secondary" onclick="navigateTo('dashboard')" style="padding: 10px 24px;"><i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i> Back to Dashboard</button>
+    </div>
+  </div>
+
   <!-- ==========================================
        HISTORY VIEW (P4.03)
        ========================================== -->
@@ -2237,7 +2804,8 @@
     
     const allViews = [
       'signup-view', 'login-view', 'onboarding-view', 
-      'dashboard-view', 'setup-view', 'interview-view', 'feedback-view', 'history-view', 'replay-view'
+      'dashboard-view', 'setup-view', 'interview-view', 'feedback-view', 
+      'history-view', 'replay-view', 'profile-view', 'progress-view'
     ];
     
     allViews.forEach(id => {
@@ -2256,7 +2824,85 @@
     if (targetId === 'onboarding-view') {
       goToOnboardStep(1); // Default to Step 1
     }
+    
+    // P4.07: Show/hide sidebar + nav based on auth views
+    const navViews = ['dashboard-view', 'history-view', 'profile-view', 'progress-view', 'setup-view', 'interview-view', 'feedback-view', 'replay-view'];
+    const showNav = navViews.includes(targetId);
+    const sidebar = document.getElementById('app-sidebar');
+    const bottomNav = document.getElementById('mobile-bottom-nav');
+    const mainEl = document.querySelector('main');
+    
+    if (sidebar) sidebar.style.display = showNav ? 'flex' : 'none';
+    if (bottomNav) bottomNav.style.display = showNav ? '' : 'none';
+    if (mainEl) {
+      if (showNav) mainEl.classList.add('app-with-sidebar');
+      else mainEl.classList.remove('app-with-sidebar');
+    }
+    
+    // Update nav active states
+    if (showNav) updateNavActiveState(targetId);
   }
+  
+  // P4.07: Navigation functions
+  function navigateTo(page) {
+    const viewId = page + '-view';
+    switchView(viewId);
+    
+    // Close any open dropdowns
+    document.querySelectorAll('.avatar-dropdown').forEach(d => d.classList.remove('open'));
+    
+    // Load view data
+    if (page === 'dashboard' && cachedProfile) {
+      loadDashboard(cachedFullName, cachedProfile);
+    } else if (page === 'history') {
+      loadHistoryView();
+    } else if (page === 'profile' && cachedProfile) {
+      loadProfileView(cachedFullName, cachedProfile);
+    } else if (page === 'progress') {
+      loadProgressView();
+    }
+  }
+  
+  function updateNavActiveState(targetId) {
+    const navMap = {
+      'dashboard-view': 'dashboard',
+      'history-view': 'history',
+      'profile-view': 'profile',
+      'progress-view': 'progress'
+    };
+    const activePage = navMap[targetId] || 'dashboard';
+    
+    document.querySelectorAll('.sidebar-nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.nav === activePage);
+    });
+    document.querySelectorAll('.mobile-nav-item').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.nav === activePage);
+    });
+  }
+  
+  function toggleAvatarDropdown() {
+    document.getElementById('avatar-dropdown').classList.toggle('open');
+  }
+  function toggleHeaderDropdown() {
+    document.getElementById('header-dropdown').classList.toggle('open');
+  }
+  
+  // Close dropdowns when clicking outside
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.sidebar-bottom') && !e.target.closest('#dash-avatar')) {
+      document.querySelectorAll('.avatar-dropdown').forEach(d => d.classList.remove('open'));
+    }
+  });
+  
+  // Quick start by type
+  function quickStartType(type) {
+    openSetupView();
+    selectType(type);
+  }
+  
+  // Cached profile data for navigation
+  let cachedProfile = null;
+  let cachedFullName = '';
 
   /* ── 4. SIGN UP FLOW (CALLS SUPABASE SIGNUP) ── */
   async function handleSignUp(event) {
@@ -2495,58 +3141,54 @@
   }
 
   /* ── 7. LOAD & DISPLAY DASHBOARD DATA ── */
+  let dashChartInstance = null;
+  let lastSessionData = null;
+
   async function loadDashboard(fullName, profile) {
-    document.getElementById('dash-fullname').textContent = fullName;
-    document.getElementById('dash-role').textContent = profile.job_role;
+    // Cache for navigation
+    cachedFullName = fullName;
+    cachedProfile = profile;
     
-    const expLabels = {
-      'entry': 'Entry level',
-      'mid': 'Mid level',
-      'senior': 'Senior level',
-      'staff': 'Staff / Principal'
-    };
-    document.getElementById('dash-experience').textContent = expLabels[profile.experience_level] || profile.experience_level;
-    document.getElementById('dash-goal').textContent = profile.interview_goal;
-    document.getElementById('dash-companies').textContent = profile.target_companies.join(', ');
+    // ZONE 1: Time-based greeting
+    const hour = new Date().getHours();
+    const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+    const firstName = fullName ? fullName.split(' ')[0] : 'User';
+    document.getElementById('dash-fullname').textContent = firstName;
+    document.getElementById('dash-greeting').innerHTML = `${timeGreeting}, <span id="dash-fullname">${firstName}</span>`;
     
-    // Streak System Logic (P4.05)
+    // Avatar initials
+    const initials = fullName ? fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : 'U';
+    document.getElementById('dash-avatar').textContent = initials;
+    document.getElementById('sidebar-avatar').textContent = initials;
+    document.getElementById('sidebar-user-name').textContent = fullName || 'User';
+    document.getElementById('sidebar-user-email').textContent = currentUser?.email || '';
+    
+    // Hidden profile fields (backward compat)
+    const expLabels = { 'entry': 'Entry level', 'mid': 'Mid level', 'senior': 'Senior level', 'staff': 'Staff / Principal' };
+    document.getElementById('dash-role').textContent = profile.job_role || '';
+    document.getElementById('dash-experience').textContent = expLabels[profile.experience_level] || profile.experience_level || '';
+    document.getElementById('dash-goal').textContent = profile.interview_goal || '';
+    document.getElementById('dash-companies').textContent = (profile.target_companies || []).join(', ');
+    
+    // ZONE 2: Streak Widget (P4.05)
     const currentStreak = profile.current_streak || 0;
     const longestStreak = profile.longest_streak || 0;
     const hasFreeze = profile.streak_freeze_available !== false;
     
-    const countText = currentStreak === 0 ? '0 day streak' : `${currentStreak} day streak`;
-    const subText = currentStreak === 0 ? 'Start your streak today &rarr;' : 'Keep it going! 🔥';
-    
-    document.getElementById('streak-count-text').textContent = countText;
-    document.getElementById('streak-sub-text').innerHTML = subText;
-    
-    if (hasFreeze) {
-      document.getElementById('streak-freeze-badge').style.display = 'block';
-    } else {
-      document.getElementById('streak-freeze-badge').style.display = 'none';
-    }
+    document.getElementById('streak-count-text').textContent = currentStreak === 0 ? '0 day streak' : `${currentStreak} day streak`;
+    document.getElementById('streak-sub-text').innerHTML = currentStreak === 0 ? 'Start your streak today &rarr;' : `Longest: ${longestStreak} days 🔥`;
+    document.getElementById('streak-freeze-badge').style.display = hasFreeze ? 'block' : 'none';
     
     if (currentStreak > 0 && currentStreak > longestStreak) {
-       document.getElementById('streak-pb-badge').style.display = 'block';
-       setTimeout(() => { 
-         const pbBadge = document.getElementById('streak-pb-badge');
-         if (pbBadge) pbBadge.style.display = 'none'; 
-       }, 3000);
+      document.getElementById('streak-pb-badge').style.display = 'block';
+      setTimeout(() => { const pb = document.getElementById('streak-pb-badge'); if (pb) pb.style.display = 'none'; }, 3000);
     } else {
-       document.getElementById('streak-pb-badge').style.display = 'none';
+      document.getElementById('streak-pb-badge').style.display = 'none';
     }
     
-    const startBtn = document.querySelector('.btn-start-interview');
-    if (currentStreak === 0 && startBtn) {
-       startBtn.style.animation = 'pulse 2s infinite';
-    } else if (startBtn) {
-       startBtn.style.animation = 'none';
-    }
-    
-    // Streak Warning Logic
+    // Streak Warning
     if (profile.last_session_date && currentStreak > 0) {
       const today = new Date().toISOString().split('T')[0];
-      const hour = new Date().getHours();
       if (profile.last_session_date < today && hour >= 18) {
         document.getElementById('streak-warning').style.display = 'flex';
         document.getElementById('streak-warning-text').textContent = `⚡ Your ${currentStreak}-day streak ends at midnight. Practice now to keep it alive.`;
@@ -2557,27 +3199,118 @@
       document.getElementById('streak-warning').style.display = 'none';
     }
     
-    // Fetch completed sessions count from sessions table (uses select RLS policy)
-    console.log("Querying completed practice sessions count...");
+    // ZONE 3 + 4 + 5: Consolidated sessions query
+    console.log("P4.07: Querying all completed sessions for dashboard...");
     try {
-      const { count, error } = await sb
+      const { data: allSessions, error } = await sb
         .from('sessions')
-        .select('*', { count: 'exact', head: true })
+        .select('id, interview_type, difficulty, job_role, created_at, completed_at, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score, improvements, strengths))')
         .eq('user_id', currentUser.id)
-        .eq('status', 'completed');
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false });
         
       if (error) throw error;
-      document.getElementById('dash-sessions-count').textContent = count || 0;
       
-      // Storage Warning logic (Phase 3.03)
-      if (count >= 15) {
+      const sessionCount = allSessions ? allSessions.length : 0;
+      
+      // ZONE 3: Stats
+      document.getElementById('dash-sessions-count').textContent = sessionCount;
+      
+      if (sessionCount > 0) {
+        // Compute average scores and hours
+        let totalOverall = 0, totalFeedbackCount = 0, bestScore = 0, totalMinutes = 0;
+        
+        allSessions.forEach(s => {
+          if (s.created_at && s.completed_at) {
+            totalMinutes += Math.round((new Date(s.completed_at) - new Date(s.created_at)) / 60000);
+          }
+          if (s.answers) {
+            s.answers.forEach(a => {
+              if (a.feedback) {
+                a.feedback.forEach(fb => {
+                  if (fb.overall_score) {
+                    totalOverall += fb.overall_score;
+                    totalFeedbackCount++;
+                    if (fb.overall_score > bestScore) bestScore = fb.overall_score;
+                  }
+                });
+              }
+            });
+          }
+        });
+        
+        const avgScore = totalFeedbackCount > 0 ? (totalOverall / totalFeedbackCount) : 0;
+        const hoursStr = totalMinutes >= 60 ? `${(totalMinutes / 60).toFixed(1)}` : `${totalMinutes}m`;
+        
+        document.getElementById('dash-avg-score').textContent = avgScore.toFixed(1);
+        document.getElementById('dash-best-score').textContent = bestScore.toFixed(1);
+        document.getElementById('dash-hours-practiced').textContent = hoursStr;
+        
+        // ZONE 4: Score Trend Chart
+        renderDashChart(allSessions);
+        
+        // ZONE 5 Right: Last Session Summary
+        const lastSession = allSessions[0];
+        if (lastSession) {
+          lastSessionData = lastSession;
+          const dateStr = new Date(lastSession.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const typeName = (lastSession.interview_type || 'behavioral').replace('_', ' ');
+          
+          // Calculate last session avg score
+          let lsTotal = 0, lsCount = 0, lsImprovements = [];
+          if (lastSession.answers) {
+            lastSession.answers.forEach(a => {
+              if (a.feedback) {
+                a.feedback.forEach(fb => {
+                  if (fb.overall_score) { lsTotal += fb.overall_score; lsCount++; }
+                  if (fb.improvements) lsImprovements.push(...fb.improvements);
+                });
+              }
+            });
+          }
+          const lsAvg = lsCount > 0 ? (lsTotal / lsCount) : 0;
+          
+          let scoreColor = '#ef4444';
+          if (lsAvg >= 7.5) scoreColor = '#4ade80';
+          else if (lsAvg >= 5) scoreColor = '#f59e0b';
+          
+          document.getElementById('ls-type').textContent = typeName.charAt(0).toUpperCase() + typeName.slice(1);
+          document.getElementById('ls-date').textContent = dateStr;
+          document.getElementById('ls-score').textContent = lsAvg.toFixed(1);
+          document.getElementById('ls-score').style.border = `3px solid ${scoreColor}44`;
+          document.getElementById('ls-score').style.color = scoreColor;
+          
+          // Top 2 improvements
+          const uniqueImps = [...new Set(lsImprovements)].slice(0, 2);
+          if (uniqueImps.length > 0) {
+            document.getElementById('ls-improvements').innerHTML = uniqueImps.map(i => `<span style="display: inline-block; background: rgba(239,68,68,0.1); color: #fca5a5; padding: 2px 8px; border-radius: 8px; font-size: 11px; margin-right: 4px;">↑ ${i}</span>`).join('');
+          } else {
+            document.getElementById('ls-improvements').textContent = '';
+          }
+          
+          document.getElementById('last-session-card').style.display = 'block';
+          document.getElementById('last-session-empty').style.display = 'none';
+        }
+      } else {
+        document.getElementById('dash-avg-score').textContent = '—';
+        document.getElementById('dash-best-score').textContent = '—';
+        document.getElementById('dash-hours-practiced').textContent = '0';
+        document.getElementById('last-session-card').style.display = 'none';
+        document.getElementById('last-session-empty').style.display = 'flex';
+      }
+      
+      // Storage Warning
+      if (sessionCount >= 15) {
         document.getElementById('storage-warning').style.display = 'flex';
       } else {
         document.getElementById('storage-warning').style.display = 'none';
       }
     } catch (e) {
-      console.error("Failed to query completed sessions count:", e.message);
+      console.error("Dashboard sessions query error:", e.message);
       document.getElementById('dash-sessions-count').textContent = '0';
+      document.getElementById('dash-avg-score').textContent = '—';
+      document.getElementById('dash-best-score').textContent = '—';
+      document.getElementById('dash-hours-practiced').textContent = '0';
     }
     
     // P4.06: Smart Suggestion Engine
@@ -2585,6 +3318,223 @@
     
     // P4.06: Interview Countdown
     loadInterviewCountdown(profile);
+  }
+  
+  // P4.07: Dashboard Score Trend Chart
+  function renderDashChart(sessions) {
+    const canvas = document.getElementById('dashScoreTrendChart');
+    const emptyEl = document.getElementById('dash-chart-empty');
+    if (!canvas) return;
+    
+    // Process sessions to get per-session avg scores
+    const processed = sessions.map(s => {
+      let total = 0, count = 0;
+      if (s.answers) {
+        s.answers.forEach(a => {
+          if (a.feedback) a.feedback.forEach(fb => {
+            if (fb.overall_score) { total += fb.overall_score; count++; }
+          });
+        });
+      }
+      return { date: s.created_at, avg: count > 0 ? total / count : 0 };
+    }).reverse(); // chronological
+    
+    if (processed.length < 3) {
+      emptyEl.style.display = 'flex';
+      canvas.style.display = 'none';
+      return;
+    }
+    
+    emptyEl.style.display = 'none';
+    canvas.style.display = 'block';
+    
+    const last10 = processed.slice(-10);
+    const labels = last10.map(s => new Date(s.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }));
+    const dataPts = last10.map(s => s.avg);
+    
+    // 3-session rolling average
+    const rollingAvg = dataPts.map((val, i) => {
+      if (i < 2) return null;
+      return ((dataPts[i] + dataPts[i-1] + dataPts[i-2]) / 3);
+    });
+    
+    if (dashChartInstance) dashChartInstance.destroy();
+    
+    dashChartInstance = new Chart(canvas, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Score',
+            data: dataPts,
+            borderColor: '#4fc3f7',
+            backgroundColor: 'rgba(79, 195, 247, 0.08)',
+            borderWidth: 2,
+            pointBackgroundColor: '#fff',
+            pointBorderColor: '#4fc3f7',
+            pointBorderWidth: 2,
+            pointRadius: 4,
+            pointHoverRadius: 6,
+            fill: true,
+            tension: 0.3
+          },
+          {
+            label: '3-Session Avg',
+            data: rollingAvg,
+            borderColor: '#a78bfa',
+            borderWidth: 1.5,
+            borderDash: [5, 4],
+            pointRadius: 0,
+            fill: false,
+            tension: 0.3
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { min: 0, max: 10, grid: { color: 'rgba(255,255,255,0.04)' }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } } },
+          x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.4)', font: { size: 10 } } }
+        },
+        plugins: {
+          legend: { display: true, labels: { color: 'rgba(255,255,255,0.5)', font: { size: 11 }, usePointStyle: true, pointStyle: 'line' } },
+          tooltip: {
+            backgroundColor: 'rgba(0,0,0,0.85)',
+            titleColor: '#fff',
+            bodyColor: '#4fc3f7',
+            padding: 10,
+            displayColors: false,
+            callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(1) }
+          }
+        }
+      }
+    });
+  }
+  
+  // P4.07: Last session actions
+  function viewLastSessionReport() {
+    if (!lastSessionData) return;
+    activeSession = lastSessionData;
+    setupState = { type: lastSessionData.interview_type, difficulty: lastSessionData.difficulty };
+    document.getElementById('feedback-loading').style.display = 'flex';
+    displayFeedbackReport();
+  }
+  function replayLastSession() {
+    if (!lastSessionData) return;
+    loadReplayView(lastSessionData.id);
+  }
+  
+  // P4.07: Profile View
+  function loadProfileView(fullName, profile) {
+    const expLabels = { 'entry': 'Entry level', 'mid': 'Mid level', 'senior': 'Senior level', 'staff': 'Staff / Principal' };
+    document.getElementById('prof-email').textContent = currentUser?.email || '-';
+    document.getElementById('prof-role').textContent = profile.job_role || '-';
+    document.getElementById('prof-experience').textContent = expLabels[profile.experience_level] || profile.experience_level || '-';
+    document.getElementById('prof-companies').textContent = (profile.target_companies || []).join(', ') || '-';
+    document.getElementById('prof-goal').textContent = profile.interview_goal || '-';
+    document.getElementById('prof-streak').textContent = `${profile.current_streak || 0} days`;
+    document.getElementById('prof-longest-streak').textContent = `${profile.longest_streak || 0} days`;
+  }
+  
+  // P4.07: Progress View
+  async function loadProgressView() {
+    try {
+      const { data: allSessions } = await sb
+        .from('sessions')
+        .select('id, interview_type, created_at, completed_at, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score))')
+        .eq('user_id', currentUser.id)
+        .eq('status', 'completed')
+        .order('created_at', { ascending: false });
+      
+      if (!allSessions || allSessions.length === 0) {
+        document.getElementById('prog-total-sessions').textContent = '0';
+        document.getElementById('prog-avg-score').textContent = '0.0';
+        document.getElementById('prog-best-score').textContent = '0.0';
+        document.getElementById('prog-total-hours').textContent = '0';
+        return;
+      }
+      
+      let totalO = 0, totalC = 0, totalD = 0, totalS = 0, fbCount = 0, best = 0, totalMin = 0;
+      const typeScores = {};
+      
+      allSessions.forEach(s => {
+        if (s.created_at && s.completed_at) totalMin += Math.round((new Date(s.completed_at) - new Date(s.created_at)) / 60000);
+        const type = s.interview_type || 'other';
+        if (!typeScores[type]) typeScores[type] = { total: 0, count: 0 };
+        
+        if (s.answers) s.answers.forEach(a => {
+          if (a.feedback) a.feedback.forEach(fb => {
+            if (fb.overall_score) {
+              totalO += fb.overall_score; fbCount++;
+              if (fb.overall_score > best) best = fb.overall_score;
+              typeScores[type].total += fb.overall_score;
+              typeScores[type].count++;
+            }
+            if (fb.clarity_score) totalC += fb.clarity_score;
+            if (fb.depth_score) totalD += fb.depth_score;
+            if (fb.structure_score) totalS += fb.structure_score;
+          });
+        });
+      });
+      
+      document.getElementById('prog-total-sessions').textContent = allSessions.length;
+      document.getElementById('prog-avg-score').textContent = fbCount > 0 ? (totalO / fbCount).toFixed(1) : '0.0';
+      document.getElementById('prog-best-score').textContent = best.toFixed(1);
+      document.getElementById('prog-total-hours').textContent = totalMin >= 60 ? `${(totalMin / 60).toFixed(1)}` : `${totalMin}m`;
+      
+      // Type breakdown
+      const typeContainer = document.getElementById('prog-type-breakdown');
+      const typeEmpty = document.getElementById('prog-type-empty');
+      const typeEntries = Object.entries(typeScores).filter(([, d]) => d.count > 0);
+      
+      if (typeEntries.length > 0) {
+        typeEmpty.style.display = 'none';
+        const typeColors = { behavioral: '#4fc3f7', technical: '#a78bfa', system_design: '#f59e0b', hr: '#4ade80', dsa: '#f87171' };
+        typeContainer.innerHTML = typeEntries.map(([type, data]) => {
+          const avg = (data.total / data.count).toFixed(1);
+          const pct = ((data.total / data.count) / 10) * 100;
+          const color = typeColors[type] || '#4fc3f7';
+          return `<div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:100px;font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:capitalize;">${type.replace('_',' ')}</div>
+            <div style="flex:1;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${color};border-radius:4px;transition:width 0.5s ease;"></div>
+            </div>
+            <div style="min-width:32px;text-align:right;font-size:13px;font-weight:700;color:${color};">${avg}</div>
+          </div>`;
+        }).join('');
+      } else {
+        typeEmpty.style.display = 'block';
+      }
+      
+      // Skill breakdown
+      const skillContainer = document.getElementById('prog-skill-breakdown');
+      const skillEmpty = document.getElementById('prog-skill-empty');
+      if (fbCount > 0) {
+        skillEmpty.style.display = 'none';
+        const skills = [
+          { name: 'Clarity', avg: (totalC / fbCount).toFixed(1), color: '#4fc3f7' },
+          { name: 'Depth', avg: (totalD / fbCount).toFixed(1), color: '#a78bfa' },
+          { name: 'Structure', avg: (totalS / fbCount).toFixed(1), color: '#4ade80' },
+          { name: 'Overall', avg: (totalO / fbCount).toFixed(1), color: '#f59e0b' }
+        ];
+        skillContainer.innerHTML = skills.map(s => {
+          const pct = (parseFloat(s.avg) / 10) * 100;
+          return `<div style="display:flex;align-items:center;gap:12px;">
+            <div style="width:80px;font-size:12px;font-weight:600;color:var(--text-secondary);">${s.name}</div>
+            <div style="flex:1;height:8px;background:rgba(255,255,255,0.05);border-radius:4px;overflow:hidden;">
+              <div style="height:100%;width:${pct}%;background:${s.color};border-radius:4px;transition:width 0.5s ease;"></div>
+            </div>
+            <div style="min-width:32px;text-align:right;font-size:13px;font-weight:700;color:${s.color};">${s.avg}</div>
+          </div>`;
+        }).join('');
+      } else {
+        skillEmpty.style.display = 'block';
+      }
+    } catch (e) {
+      console.error("Progress view error:", e);
+    }
   }
 
   /* ==========================================
@@ -2772,7 +3722,7 @@
         // Interview date passed — clear it
         textEl.textContent = 'Interview date passed';
         textEl.style.color = 'var(--text-secondary)';
-        sb.from('profiles').update({ interview_date: null }).eq('id', currentUser.id);
+        sb.from('profiles').update({ interview_date: null }).eq('user_id', currentUser.id);
       } else if (diffDays <= 3) {
         textEl.innerHTML = `<span style="color: #f87171; font-weight: 700;">⚡ ${diffDays} day${diffDays !== 1 ? 's' : ''} left — practice today</span>`;
       } else {
@@ -2792,13 +3742,13 @@
     const textEl = document.getElementById('countdown-text');
     
     if (!dateValue) {
-      await sb.from('profiles').update({ interview_date: null }).eq('id', currentUser.id);
+      await sb.from('profiles').update({ interview_date: null }).eq('user_id', currentUser.id);
       textEl.textContent = 'No interview date set';
       textEl.style.color = 'var(--text-secondary)';
       return;
     }
     
-    await sb.from('profiles').update({ interview_date: dateValue }).eq('id', currentUser.id);
+    await sb.from('profiles').update({ interview_date: dateValue }).eq('user_id', currentUser.id);
     
     // Re-render countdown
     const interviewDate = new Date(dateValue + 'T00:00:00');
@@ -3459,7 +4409,7 @@ SESSION CONTEXT:
       const { data: profile } = await sb
         .from('profiles')
         .select('elevenlabs_chars_used')
-        .eq('id', currentUser.id)
+        .eq('user_id', currentUser.id)
         .single();
         
       const charsUsed = (profile && profile.elevenlabs_chars_used) ? profile.elevenlabs_chars_used : 0;
@@ -3515,7 +4465,7 @@ SESSION CONTEXT:
       await sb
         .from('profiles')
         .update({ elevenlabs_chars_used: charsUsed + cleanText.length })
-        .eq('id', currentUser.id);
+        .eq('user_id', currentUser.id);
 
       return new Promise(resolve => { audio.onended = () => { ring.classList.remove('active'); resolve(); } });
     } catch (err) {
@@ -4457,7 +5407,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     try {
       const { data: profile } = await sb.from('profiles')
         .select('current_streak, longest_streak, last_session_date, streak_freeze_available')
-        .eq('id', currentUser.id).single();
+        .eq('user_id', currentUser.id).single();
       if (!profile) return;
       
       const today = new Date().toISOString().split('T')[0];
@@ -4493,7 +5443,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
         longest_streak: longest,
         last_session_date: today,
         streak_freeze_available: newFreezeState
-      }).eq('id', currentUser.id);
+      }).eq('user_id', currentUser.id);
       
       console.log(`✅ Streak updated: ${newStreak} days`);
     } catch(e) {
@@ -4632,7 +5582,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     
     // Fetch and update streak
     if (currentUser) {
-       const { data: prof } = await sb.from('profiles').select('current_streak').eq('id', currentUser.id).single();
+       const { data: prof } = await sb.from('profiles').select('current_streak').eq('user_id', currentUser.id).single();
        if (prof) {
          document.getElementById('hist-streak').innerHTML = `${prof.current_streak || 0} <i class="fa-solid fa-fire" style="font-size: 20px;"></i>`;
        }
