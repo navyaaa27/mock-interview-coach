@@ -4396,6 +4396,14 @@ SESSION CONTEXT:
       window.speechSynthesis.speak(msg);
     };
 
+    if (!AI_CONFIG.elevenLabsApiKey) {
+      const key = prompt("Please enter your ElevenLabs API key (it will be securely saved in your browser's local storage):");
+      if (key) {
+        localStorage.setItem('elevenLabsApiKey', key.trim());
+        AI_CONFIG.elevenLabsApiKey = key.trim();
+      }
+    }
+
     if (!AI_CONFIG.elevenLabsApiKey || !AI_CONFIG.elevenLabsVoiceId) {
       return playFallback();
     }
@@ -4621,7 +4629,15 @@ SESSION CONTEXT:
       };
 
       try {
-        if (!AI_CONFIG.deepgramApiKey) throw new Error("No Deepgram API key set");
+        if (!AI_CONFIG.deepgramApiKey) {
+          const key = prompt("Please enter your Deepgram API key (it will be securely saved in your browser's local storage):");
+          if (key) {
+            localStorage.setItem('deepgramApiKey', key.trim());
+            AI_CONFIG.deepgramApiKey = key.trim();
+          } else {
+            throw new Error("No Deepgram API key set");
+          }
+        }
         
         deepgramClient = await startDeepgramTranscription((text, isFinal, isError) => {
           if (isError) {
@@ -5167,11 +5183,11 @@ SESSION CONTEXT:
     model: 'gemini-2.5-flash',
     
     // ElevenLabs API key and Voice ID for premium TTS
-    elevenLabsApiKey: '', // REPLACE THIS WITH YOUR ELEVENLABS API KEY OR FETCH SECURELY
+    elevenLabsApiKey: localStorage.getItem('elevenLabsApiKey') || '',
     elevenLabsVoiceId: 'SXuKWBhKoIoAHKlf6Gt3',
     
     // Deepgram API key for real-time transcription
-    deepgramApiKey: '', // REPLACE THIS WITH YOUR DEEPGRAM API KEY OR FETCH SECURELY
+    deepgramApiKey: localStorage.getItem('deepgramApiKey') || '',
     
     feedbackSystemPrompt: `You are an expert interview coach who has reviewed thousands of interview transcripts. Your job is to analyse a candidate's answer and give structured, honest, specific feedback.
 
