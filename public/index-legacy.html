@@ -4396,14 +4396,6 @@ SESSION CONTEXT:
       window.speechSynthesis.speak(msg);
     };
 
-    if (!AI_CONFIG.elevenLabsApiKey) {
-      const key = prompt("Please enter your ElevenLabs API key (it will be securely saved in your browser's local storage):");
-      if (key) {
-        localStorage.setItem('elevenLabsApiKey', key.trim());
-        AI_CONFIG.elevenLabsApiKey = key.trim();
-      }
-    }
-
     if (!AI_CONFIG.elevenLabsApiKey || !AI_CONFIG.elevenLabsVoiceId) {
       return playFallback();
     }
@@ -4629,15 +4621,7 @@ SESSION CONTEXT:
       };
 
       try {
-        if (!AI_CONFIG.deepgramApiKey) {
-          const key = prompt("Please enter your Deepgram API key (it will be securely saved in your browser's local storage):");
-          if (key) {
-            localStorage.setItem('deepgramApiKey', key.trim());
-            AI_CONFIG.deepgramApiKey = key.trim();
-          } else {
-            throw new Error("No Deepgram API key set");
-          }
-        }
+        if (!AI_CONFIG.deepgramApiKey) throw new Error("No Deepgram API key set");
         
         deepgramClient = await startDeepgramTranscription((text, isFinal, isError) => {
           if (isError) {
@@ -5178,16 +5162,16 @@ SESSION CONTEXT:
 
   /* ── AI CONFIGURATION ── */
   const AI_CONFIG = {
-    // Google Gemini API key
-    geminiApiKey: localStorage.getItem('geminiApiKey') || '',
+    // Gemini API key for feedback generation
+    geminiApiKey: new URLSearchParams(window.location.search).get('geminiKey') || localStorage.getItem('geminiApiKey') || '',
     model: 'gemini-2.5-flash',
     
     // ElevenLabs API key and Voice ID for premium TTS
-    elevenLabsApiKey: localStorage.getItem('elevenLabsApiKey') || '',
+    elevenLabsApiKey: '', // REPLACE THIS WITH YOUR ELEVENLABS API KEY OR FETCH SECURELY
     elevenLabsVoiceId: 'SXuKWBhKoIoAHKlf6Gt3',
     
     // Deepgram API key for real-time transcription
-    deepgramApiKey: localStorage.getItem('deepgramApiKey') || '',
+    deepgramApiKey: '', // REPLACE THIS WITH YOUR DEEPGRAM API KEY OR FETCH SECURELY
     
     feedbackSystemPrompt: `You are an expert interview coach who has reviewed thousands of interview transcripts. Your job is to analyse a candidate's answer and give structured, honest, specific feedback.
 
@@ -5225,13 +5209,8 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
    */
   async function callGeminiAPI(systemPrompt, userMessage) {
     if (!AI_CONFIG.geminiApiKey) {
-      const key = prompt("Please enter your Gemini API key (it will be securely saved in your browser's local storage):");
-      if (key) {
-        localStorage.setItem('geminiApiKey', key.trim());
-        AI_CONFIG.geminiApiKey = key.trim();
-      } else {
-        throw new Error('Gemini API key is required to use the AI features.');
-      }
+      console.error("Gemini API key is required for feedback. Please add VITE_GEMINI_API_KEY to your .env file.");
+      throw new Error("Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.");
     }
     const url = `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.geminiApiKey}`;
     const body = {
