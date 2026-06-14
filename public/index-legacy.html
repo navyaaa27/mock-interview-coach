@@ -5167,11 +5167,11 @@ SESSION CONTEXT:
     model: 'gemini-2.5-flash',
     
     // ElevenLabs API key and Voice ID for premium TTS
-    elevenLabsApiKey: '', // REPLACE THIS WITH YOUR ELEVENLABS API KEY OR FETCH SECURELY
+    elevenLabsApiKey: new URLSearchParams(window.location.search).get('elevenLabsKey') || '', 
     elevenLabsVoiceId: 'SXuKWBhKoIoAHKlf6Gt3',
     
     // Deepgram API key for real-time transcription
-    deepgramApiKey: '', // REPLACE THIS WITH YOUR DEEPGRAM API KEY OR FETCH SECURELY
+    deepgramApiKey: new URLSearchParams(window.location.search).get('deepgramKey') || '',
     
     feedbackSystemPrompt: `You are an expert interview coach who has reviewed thousands of interview transcripts. Your job is to analyse a candidate's answer and give structured, honest, specific feedback.
 

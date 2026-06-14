@@ -8,6 +8,12 @@ export default function SessionPage() {
   if (import.meta.env.VITE_GEMINI_API_KEY) {
     searchParams.set('geminiKey', import.meta.env.VITE_GEMINI_API_KEY);
   }
+  if (import.meta.env.VITE_DEEPGRAM_API_KEY) {
+    searchParams.set('deepgramKey', import.meta.env.VITE_DEEPGRAM_API_KEY);
+  }
+  if (import.meta.env.VITE_ELEVENLABS_API_KEY) {
+    searchParams.set('elevenLabsKey', import.meta.env.VITE_ELEVENLABS_API_KEY);
+  }
   
   return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: '#000' }}>
