@@ -4884,7 +4884,7 @@ SESSION CONTEXT:
     fView.style.display = 'block';
     
     // Fetch all feedback data
-    const { data: answersData } = await sb.from('answers').select('id, question_text, answer_text').eq('session_id', activeSession.id);
+    const { data: answersData } = await sb.from('answers').select('id, custom_question_text, answer_text').eq('session_id', activeSession.id);
     
     if (!answersData || answersData.length === 0) {
        alert("No feedback was generated because no questions were answered.");
