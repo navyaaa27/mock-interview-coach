@@ -4567,6 +4567,20 @@ SESSION CONTEXT:
         }, 8000);
       }
     };
+
+    rec.onerror = (event) => {
+      console.warn("Speech recognition error", event.error);
+    };
+
+    rec.onend = () => {
+      // Auto-restart if we are still supposed to be recording
+      if (interviewState.isRecording) {
+        try {
+          rec.start();
+        } catch(e) {}
+      }
+    };
+
     return rec;
   }
 
@@ -4650,12 +4664,24 @@ SESSION CONTEXT:
         startFallbackRec();
       }
       
-      function startFallbackRec() {
+      async function startFallbackRec() {
+        try {
+          // Explicitly request microphone permissions first. 
+          // This prevents SpeechRecognition from silently failing in iframes or when permissions aren't pre-granted.
+          await navigator.mediaDevices.getUserMedia({ audio: true });
+        } catch (err) {
+          console.error("Microphone permission denied or unavailable:", err);
+          renderTranscript('', 'Microphone access denied.');
+          return;
+        }
+
         if (!interviewState.recognition) {
           interviewState.recognition = initSpeechRecognition();
         }
         if (interviewState.recognition) {
-          interviewState.recognition.start();
+          try {
+            interviewState.recognition.start();
+          } catch(e) {} // ignore if already started
           resetSilenceTimer();
           renderTranscript('', 'Listening (Fallback)...');
         }
