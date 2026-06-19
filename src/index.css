@@ -26,7 +26,7 @@
   body {
     background: var(--bg-color);
     color: var(--text-primary);
-    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     overflow-x: hidden;
     min-height: 100vh;
     display: flex;
@@ -34,7 +34,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
   }
   
   canvas {
@@ -73,8 +73,9 @@
     gap: 8px;
   }
   
-  .logo span {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+  .brand-logo h1 {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 24px;
     /* Much brighter cyan -> lilac -> pink */
     background: linear-gradient(to right, #67e8f9, #d8b4fe, #f9a8d4);
     -webkit-background-clip: text;
@@ -172,7 +173,7 @@
   }
   
   h2 span {
-    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-family: 'Times New Roman', Times, serif;
     /* Much brighter cyan -> lilac -> pink */
     background: linear-gradient(to right, #67e8f9, #d8b4fe, #f9a8d4);
     -webkit-background-clip: text;
