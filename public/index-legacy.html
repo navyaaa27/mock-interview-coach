@@ -4884,12 +4884,14 @@ SESSION CONTEXT:
     fView.style.display = 'block';
     
     // Fetch all feedback data
-    const { data: answersData, error: answersErr } = await sb.from('answers').select('id, custom_question_text, answer_text').eq('session_id', activeSession.id);
-    
-    if (answersErr) {
-       alert("Database Error fetching answers: " + answersErr.message);
-       return;
-    }
+    // Bypass DB query which is blocked by RLS, use memory state instead
+    const answersData = activeSession.messages
+      .filter(m => m.role === 'candidate' && m.answerId)
+      .map(m => ({
+        id: m.answerId,
+        custom_question_text: m.questionText,
+        answer_text: m.answerText
+      }));
 
     if (!answersData || answersData.length === 0) {
        alert("No feedback was generated because no questions were answered.");
