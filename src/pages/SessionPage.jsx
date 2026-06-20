@@ -5,7 +5,7 @@ export default function SessionPage() {
   
   // Pass env variables securely to the iframe without exposing them in git
   const searchParams = new URLSearchParams(location.search);
-  if (import.meta.env.VITE_GEMINI_API_KEY) {
+  if (import.meta.env.VITE_GEMINI_API_KEY && !import.meta.env.VITE_GEMINI_API_KEY.includes('goes_here')) {
     searchParams.set('geminiKey', import.meta.env.VITE_GEMINI_API_KEY);
   }
   if (import.meta.env.VITE_DEEPGRAM_API_KEY) {
@@ -18,7 +18,7 @@ export default function SessionPage() {
   return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: '#000' }}>
       <iframe 
-        src={`/index-legacy.html?${searchParams.toString()}${location.hash}`} 
+        src={`/index-legacy.html?_cb=${Date.now()}&${searchParams.toString()}${location.hash}`} 
         style={{ width: '100%', height: '100%', border: 'none' }}
         title="Legacy App"
         allow="microphone; camera"
