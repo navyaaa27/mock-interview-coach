@@ -5263,12 +5263,14 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
         });
         
         if (!response.ok) {
-          if (response.status >= 500 && attempt < 3) {
+          if ((response.status >= 500 || response.status === 429) && attempt < 3) {
             console.warn(`Gemini API ${response.status} error, retrying (${attempt}/3)...`);
-            await new Promise(r => setTimeout(r, 1500 * attempt));
+            // Wait longer for 429 errors
+            const delay = response.status === 429 ? 3000 * attempt : 1500 * attempt;
+            await new Promise(r => setTimeout(r, delay));
             continue;
           }
-          throw new Error(`Gemini API error: ${response.status}`);
+          throw new Error(`${response.status}`);
         }
         
         const result = await response.json();
