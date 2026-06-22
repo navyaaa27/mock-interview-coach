@@ -4253,7 +4253,7 @@ SESSION CONTEXT:
         let sampleInterval = 500;
         
         const processFrame = async () => {
-          if (!faceMesh || isEyeTrackingDisabled) return;
+          if (!faceMesh || isEyeTrackingDisabled || !videoEl) return;
           if (videoEl.readyState >= 2 && interviewState.isRecording) {
             const start = performance.now();
             await faceMesh.send({image: videoEl});
