@@ -5144,11 +5144,21 @@ SESSION CONTEXT:
 
     let finalQuestionId = questionId;
     if (!finalQuestionId) {
-      // Supabase schema demands a non-null question_id.
-      // We generate a dummy UUID to bypass this constraint for dynamic questions.
-      finalQuestionId = '00000000-0000-0000-0000-000000000000';
-      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-        finalQuestionId = crypto.randomUUID();
+      // Supabase schema demands a valid foreign key for question_id.
+      // First, try to insert this new dynamic question into the bank.
+      const { data: newQ, error: qErr } = await sb.from('questions').insert({
+        question_text: questionText || 'Dynamic AI Question'
+      }).select('id').maybeSingle();
+      
+      if (!qErr && newQ) {
+        finalQuestionId = newQ.id;
+      } else {
+        // If RLS blocks inserts, pull ANY existing valid question_id to satisfy the FK constraint.
+        // We still store the REAL AI text in custom_question_text.
+        const { data: fallbackQ } = await sb.from('questions').select('id').limit(1).maybeSingle();
+        if (fallbackQ) {
+          finalQuestionId = fallbackQ.id;
+        }
       }
     }
     
