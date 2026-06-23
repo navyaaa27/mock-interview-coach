@@ -5142,9 +5142,19 @@ SESSION CONTEXT:
     // 1. Try to find a matching question_id from the bank
     const questionId = await lookupQuestionId(questionText);
 
+    let finalQuestionId = questionId;
+    if (!finalQuestionId) {
+      // Supabase schema demands a non-null question_id.
+      // We generate a dummy UUID to bypass this constraint for dynamic questions.
+      finalQuestionId = '00000000-0000-0000-0000-000000000000';
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        finalQuestionId = crypto.randomUUID();
+      }
+    }
+    
     const payload = {
       session_id:            activeSession.id,
-      question_id:           questionId,                    // null if dynamic question
+      question_id:           finalQuestionId,               // bypass NOT NULL constraint
       custom_question_text:  questionId ? null : questionText, // store text if no bank match
       answer_text:           answerText,
       answer_audio_url:      audioUrl,
