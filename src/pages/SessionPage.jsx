@@ -1,3 +1,4 @@
+import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
 export default function SessionPage() {
@@ -14,7 +15,17 @@ export default function SessionPage() {
   if (import.meta.env.VITE_ELEVENLABS_API_KEY) {
     searchParams.set('elevenLabsKey', import.meta.env.VITE_ELEVENLABS_API_KEY);
   }
-  
+  // P5.05 Listen for session completed event from legacy app
+  useEffect(() => {
+    const handleMessage = (event) => {
+      if (event.data?.type === 'SESSION_COMPLETED' && event.data?.userId) {
+        import('../lib/readinessService').then(m => m.recalculateReadiness(event.data.userId));
+      }
+    };
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
+
   return (
     <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: '#000' }}>
       <iframe 

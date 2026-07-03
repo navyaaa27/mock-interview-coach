@@ -1957,6 +1957,23 @@
     </div>
 
     <div style="display: flex; gap: 14px; margin-bottom: 24px; flex-wrap: wrap;">
+      <!-- P5.05: Readiness Widget -->
+      <div id="readiness-widget" class="card" style="flex: 1; min-width: 260px; padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%); cursor: pointer;" onclick="document.querySelector('.nav-item[onclick=\'switchView(\\\'progress-view\\\')\']')?.click() || (window.location.href='/progress')">
+        <div style="display: flex; align-items: center; gap: 16px;">
+          <div style="position: relative; width: 60px; height: 60px;">
+            <svg width="60" height="60" style="transform: rotate(-90deg);">
+              <circle cx="30" cy="30" r="24" stroke="rgba(255,255,255,0.05)" stroke-width="5" fill="none" />
+              <circle id="dash-readiness-ring" cx="30" cy="30" r="24" stroke="#666" stroke-width="5" fill="none" stroke-linecap="round" style="stroke-dasharray: 150.796; stroke-dashoffset: 150.796; transition: stroke-dashoffset 1.5s ease-out;" />
+            </svg>
+            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: white;" id="dash-readiness-score">0</div>
+          </div>
+          <div>
+            <div id="dash-readiness-label" style="font-size: 16px; font-weight: 800; color: white;">Just getting started</div>
+            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Interview Readiness &rarr;</div>
+          </div>
+        </div>
+      </div>
+
       <!-- Streak Widget -->
       <div id="streak-widget" class="card" style="flex: 1; min-width: 260px; padding: 20px; display: flex; justify-content: space-between; align-items: center; background: linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.01) 100%);">
         <div style="display: flex; align-items: center; gap: 16px;">
@@ -2750,12 +2767,12 @@
           // Load public user full_name
           const { data: userRecord } = await sb
             .from('users')
-            .select('full_name')
+            .select('full_name, readiness_score, readiness_updated_at')
             .eq('id', currentUser.id)
             .single();
             
           const fullName = userRecord ? userRecord.full_name : 'Practice User';
-          loadDashboard(fullName, profile);
+          loadDashboard(fullName, profile, userRecord);
           switchView('dashboard');
         } else {
           console.log("No profile record found! Launching onboarding wizard.");
@@ -3140,10 +3157,18 @@
   let dashChartInstance = null;
   let lastSessionData = null;
 
-  async function loadDashboard(fullName, profile) {
+  let cachedUserRecord = null;
+  async function loadDashboard(fullName, profile, userRecord) {
     // Cache for navigation
     cachedFullName = fullName;
     cachedProfile = profile;
+    
+    if (userRecord) {
+      cachedUserRecord = userRecord;
+    } else if (!cachedUserRecord) {
+      const { data } = await sb.from('users').select('readiness_score, readiness_updated_at').eq('id', currentUser.id).single();
+      cachedUserRecord = data;
+    }
     
     // ZONE 1: Time-based greeting
     const hour = new Date().getHours();
@@ -3166,6 +3191,43 @@
     document.getElementById('dash-goal').textContent = profile.interview_goal || '';
     document.getElementById('dash-companies').textContent = (profile.target_companies || []).join(', ');
     
+    // P5.05: Zone 2 - Readiness Widget
+    if (cachedUserRecord) {
+      const score = cachedUserRecord.readiness_score || 0;
+      let label = "Just getting started";
+      let color = "#666666";
+      let glow = "none";
+      
+      if (score >= 85) { label = "Interview ready 🎯"; color = "#2dd4a0"; glow = "0 0 20px rgba(45, 212, 160, 0.4)"; }
+      else if (score >= 75) { label = "Strong candidate"; color = "#2dd4a0"; }
+      else if (score >= 60) { label = "Getting interview-ready"; color = "#60cfff"; }
+      else if (score >= 40) { label = "Building foundations"; color = "#ffcc60"; }
+      
+      const r = 24;
+      const circ = 2 * Math.PI * r;
+      const offset = circ - (score / 100) * circ;
+      
+      const ringEl = document.getElementById('dash-readiness-ring');
+      if (ringEl) {
+        ringEl.style.stroke = color;
+        ringEl.style.strokeDashoffset = offset;
+        if (score >= 85) ringEl.style.filter = 'drop-shadow(0px 0px 8px rgba(45,212,160,0.5))';
+      }
+      
+      const scoreEl = document.getElementById('dash-readiness-score');
+      if (scoreEl) {
+        scoreEl.textContent = score;
+        scoreEl.style.textShadow = glow;
+      }
+      
+      const labelEl = document.getElementById('dash-readiness-label');
+      if (labelEl) {
+        labelEl.textContent = label;
+        labelEl.style.color = color;
+        labelEl.style.textShadow = glow;
+      }
+    }
+
     // ZONE 2: Streak Widget (P4.05)
     const currentStreak = profile.current_streak || 0;
     const longestStreak = profile.longest_streak || 0;
@@ -3406,7 +3468,32 @@
           }
         }
       }
+      }
     });
+
+    // P5.03: Auto-start interview if requested (for Study Plan Quick Practice)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('autoStart') === 'true') {
+      const type = urlParams.get('type') || 'behavioral';
+      const difficulty = urlParams.get('difficulty') || 'medium';
+      setupState.type = type;
+      setupState.difficulty = difficulty;
+      setupState.mode = 'video';
+      
+      const typeChip = document.getElementById('int-type-chip');
+      const diffChip = document.getElementById('int-diff-chip');
+      if (typeChip) typeChip.textContent = type.toUpperCase();
+      if (diffChip) diffChip.textContent = difficulty.toUpperCase();
+      
+      // Update UI and launch
+      switchView('interview-view');
+      startInterviewSession(type, difficulty);
+      
+      // Remove autoStart from URL so it doesn't trigger again on reload if we push state
+      const url = new URL(window.location);
+      url.searchParams.delete('autoStart');
+      window.history.replaceState({}, '', url);
+    }
   }
   
   // P4.07: Last session actions
@@ -5431,6 +5518,11 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
 
       console.log(`\n🎉 FEEDBACK ENGINE COMPLETE.\n`);
       
+      // P5.05 Trigger Readiness Recalculation
+      if (window.parent !== window) {
+        window.parent.postMessage({ type: 'SESSION_COMPLETED', userId: currentUser.id }, '*');
+      }
+
     } catch (err) {
       console.error('Feedback engine error:', err.message);
     } finally {

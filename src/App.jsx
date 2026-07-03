@@ -3,6 +3,7 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import LoginPage from './pages/LoginPage'
 import SignupPage from './pages/SignupPage'
 import SessionPage from './pages/SessionPage'
+import ProgressPage from './pages/ProgressPage'
 
 function RequireAuth({ children }) {
   const { currentUser } = useAuth()
@@ -22,6 +23,16 @@ function AppRoutes() {
       {/* Auth Routes */}
       <Route path="/login" element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
       <Route path="/signup" element={<RedirectIfAuth><SignupPage /></RedirectIfAuth>} />
+
+      {/* New React Pages */}
+      <Route 
+        path="/progress" 
+        element={
+          <RequireAuth>
+            <ProgressPage />
+          </RequireAuth>
+        } 
+      />
 
       {/* Legacy App Wrapper (handles dashboard, history, session, etc) */}
       <Route 
