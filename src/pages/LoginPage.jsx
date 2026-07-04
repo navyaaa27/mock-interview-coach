@@ -23,6 +23,15 @@ export default function LoginPage() {
     if (signInError) {
       setError(signInError.message)
       setLoading(false)
+      // A09: Log failed login (email only — NEVER log passwords)
+      try {
+        await supabase.from('auth_logs').insert({
+          user_id: null,
+          event_type: 'failed_login',
+          user_agent: navigator.userAgent,
+          email_attempted: email
+        })
+      } catch (_) {}
     } else {
       navigate('/dashboard')
     }

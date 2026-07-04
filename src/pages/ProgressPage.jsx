@@ -97,7 +97,15 @@ export default function ProgressPage() {
   if (error) return <div style={{ color: 'red', padding: '2rem' }}>Error loading data: {error.message}</div>;
   
   if (!data?.sessionChartData?.length || data.sessionChartData.length < 3) {
-    return <ProgressEmptyState />;
+    return (
+      <div>
+        <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
+          <h1 style={{ marginBottom: '2rem', fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>Progress Analytics</h1>
+          <ReadinessScore />
+        </div>
+        <ProgressEmptyState />
+      </div>
+    );
   }
 
   return (

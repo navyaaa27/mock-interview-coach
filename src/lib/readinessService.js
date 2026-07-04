@@ -2,16 +2,16 @@ import { supabase } from './supabase';
 
 export async function recalculateReadiness(userId, saveToDb = true) {
   try {
-    // 1. Fetch user data (streak)
+    // 1. Fetch user streak from profiles table
     const { data: user, error: userErr } = await supabase
-      .from('users')
+      .from('profiles')
       .select('current_streak')
-      .eq('id', userId)
+      .eq('user_id', userId)
       .maybeSingle();
       
-    if (userErr) throw userErr;
+    if (userErr) console.warn('Could not fetch streak:', userErr.message);
 
-    // 2. Fetch last 20 completed sessions
+    // 2. Fetch last 20 completed sessions (with generation_status for null-safety)
     const { data: sessions, error: sessionErr } = await supabase
       .from('sessions')
       .select(`
@@ -19,7 +19,7 @@ export async function recalculateReadiness(userId, saveToDb = true) {
         interview_type, 
         difficulty, 
         created_at,
-        answers ( feedback ( overall_score, words_per_minute, eye_contact_percent ) )
+        answers ( feedback ( overall_score, words_per_minute, eye_contact_percent, generation_status ) )
       `)
       .eq('user_id', userId)
       .eq('status', 'completed')
@@ -119,17 +119,94 @@ export async function recalculateReadiness(userId, saveToDb = true) {
     if (finalScore < 0) finalScore = 0;
     if (finalScore > 100) finalScore = 100;
 
+    // P5.06: Gap Analysis Calculation
+    let gapAnalysis = null;
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('target_companies')
+      .eq('user_id', userId)
+      .maybeSingle();
+
+    const targetCompany = (profile?.target_companies && profile.target_companies.length > 0) 
+      ? profile.target_companies[0] 
+      : 'Startup';
+
+    const { data: companyData } = await supabase
+      .from('company_profiles')
+      .select('*')
+      .eq('company_name', targetCompany)
+      .maybeSingle();
+
+    let companySettings = companyData;
+    if (!companySettings) {
+      const { data: startupData } = await supabase
+        .from('company_profiles')
+        .select('*')
+        .eq('company_name', 'Startup')
+        .maybeSingle();
+      companySettings = startupData;
+    }
+
+    if (companySettings) {
+      const technicalSessions = sessionScores.filter(s => s.type === 'technical');
+      const behavioralSessions = sessionScores.filter(s => s.type === 'behavioral');
+      
+      const avgTech = technicalSessions.length > 0 
+        ? technicalSessions.reduce((acc, s) => acc + s.avg_score, 0) / technicalSessions.length 
+        : 0;
+      
+      const avgBehav = behavioralSessions.length > 0
+        ? behavioralSessions.reduce((acc, s) => acc + s.avg_score, 0) / behavioralSessions.length
+        : 0;
+
+      const scoreGap = companySettings.readiness_threshold - finalScore;
+      
+      gapAnalysis = {
+        company: companySettings.company_name,
+        score_gap: scoreGap,
+        technical_gap: Number((companySettings.min_technical_score - avgTech).toFixed(1)),
+        behavioral_gap: Number((companySettings.min_behavioral_score - avgBehav).toFixed(1)),
+        hard_sessions_gap: companySettings.hard_session_requirement - hardSessions.length,
+        estimated_sessions_to_ready: scoreGap > 0 ? Math.ceil(scoreGap / 3.5) : 0,
+        threshold: companySettings.readiness_threshold,
+        hard_req: companySettings.hard_session_requirement
+      };
+    }
+
+    // P6.01 FIX 5: Null-safety — check if too many sessions have pending feedback
+    const last10ForStaleCheck = sessions.slice(0, 10);
+    let pendingCount = 0;
+    for (const s of last10ForStaleCheck) {
+      const allFb = s.answers?.flatMap(a => a.feedback || []) || [];
+      const hasPending = allFb.some(fb => fb.generation_status === 'pending_retry');
+      const hasNoRealScore = allFb.length === 0 || allFb.every(fb => !fb.overall_score);
+      if (hasPending || hasNoRealScore) pendingCount++;
+    }
+    const staleFraction = last10ForStaleCheck.length > 0 ? pendingCount / last10ForStaleCheck.length : 0;
+    const isStale = staleFraction > 0.5; // >50% sessions have pending/missing feedback
+
     // Save to DB
     if (saveToDb) {
-      await supabase.from('users').update({ 
-        readiness_score: finalScore, 
-        readiness_updated_at: new Date().toISOString() 
-      }).eq('id', userId);
+      if (isStale) {
+        // Don't overwrite score — just mark it as stale
+        console.warn(`Readiness score stale: ${pendingCount}/${last10ForStaleCheck.length} sessions have pending feedback`);
+        await supabase.from('users').update({ 
+          readiness_score_stale: true 
+        }).eq('id', userId);
+      } else {
+        await supabase.from('users').update({ 
+          readiness_score: finalScore, 
+          readiness_updated_at: new Date().toISOString(),
+          readiness_score_stale: false,
+          gap_analysis_json: gapAnalysis
+        }).eq('id', userId);
+      }
     }
 
     return {
       score: finalScore,
-      signals: signals
+      signals: signals,
+      gap_analysis: gapAnalysis
     };
 
   } catch (error) {
