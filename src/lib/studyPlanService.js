@@ -27,6 +27,29 @@ export async function generateStudyPlan(userId) {
     }
   }
 
+  // P6.03 RATE LIMIT 4: Global hourly Gemini safety check
+  // If >500 study-plan generations across ALL users in the last hour, queue instead of call
+  const oneHourAgo = new Date(Date.now() - 60 * 60 * 1000).toISOString();
+  const { count: recentCount } = await supabase
+    .from('study_plans')
+    .select('id', { count: 'exact', head: true })
+    .gte('generated_at', oneHourAgo);
+
+  if (recentCount >= 500) {
+    // Queue the request — the pg_cron job will process it
+    const { error: qErr } = await supabase.from('study_plan_queue').insert({
+      user_id: userId,
+      status: 'pending'
+    });
+    if (!qErr) {
+      return {
+        success: false,
+        queued: true,
+        message: 'High demand right now — your study plan is queued and will be ready in a few minutes.'
+      };
+    }
+  }
+
   // 2. Data Aggregation
   // Fetch user profile
   const { data: profile } = await supabase
@@ -35,11 +58,11 @@ export async function generateStudyPlan(userId) {
     .eq('user_id', userId)
     .maybeSingle();
 
-  // Fetch user streak
+  // Fetch user streak (streak lives in profiles, not users)
   const { data: user } = await supabase
-    .from('users')
+    .from('profiles')
     .select('current_streak')
-    .eq('id', userId)
+    .eq('user_id', userId)
     .maybeSingle();
 
   // Fetch all completed sessions with feedback
@@ -222,10 +245,23 @@ Return a JSON object with exactly this structure:
       plan_json: parsedPlan,
       is_active: true
     })
-    .select('plan_json')
+    .select('id, plan_json')
     .single();
 
   if (insertErr) throw new Error("Failed to save study plan to database: " + insertErr.message);
+
+  // Trigger Study Plan Ready Email
+  try {
+    await supabase.functions.invoke('send-email', {
+      body: {
+        email_type: 'study_plan_ready',
+        user_id: userId,
+        plan_id: newPlan.id
+      }
+    });
+  } catch (emailErr) {
+    console.error("Failed to trigger study plan ready email:", emailErr);
+  }
 
   return {
     success: true,
