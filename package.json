@@ -15,7 +15,9 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.107.0",
     "@vitejs/plugin-react": "^6.0.2",
+    "canvas-confetti": "^1.9.4",
     "ogl": "^1.0.11",
+    "pg": "^8.22.0",
     "playwright": "^1.60.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",

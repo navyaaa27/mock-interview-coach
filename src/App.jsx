@@ -1,9 +1,23 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import LoginPage from './pages/LoginPage'
-import SignupPage from './pages/SignupPage'
-import SessionPage from './pages/SessionPage'
-import ProgressPage from './pages/ProgressPage'
+import { lazy, Suspense } from 'react'
+
+const LoginPage = lazy(() => import('./pages/LoginPage'))
+const SignupPage = lazy(() => import('./pages/SignupPage'))
+const SessionPage = lazy(() => import('./pages/SessionPage'))
+const ProgressPage = lazy(() => import('./pages/ProgressPage'))
+
+function PageSkeleton() {
+  return (
+    <div style={{ height: '100vh', width: '100vw', background: '#0f172a', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '20px' }}>
+      <div className="skeleton-bar" style={{ width: '200px', height: '24px', background: '#334155', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+      <div className="skeleton-bar" style={{ width: '150px', height: '16px', background: '#334155', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+      <div className="skeleton-bar" style={{ width: '250px', height: '16px', background: '#334155', borderRadius: '4px', animation: 'pulse 1.5s infinite' }}></div>
+      <style>{`@keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: .5; } }`}</style>
+    </div>
+  )
+}
+
 
 function RequireAuth({ children }) {
   const { currentUser } = useAuth()
@@ -51,7 +65,9 @@ function App() {
   return (
     <AuthProvider>
       <Router>
-        <AppRoutes />
+        <Suspense fallback={<PageSkeleton />}>
+          <AppRoutes />
+        </Suspense>
       </Router>
     </AuthProvider>
   )

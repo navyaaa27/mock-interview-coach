@@ -23,7 +23,11 @@ export function useProgressData(userId) {
           `)
           .eq('user_id', userId)
           .eq('status', 'completed')
-          .order('created_at', { ascending: true });
+          .order('created_at', { ascending: false })
+          .limit(50);
+
+        // Reverse to maintain chronological order for charts after fetching the 50 most recent
+        if (sessions) sessions.reverse();
 
         if (sessionsErr) throw sessionsErr;
 
@@ -37,11 +41,11 @@ export function useProgressData(userId) {
 
         if (progressErr) throw progressErr;
 
-        // 3. User streak data
+        // 3. User streak data (streak lives in profiles, not users)
         const { data: user, error: userErr } = await supabase
-          .from('users')
-          .select('current_streak, longest_streak, elevenlabs_chars_used')
-          .eq('id', userId)
+          .from('profiles')
+          .select('current_streak, longest_streak')
+          .eq('user_id', userId)
           .maybeSingle();
 
         if (userErr) throw userErr;
