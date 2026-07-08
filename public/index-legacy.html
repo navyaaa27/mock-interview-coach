@@ -1175,6 +1175,11 @@
     border-color: #a78bfa;
   }
   
+  select.modern-select option {
+    background-color: #1a1a2e; /* Dark background so white text is readable */
+    color: white;
+  }
+  
   /* ── PROGRESS CONTAINER ── */
   .progress-section {
     background: rgba(255, 255, 255, 0.01);
@@ -2251,31 +2256,11 @@
         <div id="hist-total" style="font-size: 32px; font-weight: 800; color: white; margin-top: 8px;">0</div>
       </div>
       <div class="card" style="padding: 16px; text-align: center;">
-        <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase;">Average Score</div>
-        <div id="hist-avg" style="font-size: 32px; font-weight: 800; color: #4fc3f7; margin-top: 8px;">0.0</div>
-      </div>
-      <div class="card" style="padding: 16px; text-align: center;">
-        <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase;">Best Score</div>
-        <div id="hist-best" style="font-size: 32px; font-weight: 800; color: #4ade80; margin-top: 8px;">0.0</div>
-      </div>
-      <div class="card" style="padding: 16px; text-align: center;">
         <div style="color: var(--text-secondary); font-size: 13px; font-weight: 600; text-transform: uppercase;">Current Streak</div>
         <div id="hist-streak" style="font-size: 32px; font-weight: 800; color: #f59e0b; margin-top: 8px;">0 <i class="fa-solid fa-fire" style="font-size: 20px;"></i></div>
       </div>
     </div>
     
-    <!-- SECTION 4: Score Trend Chart -->
-    <div class="card" style="padding: 24px; margin-bottom: 32px;">
-      <div style="display: flex; justify-content: space-between; margin-bottom: 16px;">
-        <h3 style="margin: 0; font-size: 16px;">Score Progression</h3>
-      </div>
-      <div id="hist-chart-container" style="position: relative; height: 250px; width: 100%;">
-        <canvas id="scoreTrendChart"></canvas>
-        <div id="hist-chart-empty" style="display: none; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--text-secondary); font-style: italic;">
-          Complete 3 sessions to see your trend
-        </div>
-      </div>
-    </div>
     
     <!-- SECTION 2: Filter Bar -->
     <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
@@ -5847,15 +5832,11 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
       document.getElementById('hist-empty').style.display = 'block';
       document.getElementById('hist-list').style.display = 'none';
       document.getElementById('hist-total').textContent = '0';
-      document.getElementById('hist-avg').textContent = '0.0';
-      document.getElementById('hist-best').textContent = '0.0';
-      if (document.getElementById('hist-chart-container')) document.getElementById('hist-chart-container').style.display = 'none';
       return;
     }
     
     document.getElementById('hist-empty').style.display = 'none';
     document.getElementById('hist-list').style.display = 'flex';
-    if (document.getElementById('hist-chart-container')) document.getElementById('hist-chart-container').style.display = 'block';
     
     // Process sessions to add computed scores and duration
     globalHistoryData = sessions.map(session => {
@@ -5894,12 +5875,8 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     
     // Update Summary Stats
     const totalSessions = globalHistoryData.length;
-    const avgScore = globalHistoryData.reduce((acc, s) => acc + s.avgOverall, 0) / totalSessions;
-    const bestScore = Math.max(...globalHistoryData.map(s => s.avgOverall));
     
     document.getElementById('hist-total').textContent = totalSessions;
-    document.getElementById('hist-avg').textContent = avgScore.toFixed(1);
-    document.getElementById('hist-best').textContent = bestScore.toFixed(1);
     
     // Fetch and update streak
     if (currentUser) {
@@ -6034,96 +6011,10 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
   }
 
   function renderTrendChart(sessions) {
-    const ctxElement = document.getElementById('scoreTrendChart');
-    if (!ctxElement) return;
-    
-    if (sessions.length < 2) {
-      document.getElementById('hist-chart-empty').style.display = 'flex';
-      ctxElement.style.display = 'none';
-      return;
-    } else {
-      document.getElementById('hist-chart-empty').style.display = 'none';
-      ctxElement.style.display = 'block';
-    }
-
-    const chronological = [...sessions].reverse();
-    const labels = chronological.map(s => {
-      const d = new Date(s.created_at);
-      return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-    });
-    const dataPts = chronological.map(s => s.avgOverall);
-    
-    if (scoreTrendChartInstance) {
-      scoreTrendChartInstance.destroy();
-    }
-    
-    const targetLinePlugin = {
-      id: 'targetLine',
-      beforeDraw: chart => {
-        const ctx = chart.ctx;
-        const yAxis = chart.scales.y;
-        const xAxis = chart.scales.x;
-        const yPos = yAxis.getPixelForValue(8.0);
-        
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(xAxis.left, yPos);
-        ctx.lineTo(xAxis.right, yPos);
-        ctx.lineWidth = 1;
-        ctx.strokeStyle = 'rgba(74, 222, 128, 0.5)';
-        ctx.setLineDash([5, 5]);
-        ctx.stroke();
-        
-        ctx.fillStyle = 'rgba(74, 222, 128, 0.8)';
-        ctx.font = '10px Plus Jakarta Sans';
-        ctx.fillText('Target (8.0)', xAxis.left + 5, yPos - 5);
-        ctx.restore();
-      }
-    };
-
-    scoreTrendChartInstance = new Chart(ctxElement, {
-      type: 'line',
-      data: {
-        labels: labels,
-        datasets: [{
-          label: 'Overall Score',
-          data: dataPts,
-          borderColor: '#4fc3f7',
-          backgroundColor: 'rgba(79, 195, 247, 0.1)',
-          borderWidth: 2,
-          pointBackgroundColor: '#fff',
-          pointBorderColor: '#4fc3f7',
-          pointBorderWidth: 2,
-          pointRadius: 4,
-          pointHoverRadius: 6,
-          fill: true,
-          tension: 0.3
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { min: 0, max: 10, grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: 'rgba(255,255,255,0.5)' } },
-          x: { grid: { display: false }, ticks: { color: 'rgba(255,255,255,0.5)' } }
-        },
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(0,0,0,0.8)',
-            titleColor: 'rgba(255,255,255,0.8)',
-            bodyColor: '#4fc3f7',
-            padding: 10,
-            displayColors: false,
-            callbacks: {
-              label: function(context) { return 'Score: ' + context.parsed.y.toFixed(1); }
-            }
-          }
-        }
-      },
-      plugins: [targetLinePlugin]
-    });
+    // Chart has been removed from UI
   }
+
+
 
   async function viewPastReport(sessionId) {
     const session = globalHistoryData.find(s => s.id === sessionId);

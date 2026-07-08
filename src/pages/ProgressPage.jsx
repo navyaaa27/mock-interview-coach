@@ -92,6 +92,7 @@ import ReadinessScore from '../components/ReadinessScore/ReadinessScore';
 export default function ProgressPage() {
   const { currentUser } = useAuth();
   const { data, loading, error } = useProgressData(currentUser?.id);
+  const navigate = useNavigate();
 
   if (loading) return <ProgressSkeleton />;
   if (error) return <div style={{ color: 'red', padding: '2rem' }}>Error loading data: {error.message}</div>;
@@ -100,7 +101,24 @@ export default function ProgressPage() {
     return (
       <div>
         <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-          <h1 style={{ marginBottom: '2rem', fontSize: '2rem', fontWeight: 'bold', color: '#fff' }}>Progress Analytics</h1>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+            <button
+              onClick={() => navigate('/dashboard')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                background: 'rgba(255,255,255,0.08)',
+                border: '1px solid rgba(255,255,255,0.15)',
+                color: '#fff', padding: '8px 16px', borderRadius: '10px',
+                fontSize: '14px', fontWeight: '500', cursor: 'pointer',
+                transition: 'all 0.2s ease', backdropFilter: 'blur(8px)'
+              }}
+              onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+              onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+            >
+              <i className="fa-solid fa-arrow-left" style={{ fontSize: '12px' }}></i> Back
+            </button>
+            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Progress Analytics</h1>
+          </div>
           <ReadinessScore />
         </div>
         <ProgressEmptyState />
@@ -110,7 +128,24 @@ export default function ProgressPage() {
 
   return (
     <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1 style={{ marginBottom: '2rem', fontSize: '2rem', fontWeight: 'bold' }}>Progress Analytics</h1>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+        <button
+          onClick={() => navigate('/dashboard')}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            background: 'rgba(255,255,255,0.08)',
+            border: '1px solid rgba(255,255,255,0.15)',
+            color: '#fff', padding: '8px 16px', borderRadius: '10px',
+            fontSize: '14px', fontWeight: '500', cursor: 'pointer',
+            transition: 'all 0.2s ease', backdropFilter: 'blur(8px)'
+          }}
+          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
+          onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
+        >
+          <i className="fa-solid fa-arrow-left" style={{ fontSize: '12px' }}></i> Back
+        </button>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>Progress Analytics</h1>
+      </div>
       
       <ReadinessScore />
 
