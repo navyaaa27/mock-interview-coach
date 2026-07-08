@@ -14,7 +14,7 @@
   width: 100vw;
   height: 100vh;
   z-index: 0;
-  pointer-events: none;
+  pointer-events: auto;
 }
 
 .bg-layer {
@@ -30,6 +30,17 @@
   display: flex;
   flex-direction: column;
   width: 100%;
+  pointer-events: none;
+}
+
+/* Re-enable clicks ONLY for actual interactive elements */
+.auth-nav .logo,
+.auth-nav .nav-links a,
+.auth-card,
+.auth-card *,
+.footer-links,
+.footer-links * {
+  pointer-events: auto;
 }
 
 .auth-nav {
