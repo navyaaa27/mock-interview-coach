@@ -166,9 +166,16 @@ export default function SoftAurora({
   useEffect(() => {
     if (!containerRef.current) return;
     const container = containerRef.current;
-    const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
-    const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 0);
+    let renderer;
+    let gl;
+    try {
+      renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
+      gl = renderer.gl;
+      gl.clearColor(0, 0, 0, 0);
+    } catch (err) {
+      console.warn("WebGL not supported, SoftAurora will not render.");
+      return;
+    }
 
     let program;
     let currentMouse = [0.5, 0.5];

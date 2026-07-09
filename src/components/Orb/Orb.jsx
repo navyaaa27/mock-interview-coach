@@ -187,10 +187,17 @@ export default function Orb({
     const container = ctnDom.current;
     if (!container) return;
 
-    const renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
-    const gl = renderer.gl;
-    gl.clearColor(0, 0, 0, 0);
-    container.appendChild(gl.canvas);
+    let renderer;
+    let gl;
+    try {
+      renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
+      gl = renderer.gl;
+      gl.clearColor(0, 0, 0, 0);
+      container.appendChild(gl.canvas);
+    } catch (err) {
+      console.warn("WebGL not supported, Orb will not render.");
+      return;
+    }
 
     const geometry = new Triangle(gl);
     const program = new Program(gl, {

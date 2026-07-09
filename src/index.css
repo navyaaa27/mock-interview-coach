@@ -117,15 +117,15 @@
   
   /* ── COMPONENT: GLASS CARD CONTAINER ── */
   .auth-card {
-  background: transparent !important;
-  border: none !important;
-  backdrop-filter: none !important;
-  -webkit-backdrop-filter: none !important;
-  border-radius: 24px;
-  width: 100%;
-  max-width: 480px;
-  padding: 40px;
-  box-shadow: none !important;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 24px;
+    width: 100%;
+    max-width: 480px;
+    padding: 40px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     display: none; /* Controlled by router */
     animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }

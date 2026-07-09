@@ -88,12 +88,19 @@ export default function DarkVeil({
     const canvas = ref.current;
     const parent = canvas.parentElement;
 
-    const renderer = new Renderer({
-      dpr: Math.min(window.devicePixelRatio, 2),
-      canvas
-    });
+    let renderer;
+    let gl;
+    try {
+      renderer = new Renderer({
+        dpr: Math.min(window.devicePixelRatio, 2),
+        canvas
+      });
+      gl = renderer.gl;
+    } catch (err) {
+      console.warn("WebGL not supported, DarkVeil will not render.");
+      return;
+    }
 
-    const gl = renderer.gl;
     const geometry = new Triangle(gl);
 
     const program = new Program(gl, {

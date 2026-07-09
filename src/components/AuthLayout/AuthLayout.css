@@ -14,7 +14,7 @@
   width: 100vw;
   height: 100vh;
   z-index: 0;
-  pointer-events: auto;
+  pointer-events: none;
 }
 
 .bg-layer {
@@ -30,17 +30,6 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  pointer-events: none;
-}
-
-/* Re-enable clicks ONLY for actual interactive elements */
-.auth-nav .logo,
-.auth-nav .nav-links a,
-.auth-card,
-.auth-card *,
-.footer-links,
-.footer-links * {
-  pointer-events: auto;
 }
 
 .auth-nav {
@@ -122,21 +111,6 @@
   max-width: 600px;
 }
 
-.auth-card-wrapper {
-  width: 100%;
-  max-width: 440px;
-  margin: 0 auto;
-}
-
-/* Auth Card Adjustments inside layout */
-.auth-card-wrapper .auth-card {
-  margin: 0;
-  background: rgba(15, 15, 20, 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
-
 .auth-feature-section {
   max-width: 1200px;
   margin: 80px auto;
@@ -144,6 +118,32 @@
   display: flex;
   flex-direction: column;
   gap: 120px;
+  /* Strong dark halo to make text highly readable on the crystal background */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.auth-card-wrapper {
+  width: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  /* Strong dark halo to make text highly readable on the crystal background */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+/* Auth Card Adjustments inside layout */
+.auth-card-wrapper .auth-card {
+  margin: 0;
+  /* Removed frosted glass */
+  background: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border: none;
+  box-shadow: none;
+}
+
+.auth-card-wrapper input {
+  /* Prevent the shadow from applying inside the input fields */
+  text-shadow: none;
 }
 
 .feature-block {
@@ -214,11 +214,12 @@
 }
 
 .glass-panel {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 40px;
-  backdrop-filter: blur(12px);
+  /* Removed frosted glass */
+  background: transparent;
+  border: none;
+  padding: 0;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -312,12 +313,13 @@
 }
 
 .grid-item {
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 24px;
-  padding: 40px;
+  /* Removed frosted glass */
+  background: transparent;
+  border: none;
+  padding: 0;
   text-align: left;
-  backdrop-filter: blur(12px);
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
 }
 
 .grid-item i {

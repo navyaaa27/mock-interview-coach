@@ -1,0 +1,287 @@
+.css-peach-container {
+  position: absolute;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10;
+  /* Add perspective to give rings a true 3D tilt */
+  perspective: 1000px;
+}
+
+/* 
+  The Sphere:
+  Styled using multiple box-shadows (inset) and a radial-gradient to fake 3D lighting.
+*/
+.css-peach-sphere {
+  position: absolute;
+  left: 50%;
+  top: -100px; /* Starts above the screen */
+  width: 250px;
+  height: 250px;
+  margin-left: -125px; /* Center horizontally */
+  border-radius: 50%;
+  z-index: 18; /* Above the water floor (15), but below the foreground rocks (20) */
+  
+  /* Vibrant cyan/pink/purple gradient matching the user's new reference */
+  background: radial-gradient(circle at 40% 30%, #ffffff 0%, #c4b5fd 25%, #f472b6 65%, #22d3ee 100%);
+  
+  /* Inner shadow for 3D lighting depth */
+  box-shadow: 
+    inset -20px -20px 40px rgba(0, 0, 10, 0.7),
+    inset 15px 15px 25px rgba(255, 255, 255, 0.9),
+    0 0 30px rgba(244, 114, 182, 0.5); /* Outer pink glow */
+}
+
+/* Foreground Rocks Parallax Wrappers */
+.css-peach-rock-wrapper {
+  position: absolute;
+  top: 0;
+  height: 200vh;
+  width: 35vw;
+  z-index: 20; /* Keep rocks above the rings and sphere */
+}
+
+.css-peach-rock-wrapper.left {
+  left: 0;
+}
+
+.css-peach-rock-wrapper.right {
+  right: 0;
+}
+
+/* Inner Mirror Container for the Right Side */
+.css-peach-rock-mirror {
+  position: absolute;
+  inset: 0;
+  transform: scaleX(-1); /* Flips the entire right side inward perfectly */
+}
+
+/* Actual Rock Segments */
+.css-peach-rock {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  background-image: url('/obsidian_rock.png'); /* Back to the original angular rock! */
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: right center; /* Align the jagged edge facing inwards */
+  
+  /* Feather the inner edge so it perfectly blends */
+  -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+  mask-image: linear-gradient(to right, black 85%, transparent 100%);
+}
+
+.css-peach-rock.top {
+  top: 0;
+}
+
+/* Flipped vertically so it seamlessly connects with the top rock */
+.css-peach-rock.bottom {
+  top: 100vh;
+  transform: scaleY(-1);
+}
+
+/* 
+  The Outer Glow Ring:
+  Styled with a conic-gradient border using masking, heavily rotated in 3D to look flat like Saturn's rings.
+*/
+.css-peach-ring {
+  position: absolute;
+  left: 50%;
+  top: 70vh;
+  width: 600px;
+  height: 600px;
+  margin-left: -300px;
+  margin-top: -300px;
+  border-radius: 50%;
+  
+  /* Gradient background */
+  background: conic-gradient(
+    from 0deg,
+    #4fc3f7,
+    #e100ff,
+    #ffb6c1,
+    #4fc3f7
+  );
+  
+  /* Mask out the center so it looks like a 4px border */
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 4px), black calc(100% - 4px));
+  mask: radial-gradient(closest-side, transparent calc(100% - 4px), black calc(100% - 4px));
+  
+  /* Faux 3D neon glow - increased glow */
+  filter: drop-shadow(0 0 25px rgba(225, 0, 255, 0.6)) drop-shadow(0 0 40px rgba(79, 195, 247, 0.5));
+    
+  /* Start flat, rotateX creates the 3D disk illusion. 
+     We use an animation to slowly spin it on Z axis */
+  transform: rotateX(75deg);
+  animation: spinOuter 20s linear infinite;
+}
+
+/* --- Water & Reflection --- */
+.css-peach-water-plane {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 40vh; /* Taller to accommodate the 3D tilt */
+  z-index: 15; /* Place below the rocks (z-index: 20) */
+  perspective: 1000px;
+  overflow: hidden; /* Hide the edges of the 3D floor */
+  pointer-events: none;
+}
+
+.css-peach-water-surface {
+  position: absolute;
+  bottom: -50vh;
+  left: -50vw;
+  width: 200vw;
+  height: 150vh;
+  background-image: url('/dark_ocean_water.png');
+  background-size: 500px;
+  background-repeat: repeat;
+  /* Rotate it flat to create a massive 3D floor horizon */
+  transform: rotateX(82deg);
+  /* Feather the top edge into total darkness to create a seamless horizon without cutting anything */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
+  animation: oceanWaves 20s linear infinite;
+  opacity: 0.9;
+}
+
+@keyframes oceanWaves {
+  from { background-position: 0 0; }
+  to { background-position: 0 500px; } /* Waves continuously rolling towards the camera */
+}
+
+.css-peach-sphere-reflection {
+  position: absolute;
+  left: 50%;
+  top: 0; /* Reset top so Framer Motion controls it cleanly from the top of the water plane */
+  width: 250px;
+  height: 250px;
+  margin-left: -125px;
+  border-radius: 50%;
+  
+  /* Same gradient as original sphere but slightly dimmer */
+  background: radial-gradient(circle at 40% 30%, #ffffff 0%, #c4b5fd 25%, #f472b6 65%, #22d3ee 100%);
+  opacity: 0.6; /* Dim reflection */
+  
+  /* Apply the liquid ripple filter! */
+  filter: url(#water-ripple) drop-shadow(0 0 20px rgba(244, 114, 182, 0.3));
+  transform: scaleY(-1); /* Mirror vertically */
+  z-index: 2; /* Sit on top of the water surface */
+}
+
+/* --- Splash Animation (Expanding Ripples) --- */
+.css-peach-splash-container {
+  position: absolute;
+  left: 50%;
+  bottom: 25vh; /* Exactly at the water line */
+  width: 0;
+  height: 0;
+  z-index: 30;
+  /* Perspective to lay the ripples flat on the water */
+  perspective: 1000px;
+}
+
+.css-splash-ripple {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  /* Lay flat horizontally */
+  transform: translate(-50%, -50%) rotateX(75deg);
+  border: 2px solid rgba(244, 114, 182, 0.8);
+  border-radius: 50%;
+  box-shadow: 0 0 20px rgba(34, 211, 238, 0.6), inset 0 0 20px rgba(244, 114, 182, 0.6);
+  opacity: 0;
+}
+
+.css-splash-ripple.animate {
+  animation: expandRipple 2.5s cubic-bezier(0.1, 0.8, 0.3, 1) forwards;
+}
+
+@keyframes expandRipple {
+  0% { width: 250px; height: 250px; opacity: 1; border-width: 4px; }
+  100% { width: 1000px; height: 1000px; opacity: 0; border-width: 0px; }
+}
+
+.css-splash-ripple.r1 { animation-delay: 0.0s; }
+.css-splash-ripple.r2 { animation-delay: 0.4s; border-color: rgba(34, 211, 238, 0.8); }
+.css-splash-ripple.r3 { animation-delay: 0.8s; }
+
+/* --- Scattered Water Rocks --- */
+.css-water-rock {
+  position: absolute;
+  bottom: 20vh; /* Sitting in the water */
+  background-image: url('/obsidian_rock.png');
+  background-size: cover;
+  background-position: center;
+  z-index: 26; /* Above water plane (25), below splash (30) */
+  border-radius: 50% 50% 10% 10%; /* Rounded top, flat bottom to look submerged */
+  /* Cut off the bottom to look submerged */
+  clip-path: polygon(0 0, 100% 0, 100% 80%, 0 100%);
+  filter: drop-shadow(0 10px 10px rgba(0,0,0,0.8));
+}
+
+.css-water-rock.w1 {
+  left: 25vw;
+  width: 200px;
+  height: 120px;
+  transform: rotate(-15deg);
+}
+
+.css-water-rock.w2 {
+  right: 20vw;
+  bottom: 18vh;
+  width: 300px;
+  height: 150px;
+  transform: rotate(10deg) scaleX(-1);
+}
+
+.css-water-rock.w3 {
+  left: 35vw;
+  bottom: 15vh;
+  width: 150px;
+  height: 90px;
+  transform: rotate(5deg);
+  opacity: 0.8;
+}
+
+@keyframes spinOuter {
+  from { transform: rotateX(75deg) rotateZ(0deg); }
+  to { transform: rotateX(75deg) rotateZ(360deg); }
+}
+
+/* Secondary inner ring, slightly different color */
+.css-peach-ring-inner {
+  position: absolute;
+  left: 50%;
+  top: 70vh;
+  width: 500px;
+  height: 500px;
+  margin-left: -250px;
+  margin-top: -250px;
+  border-radius: 50%;
+  
+  background: conic-gradient(
+    from 180deg,
+    #ffffff,
+    #88aaff,
+    #ffffff
+  );
+  
+  -webkit-mask: radial-gradient(closest-side, transparent calc(100% - 2px), black calc(100% - 2px));
+  mask: radial-gradient(closest-side, transparent calc(100% - 2px), black calc(100% - 2px));
+  
+  filter: drop-shadow(0 0 10px rgba(136, 170, 255, 0.6));
+    
+  transform: rotateX(75deg) rotateY(10deg);
+  animation: spinInner 15s linear infinite;
+}
+
+@keyframes spinInner {
+  from { transform: rotateX(75deg) rotateY(10deg) rotateZ(0deg); }
+  to { transform: rotateX(75deg) rotateY(10deg) rotateZ(-360deg); }
+}
