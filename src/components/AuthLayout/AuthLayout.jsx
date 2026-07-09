@@ -81,7 +81,7 @@ export default function AuthLayout({ children, orbHue = 0 }) {
       {/* Scrolling Content */}
       <div className="auth-content-scroll">
         <nav className="auth-nav">
-          <div className="logo"><i className="fa-solid fa-microphone-lines"></i> Coach</div>
+          <div className="logo"><i className="fa-solid fa-microphone-lines"></i> <span>Coach</span></div>
           <div className="nav-links">
             <Link to="/">Home</Link>
             <Link to="/">Pricing</Link>

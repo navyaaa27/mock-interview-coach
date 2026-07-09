@@ -72,10 +72,12 @@
   }
   
   .logo span {
-    background: linear-gradient(135deg, #4fc3f7, #ab47bc);
+    font-family: 'Audiowide', cursive;
+    background: linear-gradient(to right, #22d3ee, #c4b5fd, #f472b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 900;
+    text-shadow: none !important;
   }
   
   .user-badge {
@@ -165,9 +167,11 @@
   }
   
   h2 span {
-    background: linear-gradient(135deg, #4fc3f7, #ab47bc);
+    font-family: 'Audiowide', cursive;
+    background: linear-gradient(to right, #22d3ee, #c4b5fd, #f472b6);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    text-shadow: none !important;
   }
   
   .subtitle {
