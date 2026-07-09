@@ -334,8 +334,8 @@
 
 .grid-item {
   position: relative;
-  /* Dark opaque background replacing frosted glass */
-  background: rgba(10, 10, 15, 0.95);
+  /* Dark semi-transparent background replacing frosted glass */
+  background: rgba(10, 10, 15, 0.5);
   border: none;
   border-radius: 24px;
   padding: 40px;
