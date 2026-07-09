@@ -134,18 +134,19 @@
 
 .css-peach-water-surface {
   position: absolute;
-  bottom: -50vh;
+  bottom: 0;
   left: -50vw;
   width: 200vw;
-  height: 150vh;
+  height: 100vh;
   background-image: url('/dark_ocean_water.png');
   background-size: 500px;
   background-repeat: repeat;
-  /* Rotate it flat to create a massive 3D floor horizon */
-  transform: rotateX(82deg);
-  /* Feather the top edge into total darkness to create a seamless horizon without cutting anything */
-  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
-  mask-image: linear-gradient(to bottom, transparent 0%, black 40%, black 100%);
+  /* Rotate it flat from the bottom edge of the screen */
+  transform-origin: bottom center;
+  transform: rotateX(80deg);
+  /* Feather the top edge into total darkness to create a seamless horizon */
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
+  mask-image: linear-gradient(to bottom, transparent 0%, black 20%, black 100%);
   animation: oceanWaves 20s linear infinite;
   opacity: 0.9;
 }
@@ -168,8 +169,8 @@
   background: radial-gradient(circle at 40% 30%, #ffffff 0%, #c4b5fd 25%, #f472b6 65%, #22d3ee 100%);
   opacity: 0.6; /* Dim reflection */
   
-  /* Apply the liquid ripple filter! */
-  filter: url(#water-ripple) drop-shadow(0 0 20px rgba(244, 114, 182, 0.3));
+  /* Basic reflection drop shadow without the liquid ripple filter */
+  filter: drop-shadow(0 0 20px rgba(244, 114, 182, 0.3));
   transform: scaleY(-1); /* Mirror vertically */
   z-index: 2; /* Sit on top of the water surface */
 }

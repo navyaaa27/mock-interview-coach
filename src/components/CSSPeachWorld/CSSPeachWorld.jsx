@@ -48,16 +48,6 @@ export default function CSSPeachWorld({ scrollYProgress }) {
 
   return (
     <div className="css-peach-container">
-      {/* SVG Filter for realistic water distortion */}
-      <svg style={{ position: 'absolute', width: 0, height: 0 }}>
-        <filter id="water-ripple">
-          <feTurbulence type="fractalNoise" baseFrequency="0.015 0.05" numOctaves="2" result="noise">
-            <animate attributeName="baseFrequency" values="0.015 0.05; 0.02 0.06; 0.015 0.05" dur="4s" repeatCount="indefinite" />
-          </feTurbulence>
-          <feDisplacementMap in="SourceGraphic" in2="noise" scale="15" xChannelSelector="R" yChannelSelector="G" />
-        </filter>
-      </svg>
-
       {/* Foreground Rocks - Now with parallax scrolling and seamless kaleidoscope tiling! */}
       <motion.div 
         className="css-peach-rock-wrapper left" 
