@@ -134,7 +134,7 @@
 .auth-card-wrapper .auth-card {
   margin: 0;
   /* Frosted glass 90% transparent */
-  background: rgba(15, 15, 20, 0.1);
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.1);
