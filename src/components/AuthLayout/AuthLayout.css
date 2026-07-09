@@ -133,12 +133,13 @@
 /* Auth Card Adjustments inside layout */
 .auth-card-wrapper .auth-card {
   margin: 0;
-  /* Removed frosted glass */
-  background: transparent;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  border: none;
-  box-shadow: none;
+  /* Frosted glass 90% transparent */
+  background: rgba(15, 15, 20, 0.1);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .auth-card-wrapper input {
@@ -214,12 +215,13 @@
 }
 
 .glass-panel {
-  /* Removed frosted glass */
-  background: transparent;
-  border: none;
-  padding: 0;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  /* Frosted glass 90% transparent */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 40px;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -313,13 +315,14 @@
 }
 
 .grid-item {
-  /* Removed frosted glass */
-  background: transparent;
-  border: none;
-  padding: 0;
+  /* Frosted glass 90% transparent */
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 24px;
+  padding: 40px;
   text-align: left;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
 }
 
 .grid-item i {
