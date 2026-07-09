@@ -23,6 +23,8 @@
   margin-left: -125px; /* Center horizontally */
   border-radius: 50%;
   z-index: 18; /* Above the water floor (15), but below the foreground rocks (20) */
+  will-change: transform;
+  transform: translateZ(0);
   
   /* Vibrant cyan/pink/purple gradient matching the user's new reference */
   background: radial-gradient(circle at 40% 30%, #ffffff 0%, #c4b5fd 25%, #f472b6 65%, #22d3ee 100%);
@@ -41,6 +43,8 @@
   height: 200vh;
   width: 35vw;
   z-index: 20; /* Keep rocks above the rings and sphere */
+  will-change: transform;
+  transform: translateZ(0);
 }
 
 .css-peach-rock-wrapper.left {
@@ -127,6 +131,8 @@
   width: 100vw;
   height: 40vh; /* Taller to accommodate the 3D tilt */
   z-index: 15; /* Place below the rocks (z-index: 20) */
+  will-change: transform;
+  transform: translateZ(0);
   perspective: 1000px;
   overflow: hidden; /* Hide the edges of the 3D floor */
   pointer-events: none;
