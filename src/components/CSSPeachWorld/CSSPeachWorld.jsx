@@ -5,10 +5,10 @@ import './CSSPeachWorld.css';
 export default function CSSPeachWorld({ scrollYProgress }) {
   const [hasSplashed, setHasSplashed] = useState(false);
 
-  // Add a spring to smooth out the raw scroll progress
+  // Add a buttery smooth spring to absorb choppy mouse wheel scrolling
   const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 100,
-    damping: 30,
+    stiffness: 40,
+    damping: 15,
     restDelta: 0.001
   });
 
