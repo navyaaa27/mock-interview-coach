@@ -133,13 +133,19 @@
 /* Auth Card Adjustments inside layout */
 .auth-card-wrapper .auth-card {
   margin: 0;
-  /* Frosted glass 90% transparent */
-  background: rgba(255, 255, 255, 0.1);
+  /* Directional light (04) effect */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.15);
+  border-right-color: rgba(255, 255, 255, 0.02);
+  border-bottom-color: rgba(255, 255, 255, 0.02);
+  border-radius: 16px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 
+    inset 1px 1px 0px rgba(255, 255, 255, 0.05),
+    0 25px 50px -12px rgba(0, 0, 0, 0.5);
 }
 
 .auth-card-wrapper input {
@@ -161,13 +167,18 @@
 .feature-content {
   flex: 1;
   max-width: 500px;
-  /* Frosted glass 90% transparent */
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* Directional light (04) effect */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.15);
+  border-right-color: rgba(255, 255, 255, 0.02);
+  border-bottom-color: rgba(255, 255, 255, 0.02);
   border-radius: 24px;
   padding: 40px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .feature-badge {
@@ -222,13 +233,18 @@
 }
 
 .glass-panel {
-  /* Frosted glass 90% transparent */
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* Directional light (04) effect */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.15);
+  border-right-color: rgba(255, 255, 255, 0.02);
+  border-bottom-color: rgba(255, 255, 255, 0.02);
   border-radius: 24px;
   padding: 40px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.2);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -300,13 +316,18 @@
 .grid-header {
   max-width: 600px;
   margin-bottom: 64px;
-  /* Frosted glass 90% transparent */
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* Directional light (04) effect */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.15);
+  border-right-color: rgba(255, 255, 255, 0.02);
+  border-bottom-color: rgba(255, 255, 255, 0.02);
   border-radius: 24px;
   padding: 40px;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .grid-header h2 {
@@ -329,14 +350,19 @@
 }
 
 .grid-item {
-  /* Frosted glass 90% transparent */
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  /* Directional light (04) effect */
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.01) 100%);
+  border: 1px solid transparent;
+  border-top-color: rgba(255, 255, 255, 0.2);
+  border-left-color: rgba(255, 255, 255, 0.15);
+  border-right-color: rgba(255, 255, 255, 0.02);
+  border-bottom-color: rgba(255, 255, 255, 0.02);
   border-radius: 24px;
   padding: 40px;
   text-align: left;
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
+  box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.05), 0 10px 30px rgba(0, 0, 0, 0.2);
 }
 
 .grid-item i {
