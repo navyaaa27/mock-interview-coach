@@ -10,15 +10,15 @@
   :root {
     --bg-color: #000000;
     --card-bg: rgba(10, 10, 12, 0.65);
-    --card-border: rgba(255, 255, 255, 0.08);
-    --card-border-focus: rgba(139, 92, 246, 0.4);
+    --card-border: rgba(255, 255, 255, 0.06);
+    --card-border-focus: rgba(79, 195, 247, 0.3);   /* was purple — now accent-blue */
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.6);
     --text-muted: rgba(255, 255, 255, 0.38);
     /* DEPRECATED: old rainbow/neon gradients and borders (D.01 redesign) */
     /* --primary-glow: linear-gradient(135deg, #4fc3f7, #7e57c2); */
-    --primary-accent: #8b5cf6;
-    --primary-accent-glow: rgba(139, 92, 246, 0.15);
+    --primary-accent: #ff7a45;              /* remapped to accent-ember */
+    --primary-accent-glow: rgba(255, 122, 69, 0.12); /* remapped */
     --error-color: #ef5350;
     --success-color: #4caf50;
   }
@@ -1267,7 +1267,7 @@
     margin-bottom: 12px;
   }
   .app-sidebar .sidebar-logo span {
-    background: linear-gradient(135deg, #4fc3f7, #ab47bc);
+    background: linear-gradient(135deg, #ff7a45, #4fc3f7);  /* D.01 signature gradient */
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     font-weight: 900;
@@ -1278,30 +1278,44 @@
     gap: 2px;
     padding: 0 12px;
     flex: 1;
+    overflow: visible;
   }
   .sidebar-nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    border-radius: 12px;
-    color: var(--text-secondary);
+    gap: 11px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    color: var(--text-tertiary, #666);
     font-size: 13px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: color 0.15s, background 0.15s;
     border: none;
     background: transparent;
     text-align: left;
     width: 100%;
+    position: relative;  /* needed for ::before indicator */
   }
   .sidebar-nav-item:hover {
-    background: rgba(255,255,255,0.05);
-    color: var(--text-primary);
+    background: rgba(255,255,255,0.04);
+    color: var(--text-primary, #fff);
   }
+  /* D.05: hairline left-edge indicator instead of purple bg */
   .sidebar-nav-item.active {
-    background: rgba(139, 92, 246, 0.12);
-    color: #c4b5fd;
+    color: var(--text-primary, #fff);
+    background: #0e0e0e;
+  }
+  .sidebar-nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: -12px;   /* nav padding is 12px — this puts the bar at the panel edge */
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 16px;
+    background: var(--gradient-signature-vertical, linear-gradient(180deg, #ff7a45, #4fc3f7));
+    border-radius: 0 2px 2px 0;
   }
   .sidebar-nav-item i {
     width: 20px;
@@ -1329,7 +1343,7 @@
     width: 36px;
     height: 36px;
     border-radius: 50%;
-    background: linear-gradient(135deg, #7c3aed, #4fc3f7);
+    background: linear-gradient(135deg, #ff7a45, #4fc3f7);  /* D.01 signature */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1408,7 +1422,8 @@
     background: transparent;
     transition: color 0.2s;
   }
-  .mobile-nav-item.active { color: #c4b5fd; }
+  /* D.05: mobile nav active uses accent-ember dot instead of purple text */
+  .mobile-nav-item.active { color: var(--accent-blue, #4fc3f7); }
   .mobile-nav-item i { font-size: 18px; }
 
   /* Layout adjustment when sidebar visible */
@@ -1473,7 +1488,7 @@
     transition: border-color 0.2s, transform 0.2s;
   }
   .stat-card:hover {
-    border-color: rgba(139, 92, 246, 0.25);
+    border-color: rgba(255, 255, 255, 0.1);
     transform: translateY(-2px);
   }
   .stat-card .stat-value {
@@ -1577,9 +1592,9 @@
     gap: 6px;
   }
   .quickstart-chip:hover {
-    background: rgba(139, 92, 246, 0.12);
-    border-color: rgba(139, 92, 246, 0.3);
-    color: #c4b5fd;
+    background: rgba(255, 255, 255, 0.06);
+    border-color: rgba(255, 255, 255, 0.12);
+    color: var(--text-primary);
   }
 
   /* ══════════════════════════════════════════
