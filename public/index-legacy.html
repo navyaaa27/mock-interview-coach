@@ -4123,28 +4123,32 @@ SESSION CONTEXT:
     const targetCompany = companies ? companies.split(',')[0].trim() : 'a top tech company';
     document.getElementById('setup-profile-company').textContent = targetCompany;
     
-    // Fetch Company Profile
-    let { data: companyProfiles } = await sb.from('company_profiles').select('*').ilike('company_name', targetCompany);
-    if (!companyProfiles || companyProfiles.length === 0) {
-      const { data: startupProfile } = await sb.from('company_profiles').select('*').eq('company_name', 'Startup').single();
-      activeCompanyProfile = startupProfile;
-    } else {
-      activeCompanyProfile = companyProfiles[0];
-    }
-    
-    // Render Company Intel Card
-    if (activeCompanyProfile) {
-      document.getElementById('setup-company-intel-card').style.display = 'block';
-      document.getElementById('intel-company-name').textContent = activeCompanyProfile.company_name;
-      document.getElementById('intel-tip').textContent = activeCompanyProfile.tip_for_candidate;
-      
-      const kvContainer = document.getElementById('intel-key-values');
-      kvContainer.innerHTML = '';
-      if (activeCompanyProfile.key_values) {
-        activeCompanyProfile.key_values.forEach(kv => {
-          kvContainer.innerHTML += `<span style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">${kv}</span>`;
-        });
+    try {
+      // Fetch Company Profile
+      let { data: companyProfiles } = await sb.from('company_profiles').select('*').ilike('company_name', targetCompany);
+      if (!companyProfiles || companyProfiles.length === 0) {
+        const { data: startupProfile } = await sb.from('company_profiles').select('*').eq('company_name', 'Startup').maybeSingle();
+        activeCompanyProfile = startupProfile;
+      } else {
+        activeCompanyProfile = companyProfiles[0];
       }
+      
+      // Render Company Intel Card
+      if (activeCompanyProfile) {
+        document.getElementById('setup-company-intel-card').style.display = 'block';
+        document.getElementById('intel-company-name').textContent = activeCompanyProfile.company_name;
+        document.getElementById('intel-tip').textContent = activeCompanyProfile.tip_for_candidate;
+        
+        const kvContainer = document.getElementById('intel-key-values');
+        kvContainer.innerHTML = '';
+        if (activeCompanyProfile.key_values) {
+          activeCompanyProfile.key_values.forEach(kv => {
+            kvContainer.innerHTML += `<span style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.9); padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: 600; text-transform: uppercase;">${kv}</span>`;
+          });
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to fetch company profile for setup view:", err);
     }
     
     switchView('setup-view');
