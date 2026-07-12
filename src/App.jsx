@@ -69,7 +69,9 @@ function AppRoutes() {
         path="*" 
         element={
           <RequireAuth>
-            <SessionPage />
+            <AppLayout>
+              <SessionPage />
+            </AppLayout>
           </RequireAuth>
         } 
       />

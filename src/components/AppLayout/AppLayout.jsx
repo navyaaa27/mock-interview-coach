@@ -55,7 +55,6 @@ export default function AppLayout({ children }) {
           <i className={`fa-solid ${mobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
         </button>
         <div className="sidebar-logo"><i className="fa-solid fa-cube" style={{ color: '#4fc3f7' }}></i> Interview<span>AI</span></div>
-        <div style={{ width: 24 }}></div> {/* Spacer to balance hamburger */}
       </div>
 
       {/* Sidebar Navigation */}

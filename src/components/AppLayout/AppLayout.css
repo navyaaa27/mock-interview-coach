@@ -71,8 +71,9 @@
   border-bottom: 1px solid var(--border-hairline, #141414);
   z-index: 40;
   align-items: center;
-  justify-content: space-between;
-  padding: 0 20px;
+  justify-content: flex-start;
+  padding: 0 16px;
+  gap: 16px;
 }
 
 /* Override index.css styles on mobile */

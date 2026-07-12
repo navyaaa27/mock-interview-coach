@@ -27,9 +27,9 @@ export default function SessionPage() {
   }, []);
 
   return (
-    <div style={{ width: '100vw', height: '100vh', overflow: 'hidden', background: '#000' }}>
+    <div style={{ width: '100%', height: '100%', overflow: 'hidden', background: '#000' }}>
       <iframe 
-        src={`/index-legacy.html?_cb=${Date.now()}&${searchParams.toString()}${location.hash}`} 
+        src={`/index-legacy.html?_cb=${Date.now()}&embedded=1&${searchParams.toString()}${location.hash}`} 
         style={{ width: '100%', height: '100%', border: 'none' }}
         title="Legacy App"
         allow="microphone; camera"

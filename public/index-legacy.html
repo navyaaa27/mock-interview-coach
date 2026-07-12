@@ -4,10 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Mock Interview Coach — Practice interviews that feel real</title>
-<!-- Google Fonts: Audiowide and Inter for futuristic typography -->
+<!-- Google Fonts: Space Grotesk and Plus Jakarta Sans for modern tech typography -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Audiowide&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <!-- Supabase JS Library -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -58,7 +58,7 @@
   body {
     background: var(--bg-color);
     color: var(--text-primary);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
     display: flex;
@@ -66,7 +66,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Audiowide', cursive;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
   
   canvas#c {
@@ -921,8 +921,8 @@
   }
 
   .score-card {
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(79, 195, 247, 0.1));
-    border: 1px solid rgba(255,255,255,0.1);
+    background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(79, 195, 247, 0.5)) border-box;
+    border: 1px solid transparent;
     border-radius: 24px;
     padding: 40px;
     text-align: center;
@@ -977,7 +977,8 @@
   }
 
   .fb-card {
-    background: rgba(255,255,255,0.02);
+    background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)) border-box;
+    border: 1px solid transparent;
     border-radius: 16px;
     padding: 24px;
   }
@@ -986,8 +987,8 @@
   .fb-amber { border-top: 4px solid #fbbf24; }
   
   .q-breakdown-card {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
+    background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)) border-box;
+    border: 1px solid transparent;
     border-radius: 12px;
     margin-bottom: 16px;
     overflow: hidden;
@@ -1974,7 +1975,7 @@
         <div style="display: flex; align-items: center; gap: 24px; width: 100%;">
           <i class="fa-solid fa-circle-play" style="font-size: 48px;"></i>
           <div style="text-align: left;">
-            <div style="font-family: 'Audiowide', cursive; font-size: 22px; letter-spacing: 1px; line-height: 1.2;">START NEW INTERVIEW</div>
+            <div style="font-family: 'Space Grotesk', system-ui, sans-serif; font-size: 22px; letter-spacing: 1px; line-height: 1.2;">START NEW INTERVIEW</div>
             <div style="font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.8); margin-top: 6px;">Behavioral, technical, DSA or system design.</div>
           </div>
           <i class="fa-solid fa-arrow-right" style="font-size: 24px; margin-left: auto; opacity: 0.7;"></i>
@@ -2426,23 +2427,27 @@
   <!-- ==========================================
        SETUP VIEW (Pre-Interview Configuration)
        ========================================== -->
-  <div id="setup-view" class="card" style="display: none; width: 100%; max-width: 800px; margin: 40px auto; padding: 40px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px;">
-      <h2 style="margin: 0; font-size: 24px;">Configure Your Session</h2>
-      <button class="btn btn-secondary" onclick="switchView('dashboard-view')" style="padding: 8px 16px; font-size: 13px;">Cancel</button>
+  <div id="setup-view" style="display: none; width: 100%; max-width: 900px; margin: 40px auto; padding: 32px 40px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); z-index: 20; position: relative; background: linear-gradient(#0a0a0c, #0a0a0c) padding-box, linear-gradient(135deg, rgba(167,139,250,0.5), rgba(79,195,247,0.5)) border-box; border: 1px solid transparent;">
+    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px;">
+      <div>
+        <div style="font-size: 11px; font-weight: 700; color: #a78bfa; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px;">Session Setup</div>
+        <h2 style="margin: 0; font-size: 28px; font-weight: 800; font-family: 'Inter', system-ui, sans-serif; color: #ffffff; line-height: 1.2;">Configure Interview</h2>
+        <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 6px;">Adjust your settings before starting the interview.</div>
+      </div>
+      <button onclick="switchView('dashboard-view')" style="background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 100px; padding: 10px 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">Cancel</button>
     </div>
 
     <div class="setup-container">
       
       <!-- SECTION 4: Pre-filled from profile (Moved to top for context) -->
       <div>
-        <div class="setup-summary">
-          <div>
-            <span style="color: var(--text-secondary);">Interviewing for:</span> 
-            <strong id="setup-profile-role" style="color: white; margin-left: 4px;">Role</strong> at 
-            <strong id="setup-profile-company" style="color: white;">Company</strong>
+        <div class="setup-summary" style="background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; border-radius: 16px; padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+          <div style="font-size: 14px; color: rgba(255,255,255,0.6);">
+            Interviewing for: 
+            <strong id="setup-profile-role" style="color: white; margin-left: 4px; font-weight: 600;">Role</strong> at 
+            <strong id="setup-profile-company" style="color: white; font-weight: 600;">Company</strong>
           </div>
-          <a href="#" style="color: #4fc3f7; text-decoration: none; font-size: 13px; font-weight: 600;" onclick="alert('Profile editing coming soon');">Change</a>
+          <a href="#" style="color: #a78bfa; text-decoration: none; font-size: 13px; font-weight: 600;" onclick="alert('Profile editing coming soon');">Change</a>
         </div>
         
         <div id="setup-company-intel-card" style="display: none; background: rgba(79, 195, 247, 0.05); border: 1px solid rgba(79, 195, 247, 0.2); border-radius: 12px; padding: 16px; margin-top: 16px;">
@@ -2458,95 +2463,113 @@
       </div>
 
       <!-- SECTION 1: Interview Type -->
-      <div>
-        <div class="setup-section-title">1. Interview Type</div>
-        <div class="type-grid">
-          <div class="type-card brand-glass" onclick="selectType('behavioral')" id="type-behavioral">
-            <i class="fa-solid fa-comment-dots type-card-icon"></i>
-            <div class="type-card-title">Behavioral</div>
-            <div class="type-card-desc">STAR method, teamwork, leadership</div>
+      <div style="margin-top: 32px;">
+        <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 16px;">1. Interview Type</div>
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px;">
+          <div class="type-card" onclick="selectType('behavioral')" id="type-behavioral" style="background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(79, 195, 247, 0.4), rgba(79, 195, 247, 0.1)) border-box; border: 1px solid transparent; border-radius: 12px; padding: 16px; cursor: pointer; display: flex; gap: 16px; align-items: center; transition: all 0.2s;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(79, 195, 247, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <i class="fa-solid fa-comment-dots" style="color: #4fc3f7; font-size: 16px;"></i>
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: white;">Behavioral</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.5);">STAR method, teamwork</div>
+            </div>
           </div>
-          <div class="type-card brand-glass" onclick="selectType('technical')" id="type-technical">
-            <i class="fa-solid fa-code type-card-icon"></i>
-            <div class="type-card-title">Technical</div>
-            <div class="type-card-desc">DSA, problem solving, algorithms</div>
+          <div class="type-card" onclick="selectType('technical')" id="type-technical" style="background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(167, 139, 250, 0.4), rgba(167, 139, 250, 0.1)) border-box; border: 1px solid transparent; border-radius: 12px; padding: 16px; cursor: pointer; display: flex; gap: 16px; align-items: center; transition: all 0.2s;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(167, 139, 250, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <i class="fa-solid fa-code" style="color: #a78bfa; font-size: 16px;"></i>
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: white;">Technical</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.5);">DSA, problem solving</div>
+            </div>
           </div>
-          <div class="type-card brand-glass" onclick="selectType('system_design')" id="type-system_design">
-            <i class="fa-solid fa-cubes type-card-icon"></i>
-            <div class="type-card-title">System Design</div>
-            <div class="type-card-desc">Architecture, scale, trade-offs</div>
+          <div class="type-card" onclick="selectType('system_design')" id="type-system_design" style="background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(236, 72, 153, 0.4), rgba(236, 72, 153, 0.1)) border-box; border: 1px solid transparent; border-radius: 12px; padding: 16px; cursor: pointer; display: flex; gap: 16px; align-items: center; transition: all 0.2s;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(236, 72, 153, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <i class="fa-solid fa-cubes" style="color: #ec4899; font-size: 16px;"></i>
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: white;">System Design</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.5);">Architecture, scale</div>
+            </div>
           </div>
-          <div class="type-card brand-glass" onclick="selectType('hr')" id="type-hr">
-            <i class="fa-solid fa-user-tie type-card-icon"></i>
-            <div class="type-card-title">HR / Culture</div>
-            <div class="type-card-desc">Motivation, goals, culture fit</div>
+          <div class="type-card" onclick="selectType('hr')" id="type-hr" style="background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(244, 63, 94, 0.4), rgba(244, 63, 94, 0.1)) border-box; border: 1px solid transparent; border-radius: 12px; padding: 16px; cursor: pointer; display: flex; gap: 16px; align-items: center; transition: all 0.2s;">
+            <div style="width: 40px; height: 40px; border-radius: 10px; background: rgba(244, 63, 94, 0.1); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <i class="fa-solid fa-user-tie" style="color: #f43f5e; font-size: 16px;"></i>
+            </div>
+            <div>
+              <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px; color: white;">HR / Culture</div>
+              <div style="font-size: 12px; color: rgba(255,255,255,0.5);">Motivation, goals</div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- SECTION 2: Difficulty -->
-      <div>
-        <div class="setup-section-title">2. Difficulty</div>
-        <div class="pill-group">
-          <div class="pill-btn" onclick="selectDifficulty('easy')" id="diff-easy">
-            <div style="font-weight: 600; color: white;">Easy</div>
-            <div style="font-size: 11px; margin-top: 2px;">Fresher / first round</div>
+      <div style="margin-top: 32px;">
+        <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 16px;">2. Difficulty</div>
+        <div style="display: flex; gap: 12px;">
+          <div class="pill-btn" onclick="selectDifficulty('easy')" id="diff-easy" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 16px 12px;">
+            <div style="font-weight: 600; color: white; font-size: 14px;">Easy</div>
+            <div style="font-size: 11px; margin-top: 4px; color: rgba(255,255,255,0.5);">Fresher</div>
           </div>
-          <div class="pill-btn selected" onclick="selectDifficulty('medium')" id="diff-medium">
-            <div style="font-weight: 600; color: white;">Medium</div>
-            <div style="font-size: 11px; margin-top: 2px;">Experienced / second round</div>
+          <div class="pill-btn selected" onclick="selectDifficulty('medium')" id="diff-medium" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 16px 12px;">
+            <div style="font-weight: 600; color: white; font-size: 14px;">Medium</div>
+            <div style="font-size: 11px; margin-top: 4px; color: rgba(255,255,255,0.5);">Experienced</div>
           </div>
-          <div class="pill-btn" onclick="selectDifficulty('hard')" id="diff-hard">
-            <div style="font-weight: 600; color: white;">Hard</div>
-            <div style="font-size: 11px; margin-top: 2px;">Senior / final round</div>
+          <div class="pill-btn" onclick="selectDifficulty('hard')" id="diff-hard" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 16px 12px;">
+            <div style="font-weight: 600; color: white; font-size: 14px;">Hard</div>
+            <div style="font-size: 11px; margin-top: 4px; color: rgba(255,255,255,0.5);">Senior</div>
           </div>
         </div>
       </div>
 
-      <!-- SECTION 3: Duration -->
-      <div>
-        <div class="setup-section-title">3. Duration</div>
-        <select id="setup-duration" class="modern-select">
-          <option value="15">15 minutes (3-4 questions)</option>
-          <option value="25" selected>25 minutes (5-6 questions)</option>
-          <option value="40">40 minutes (7-8 questions)</option>
-        </select>
-      </div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 32px;">
+        <!-- SECTION 3: Duration -->
+        <div>
+          <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 12px;">3. Duration</div>
+          <select id="setup-duration" class="modern-select" style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; color: white; font-size: 14px; appearance: none;">
+            <option value="15">15 mins (3-4 Qs)</option>
+            <option value="25" selected>25 mins (5-6 Qs)</option>
+            <option value="40">40 mins (7-8 Qs)</option>
+          </select>
+        </div>
 
-      <!-- INTERVIEW MODE TOGGLE -->
-      <div>
-        <div class="setup-section-title">Interview Mode</div>
-        <div class="pill-group">
-          <div class="pill-btn" onclick="selectMode('text')" id="mode-text">
-            <i class="fa-solid fa-keyboard"></i> Text Chat Only
-          </div>
-          <div class="pill-btn selected" onclick="selectMode('video')" id="mode-video">
-            <i class="fa-solid fa-video"></i> Voice & Video
+        <!-- INTERVIEW MODE TOGGLE -->
+        <div>
+          <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 12px;">Interview Mode</div>
+          <div style="display: flex; gap: 8px;">
+            <div class="pill-btn" onclick="selectMode('text')" id="mode-text" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 14px 12px; font-size: 13px;">
+              <i class="fa-solid fa-keyboard" style="margin-right: 6px;"></i> Text Only
+            </div>
+            <div class="pill-btn selected" onclick="selectMode('video')" id="mode-video" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 14px 12px; font-size: 13px;">
+              <i class="fa-solid fa-video" style="margin-right: 6px;"></i> Voice/Video
+            </div>
           </div>
         </div>
       </div>
 
       <!-- SECTION 5: Readiness Checklist -->
-      <div id="setup-checklist-section">
-        <div class="setup-section-title">Readiness Checklist</div>
-        <div class="checklist">
-          <label class="checklist-item">
-            <input type="checkbox" id="check-mic" onchange="validateSetupForm()">
-            <span>My microphone is working</span>
+      <div id="setup-checklist-section" style="margin-top: 32px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; border-radius: 16px; padding: 24px;">
+        <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 16px;">System Check</div>
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <label class="checklist-item" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+            <input type="checkbox" id="check-mic" onchange="validateSetupForm()" style="width: 18px; height: 18px; accent-color: #a78bfa;">
+            <span style="font-size: 14px; color: rgba(255,255,255,0.8);">My microphone is working</span>
           </label>
-          <label class="checklist-item">
-            <input type="checkbox" id="check-cam" onchange="validateSetupForm()">
-            <span>My camera is working</span>
+          <label class="checklist-item" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+            <input type="checkbox" id="check-cam" onchange="validateSetupForm()" style="width: 18px; height: 18px; accent-color: #a78bfa;">
+            <span style="font-size: 14px; color: rgba(255,255,255,0.8);">My camera is working</span>
           </label>
-          <label class="checklist-item">
-            <input type="checkbox" id="check-quiet" onchange="validateSetupForm()">
-            <span>I am in a quiet environment</span>
+          <label class="checklist-item" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+            <input type="checkbox" id="check-quiet" onchange="validateSetupForm()" style="width: 18px; height: 18px; accent-color: #a78bfa;">
+            <span style="font-size: 14px; color: rgba(255,255,255,0.8);">I am in a quiet environment</span>
           </label>
         </div>
       </div>
 
       <!-- START BUTTON -->
-      <button id="btn-begin-interview" class="btn btn-primary" style="width: 100%; padding: 18px; font-size: 18px; margin-top: 16px;" onclick="beginInterview()" disabled>
+      <button id="btn-begin-interview" style="width: 100%; padding: 20px; font-size: 16px; font-weight: 700; border-radius: 16px; margin-top: 32px; background: linear-gradient(135deg, #a78bfa, #4fc3f7); color: #000; border: none; cursor: pointer; transition: transform 0.2s;" onclick="beginInterview()" disabled>
         Start Interview <i class="fa-solid fa-arrow-right" style="margin-left: 8px;"></i>
       </button>
 
@@ -2800,7 +2823,9 @@
           loadDashboard(fullName, profile, userRecord);
           
           const urlParams = new URLSearchParams(window.location.search);
-          if (window.location.hash !== '#setup' && urlParams.get('autoStart') !== 'true') {
+          if (window.location.hash === '#setup') {
+            switchView('setup-view');
+          } else if (urlParams.get('autoStart') !== 'true') {
             switchView('dashboard');
           }
         } else {
@@ -2870,19 +2895,32 @@
     // P4.07: Show/hide sidebar + nav based on auth views
     const navViews = ['dashboard-view', 'history-view', 'profile-view', 'progress-view', 'setup-view', 'interview-view', 'feedback-view', 'replay-view'];
     const showNav = navViews.includes(targetId);
+    
+    // Check if embedded in React AppLayout
+    const isEmbedded = new URLSearchParams(window.location.search).get('embedded') === '1';
+    
     const sidebar = document.getElementById('app-sidebar');
     const bottomNav = document.getElementById('mobile-bottom-nav');
+    const header = document.querySelector('header');
     const mainEl = document.querySelector('main');
     
-    if (sidebar) sidebar.style.display = showNav ? 'flex' : 'none';
-    if (bottomNav) bottomNav.style.display = showNav ? '' : 'none';
+    if (sidebar) sidebar.style.display = (showNav && !isEmbedded) ? 'flex' : 'none';
+    if (bottomNav) bottomNav.style.display = (showNav && !isEmbedded) ? '' : 'none';
+    if (header) header.style.display = (showNav && !isEmbedded) ? 'flex' : 'none';
+    
     if (mainEl) {
-      if (showNav) mainEl.classList.add('app-with-sidebar');
+      if (showNav && !isEmbedded) mainEl.classList.add('app-with-sidebar');
       else mainEl.classList.remove('app-with-sidebar');
     }
     
+    // Hide the canvas orb on setup-view and feedback-view for cleaner UI
+    const canvas = document.getElementById('c');
+    if (canvas) {
+      canvas.style.display = (targetId === 'setup-view' || targetId === 'feedback-view') ? 'none' : 'block';
+    }
+    
     // Update nav active states
-    if (showNav) updateNavActiveState(targetId);
+    if (showNav && !isEmbedded) updateNavActiveState(targetId);
   }
   
   // P4.07: Navigation functions
@@ -4117,13 +4155,13 @@ SESSION CONTEXT:
   let activeCompanyProfile = null;
 
   async function openSetupView() {
-    // Populate profile summary
-    document.getElementById('setup-profile-role').textContent = document.getElementById('dash-role').textContent || 'Software Engineer';
-    const companies = document.getElementById('dash-companies').textContent;
-    const targetCompany = companies ? companies.split(',')[0].trim() : 'a top tech company';
-    document.getElementById('setup-profile-company').textContent = targetCompany;
-    
     try {
+      // Populate profile summary
+      document.getElementById('setup-profile-role').textContent = document.getElementById('dash-role').textContent || 'Software Engineer';
+      const companies = document.getElementById('dash-companies').textContent;
+      const targetCompany = companies ? companies.split(',')[0].trim() : 'a top tech company';
+      document.getElementById('setup-profile-company').textContent = targetCompany;
+    
       // Fetch Company Profile
       let { data: companyProfiles } = await sb.from('company_profiles').select('*').ilike('company_name', targetCompany);
       if (!companyProfiles || companyProfiles.length === 0) {
@@ -4148,7 +4186,7 @@ SESSION CONTEXT:
         }
       }
     } catch (err) {
-      console.warn("Failed to fetch company profile for setup view:", err);
+      console.warn("Failed to complete setup view initialization:", err);
     }
     
     switchView('setup-view');
