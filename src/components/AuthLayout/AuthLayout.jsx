@@ -1,81 +1,12 @@
-import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
-import { useScroll } from 'framer-motion'
-import Orb from '../Orb/Orb'
-import SoftAurora from '../SoftAurora/SoftAurora'
-import DarkVeil from '../DarkVeil/DarkVeil'
-import CSSPeachWorld from '../CSSPeachWorld/CSSPeachWorld'
 import './AuthLayout.css'
 
-export default function AuthLayout({ children, orbHue = 0 }) {
-  const { scrollYProgress } = useScroll();
-  const [bgState, setBgState] = useState({
-    orb: { mounted: true, opacity: 1 },
-    aurora: { mounted: false, opacity: 0 },
-    veil: { mounted: false, opacity: 0 }
-  })
-
-  useEffect(() => {
-    // 10s: Mount Aurora, fade it in OVER Orb
-    const t1 = setTimeout(() => setBgState(s => ({ ...s, aurora: { mounted: true, opacity: 1 } })), 10000);
-    // 14s: Aurora is now fully opaque. Safely unmount Orb.
-    const t2 = setTimeout(() => setBgState(s => ({ ...s, orb: { mounted: false, opacity: 0 } })), 14000);
-    // 20s: Mount Veil, fade it in OVER Aurora
-    const t3 = setTimeout(() => setBgState(s => ({ ...s, veil: { mounted: true, opacity: 1 } })), 20000);
-    // 24s: Veil is now fully opaque. Safely unmount Aurora.
-    const t4 = setTimeout(() => setBgState(s => ({ ...s, aurora: { mounted: false, opacity: 0 } })), 24000);
-
-    return () => {
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(t4);
-    };
-  }, []);
+export default function AuthLayout({ children }) {
 
   return (
     <div className="auth-layout">
-      {/* Fixed Background */}
+      {/* Fixed Background - components removed per user request */}
       <div className="auth-background">
-        <CSSPeachWorld scrollYProgress={scrollYProgress} />
-        {bgState.orb.mounted && (
-          <div className="bg-layer" style={{ opacity: bgState.orb.opacity }}>
-            <Orb hue={orbHue} hoverIntensity={5} rotateOnHover forceHoverState={false} />
-          </div>
-        )}
-        {bgState.aurora.mounted && (
-          <div className="bg-layer" style={{ opacity: bgState.aurora.opacity }}>
-            <SoftAurora
-              speed={0.6}
-              scale={1.7}
-              brightness={1}
-              color1="#3B82F6"
-              color2="#e100ff"
-              noiseFrequency={1.5}
-              noiseAmplitude={1.5}
-              bandHeight={0.6}
-              bandSpread={1.6}
-              octaveDecay={0.05}
-              layerOffset={0}
-              colorSpeed={0.9}
-              enableMouseInteraction
-              mouseInfluence={0.25}
-            />
-          </div>
-        )}
-        {bgState.veil.mounted && (
-          <div className="bg-layer" style={{ opacity: bgState.veil.opacity }}>
-            <DarkVeil
-              hueShift={-20}
-              noiseIntensity={0}
-              scanlineIntensity={0}
-              speed={1.2}
-              scanlineFrequency={0}
-              warpAmount={0}
-              resolutionScale={1.25}
-            />
-          </div>
-        )}
       </div>
 
       {/* Scrolling Content */}
