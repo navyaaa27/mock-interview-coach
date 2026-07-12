@@ -1,12 +1,21 @@
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
+import { useScroll } from 'framer-motion'
+import Orb from '../Orb/Orb'
+import CSSPeachWorld from '../CSSPeachWorld/CSSPeachWorld'
 import './AuthLayout.css'
 
-export default function AuthLayout({ children }) {
+export default function AuthLayout({ children, orbHue = 0 }) {
+  const { scrollYProgress } = useScroll();
 
   return (
     <div className="auth-layout">
-      {/* Fixed Background - components removed per user request */}
+      {/* Fixed Background */}
       <div className="auth-background">
+        <CSSPeachWorld scrollYProgress={scrollYProgress} />
+        <div className="bg-layer" style={{ opacity: 1 }}>
+          <Orb hue={orbHue} hoverIntensity={5} rotateOnHover forceHoverState={false} />
+        </div>
       </div>
 
       {/* Scrolling Content */}
@@ -20,7 +29,11 @@ export default function AuthLayout({ children }) {
         </nav>
 
         <div className="auth-hero">
-
+          <div className="hero-text">
+            <div className="hero-badge"><i className="fa-solid fa-video"></i> Realistic AI Video & Voice Interviews</div>
+            <h1>Ace your next<br/>interview!</h1>
+            <p>Talk face-to-face with our AI in a realistic video and voice chat interview. Get cutting-edge feedback with real-time eye tracking and deep performance analytics.</p>
+          </div>
           
           <div className="auth-card-wrapper">
             {children}
