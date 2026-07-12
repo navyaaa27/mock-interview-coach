@@ -11,6 +11,10 @@
   display: flex;
   flex-direction: column;
   transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Override global main tag styles from index.css */
+  align-items: stretch;
+  justify-content: flex-start;
+  padding: 0;
 }
 
 .layout-main.sidebar-collapsed {
