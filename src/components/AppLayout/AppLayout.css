@@ -1,15 +1,56 @@
-.app-with-sidebar {
+.layout-wrapper {
   display: flex;
   min-height: 100vh;
   width: 100%;
 }
 
-.app-main-content {
+.layout-main {
   flex: 1;
   min-width: 0;
-  margin-left: 220px; /* Offset for desktop sidebar */
+  margin-left: 220px;
   display: flex;
   flex-direction: column;
+  transition: margin-left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.layout-main.sidebar-collapsed {
+  margin-left: 0;
+}
+
+/* Desktop Header (for hamburger) */
+.desktop-top-header {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+  background: transparent;
+}
+
+.hamburger-btn {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  transition: background 0.15s;
+}
+
+.hamburger-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* App Sidebar overrides for collapse state */
+.app-sidebar {
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.app-sidebar.collapsed {
+  transform: translateX(-100%);
 }
 
 /* Mobile Top Header (only visible on mobile) */
@@ -30,23 +71,14 @@
   padding: 0 20px;
 }
 
-.hamburger-btn {
-  background: transparent;
-  border: none;
-  color: var(--text-primary);
-  font-size: 20px;
-  cursor: pointer;
-  padding: 4px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Desktop styles for sidebar exist in index.css, 
-   but we need to override the display:none on mobile to allow for transitions */
+/* Override index.css styles on mobile */
 @media (max-width: 767px) {
-  .app-main-content {
-    margin-left: 0;
+  .desktop-top-header {
+    display: none;
+  }
+
+  .layout-main {
+    margin-left: 0 !important;
     margin-top: 60px; /* Space for mobile header */
   }
 
@@ -67,8 +99,6 @@
     box-shadow: 4px 0 24px rgba(0,0,0,0.5);
   }
 
-  /* Hide the desktop logo in the sidebar if we are on mobile 
-     since it's already in the top nav */
   .app-sidebar .sidebar-logo.desktop-only {
     display: none;
   }

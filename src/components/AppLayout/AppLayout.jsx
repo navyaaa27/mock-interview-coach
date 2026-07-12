@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { NavLink, useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './AppLayout.css';
 
@@ -9,6 +9,10 @@ export default function AppLayout({ children }) {
   const location = useLocation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  
+  // Track desktop sidebar collapse state (default open)
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  
   const dropdownRef = useRef(null);
 
   const fullName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
@@ -37,17 +41,17 @@ export default function AppLayout({ children }) {
 
   const navItems = [
     { path: '/dashboard', icon: 'fa-solid fa-grip', label: 'Dashboard' },
-    { path: '/?history=1', icon: 'fa-solid fa-clock-rotate-left', label: 'History', isLegacy: true }, // Legacy path for history
+    { path: '/?history=1', icon: 'fa-solid fa-clock-rotate-left', label: 'History', isLegacy: true },
     { path: '/progress', icon: 'fa-solid fa-chart-line', label: 'Progress' },
-    { path: '/?profile=1', icon: 'fa-solid fa-user-gear', label: 'Profile', isLegacy: true }, // Legacy path for profile
+    { path: '/?profile=1', icon: 'fa-solid fa-user-gear', label: 'Profile', isLegacy: true },
   ];
 
   return (
-    <div className="app-with-sidebar">
+    <div className="layout-wrapper">
       
       {/* Mobile Top Header with Hamburger */}
       <div className="mobile-top-header">
-        <button className="hamburger-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+        <button className="hamburger-btn" onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label="Toggle Menu">
           <i className={`fa-solid ${mobileMenuOpen ? 'fa-xmark' : 'fa-bars'}`}></i>
         </button>
         <div className="sidebar-logo"><i className="fa-solid fa-cube" style={{ color: '#4fc3f7' }}></i> Interview<span>AI</span></div>
@@ -55,13 +59,15 @@ export default function AppLayout({ children }) {
       </div>
 
       {/* Sidebar Navigation */}
-      <nav className={`app-sidebar ${mobileMenuOpen ? 'mobile-open' : ''}`}>
-        <div className="sidebar-logo desktop-only"><i className="fa-solid fa-cube" style={{ color: '#4fc3f7' }}></i> Interview<span>AI</span></div>
+      <nav className={`app-sidebar ${isSidebarCollapsed ? 'collapsed' : ''} ${mobileMenuOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-logo desktop-only">
+          <i className="fa-solid fa-cube" style={{ color: '#4fc3f7' }}></i> Interview<span>AI</span>
+        </div>
         
         <div className="sidebar-nav">
           {navItems.map((item) => {
             const isActive = item.isLegacy 
-              ? false // Let legacy handle its own active state or check hash/query
+              ? false 
               : location.pathname === item.path;
               
             return (
@@ -69,11 +75,8 @@ export default function AppLayout({ children }) {
                 key={item.label}
                 className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
                 onClick={() => {
-                  if (item.isLegacy) {
-                    window.location.href = item.path;
-                  } else {
-                    navigate(item.path);
-                  }
+                  if (item.isLegacy) window.location.href = item.path;
+                  else navigate(item.path);
                 }}
               >
                 <i className={item.icon}></i> {item.label}
@@ -110,7 +113,18 @@ export default function AppLayout({ children }) {
       </nav>
 
       {/* Main Content Area */}
-      <main className="app-main-content">
+      <main className={`layout-main ${isSidebarCollapsed ? 'sidebar-collapsed' : ''}`}>
+        {/* Desktop Hamburger Header */}
+        <div className="desktop-top-header">
+          <button 
+            className="hamburger-btn" 
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            title={isSidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            <i className="fa-solid fa-bars"></i>
+          </button>
+        </div>
+
         {children}
       </main>
     </div>
