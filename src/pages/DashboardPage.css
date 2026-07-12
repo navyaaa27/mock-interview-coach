@@ -4,7 +4,7 @@
   min-height: 100vh;
   background: var(--bg-app, #07080a);
   color: var(--text-primary, #fff);
-  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   padding: 32px 24px 80px;
   max-width: 1100px;
   margin: 0 auto;
@@ -98,7 +98,7 @@
   color: white;
   cursor: pointer;
   transition: transform 0.2s, border-color 0.2s;
-  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   text-align: left;
 }
 .btn-start-interview:hover {
@@ -135,7 +135,7 @@
   font-size: 14px;
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
-  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
 }
 .quickstart-chip:hover {
   background: rgba(255,255,255,0.08);
@@ -321,7 +321,7 @@
   color: var(--text-secondary, #999);
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
-  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
 }
 .dash-action-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
 .dash-action-btn.blue { color: #4fc3f7; border-color: rgba(79,195,247,0.2); }

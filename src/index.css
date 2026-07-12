@@ -26,7 +26,7 @@
   body {
     background: var(--bg-color);
     color: var(--text-primary);
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
     overflow-x: hidden;
     min-height: 100vh;
     display: flex;
@@ -34,7 +34,7 @@
   }
   
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Audiowide', cursive;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
   }
   
   canvas {
@@ -74,7 +74,7 @@
   }
   
   .logo span {
-    font-family: 'Audiowide', cursive;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     /* Much brighter cyan -> lilac -> pink */
     background: linear-gradient(to right, #67e8f9, #d8b4fe, #f9a8d4);
     -webkit-background-clip: text;
@@ -172,7 +172,7 @@
   }
   
   h2 span {
-    font-family: 'Audiowide', cursive;
+    font-family: 'Space Grotesk', system-ui, sans-serif;
     /* Much brighter cyan -> lilac -> pink */
     background: linear-gradient(to right, #67e8f9, #d8b4fe, #f9a8d4);
     -webkit-background-clip: text;
