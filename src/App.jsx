@@ -6,6 +6,7 @@ const LoginPage = lazy(() => import('./pages/LoginPage'))
 const SignupPage = lazy(() => import('./pages/SignupPage'))
 const SessionPage = lazy(() => import('./pages/SessionPage'))
 const ProgressPage = lazy(() => import('./pages/ProgressPage'))
+const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 
 function PageSkeleton() {
   return (
@@ -48,7 +49,17 @@ function AppRoutes() {
         } 
       />
 
-      {/* Legacy App Wrapper (handles dashboard, history, session, etc) */}
+      {/* React Dashboard (D.02) */}
+      <Route
+        path="/dashboard"
+        element={
+          <RequireAuth>
+            <DashboardPage />
+          </RequireAuth>
+        }
+      />
+
+      {/* Legacy App Wrapper (/session, history, replay, setup) */}
       <Route 
         path="*" 
         element={

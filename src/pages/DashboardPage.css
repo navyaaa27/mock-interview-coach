@@ -1,0 +1,360 @@
+/* ── DashboardPage.css — ported from index-legacy.html ── */
+
+.dash-page {
+  min-height: 100vh;
+  background: var(--bg-app, #07080a);
+  color: var(--text-primary, #fff);
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  padding: 32px 24px 80px;
+  max-width: 1100px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+/* ── Greeting header ── */
+.dash-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 4px;
+}
+.dash-greeting {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary, #fff);
+  margin: 0;
+  line-height: 1.2;
+}
+.dash-sub {
+  font-size: 14px;
+  color: var(--text-secondary, #999);
+  margin-top: 4px;
+}
+.dash-header-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 28px;
+}
+
+/* ── Avatar dropdown ── */
+.dash-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #a78bfa, #4fc3f7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  position: relative;
+  user-select: none;
+  flex-shrink: 0;
+}
+.dash-avatar-dropdown {
+  position: absolute;
+  top: 52px;
+  right: 0;
+  background: #111;
+  border: 1px solid var(--border-hairline, #141414);
+  border-radius: var(--radius-card, 12px);
+  width: 180px;
+  z-index: 100;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+}
+.dash-avatar-dropdown button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  color: var(--text-primary, #fff);
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.15s;
+}
+.dash-avatar-dropdown button:hover { background: rgba(255,255,255,0.05); }
+.dash-avatar-dropdown button.danger { color: #f87171; }
+
+/* ── Start Interview CTA ── */
+.btn-start-interview {
+  width: 100%;
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 24px 32px;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  border: 1px solid rgba(167,139,250,0.3);
+  border-radius: 20px;
+  color: white;
+  cursor: pointer;
+  transition: transform 0.2s, border-color 0.2s;
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+  text-align: left;
+}
+.btn-start-interview:hover {
+  transform: translateY(-2px);
+  border-color: rgba(167,139,250,0.6);
+}
+.btn-start-interview .cta-title {
+  font-size: 22px;
+  font-weight: 800;
+  letter-spacing: 1px;
+  line-height: 1.2;
+}
+.btn-start-interview .cta-sub {
+  font-size: 14px;
+  font-weight: 500;
+  color: rgba(255,255,255,0.8);
+  margin-top: 6px;
+}
+
+/* ── Quick-start chips ── */
+.quickstart-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 40px;
+  justify-content: center;
+}
+.quickstart-chip {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill, 100px);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-hairline, #141414);
+  color: var(--text-secondary, #999);
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+}
+.quickstart-chip:hover {
+  background: rgba(255,255,255,0.08);
+  color: #fff;
+  border-color: rgba(255,255,255,0.15);
+}
+
+/* ── Warning banners ── */
+.dash-warning {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: var(--radius-card, 12px);
+  font-size: 13px;
+  margin-bottom: 16px;
+}
+.dash-warning.streak { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #fca5a5; }
+.dash-warning.storage { background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.3); color: #fcd34d; }
+
+/* ── Widgets row ── */
+.dash-widgets-row {
+  display: flex;
+  gap: 14px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+/* ── Hairline card (D.01) ── */
+.dash-card {
+  background: var(--bg-card, #0a0a0a);
+  border: 1px solid var(--border-hairline, #141414);
+  border-radius: var(--radius-card, 12px);
+  transition: border-color 0.2s, transform 0.2s;
+  position: relative;
+}
+.dash-card:hover { border-color: rgba(255,255,255,0.08); }
+
+/* ── Readiness hero area ── */
+.dash-readiness-widget {
+  flex: 1;
+  min-width: 260px;
+  padding: 24px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ── Streak widget ── */
+.dash-streak-widget {
+  flex: 1;
+  min-width: 260px;
+  padding: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ── Countdown widget ── */
+.dash-countdown-widget {
+  flex: 1;
+  min-width: 220px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.dash-countdown-input {
+  margin-top: 6px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 8px;
+  color: white;
+  padding: 4px 8px;
+  font-size: 12px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* ── Stats row ── */
+.dash-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 24px;
+}
+@media (max-width: 767px) {
+  .dash-stats-row { grid-template-columns: repeat(2, 1fr); }
+}
+.dash-stat-card {
+  padding: 18px;
+  text-align: center;
+}
+.dash-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  line-height: 1;
+}
+.dash-stat-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary, #999);
+  margin-top: 8px;
+}
+
+/* ── Score trend chart ── */
+.dash-chart-container {
+  padding: 24px;
+  margin-bottom: 24px;
+}
+.dash-chart-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-secondary, #999);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.dash-chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 160px;
+  color: var(--text-tertiary, #666);
+  font-size: 13px;
+  gap: 8px;
+}
+
+/* ── Two-column bottom zone ── */
+.dash-two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (max-width: 767px) { .dash-two-col { grid-template-columns: 1fr; } }
+
+/* ── Suggestion card ── */
+.dash-suggestion-card { padding: 18px; height: 100%; box-sizing: border-box; }
+.dash-suggestion-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #a78bfa;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+
+/* ── Last session card ── */
+.dash-last-session-card { padding: 20px; height: 100%; box-sizing: border-box; }
+.dash-last-session-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.dash-last-session-score {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.dash-action-btn {
+  flex: 1;
+  padding: 8px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--border-hairline, #141414);
+  border-radius: var(--radius-small, 8px);
+  color: var(--text-secondary, #999);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+  font-family: var(--font-sans, 'Inter', system-ui, sans-serif);
+}
+.dash-action-btn:hover { background: rgba(255,255,255,0.05); color: #fff; }
+.dash-action-btn.blue { color: #4fc3f7; border-color: rgba(79,195,247,0.2); }
+
+/* ── Empty states ── */
+.dash-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-tertiary, #666);
+  font-size: 13px;
+  gap: 8px;
+}
+
+/* ── Tier label below dial ── */
+.dash-tier-label {
+  font-size: 13px;
+  color: var(--text-secondary, #999);
+  font-weight: 500;
+  text-align: center;
+  letter-spacing: 0.02em;
+}
+.dash-readiness-link {
+  font-size: 12px;
+  color: var(--accent-blue, #4fc3f7);
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  opacity: 0.8;
+  transition: opacity 0.15s;
+}
+.dash-readiness-link:hover { opacity: 1; }

@@ -1,0 +1,15 @@
+.dial-wrap { position: relative; width: 200px; height: 200px; flex-shrink: 0; margin: 0 auto; display: flex; flex-direction: column; align-items: center; }
+.dial-track { fill: none; stroke: var(--border-hairline); stroke-width: 6; }
+.dial-progress { fill: none; stroke: url(#dialGrad); stroke-width: 6; stroke-linecap: round; }
+.dial-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 200px; }
+.dial-num { font-size: 44px; font-weight: 800; letter-spacing: -0.03em; line-height: 1; font-family: var(--font-sans); color: var(--text-primary); }
+.dial-label { font-size: 10px; color: var(--text-tertiary); text-transform: uppercase; letter-spacing: 0.1em; margin-top: 6px; text-align: center; }
+.dial-pulse { position: absolute; top: -8px; left: -8px; width: 216px; height: 216px; border-radius: 50%; border: 1px solid rgba(255,122,69,0.15); animation: dialPulse 2.4s ease-in-out infinite; }
+@keyframes dialPulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.06); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dial-pulse { animation: none; opacity: 0.3; }
+  .dial-progress { transition: none !important; }
+}
