@@ -2798,7 +2798,11 @@
             
           const fullName = userRecord ? userRecord.full_name : 'Practice User';
           loadDashboard(fullName, profile, userRecord);
-          switchView('dashboard');
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          if (window.location.hash !== '#setup' && urlParams.get('autoStart') !== 'true') {
+            switchView('dashboard');
+          }
         } else {
           console.log("No profile record found! Launching onboarding wizard.");
           switchView('onboarding');
