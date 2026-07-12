@@ -1,0 +1,33 @@
+:root {
+  /* Base surfaces */
+  --bg-app: #07080a;
+  --bg-card: #0a0a0a;
+  --bg-card-hover: #0e0e0e;
+  --border-hairline: #141414;
+  --border-hairline-dashed: #1e1e1e;
+
+  /* Signature gradient — used ONLY on: readiness dial, primary CTA border, sidebar active indicator, coach card left rail. Nowhere else. */
+  --gradient-signature: linear-gradient(135deg, #ff7a45, #4fc3f7);
+  --gradient-signature-vertical: linear-gradient(180deg, #ff7a45, #4fc3f7);
+
+  /* Text */
+  --text-primary: #ffffff;
+  --text-secondary: #999999;
+  --text-tertiary: #666666;
+  --text-dim: #333333;
+  --text-disabled: #555555;
+
+  /* Accent (used sparingly — streak dot, coach label only) */
+  --accent-ember: #ff7a45;
+  --accent-blue: #4fc3f7;
+
+  /* Typography */
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-mono: 'SF Mono', 'JetBrains Mono', monospace;
+
+  /* Radius */
+  --radius-card: 12px;
+  --radius-pill: 100px;
+  --radius-small: 8px;
+}

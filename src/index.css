@@ -1,3 +1,4 @@
+@import './styles/tokens.css';
 
   /* ── CSS DESIGN SYSTEM (Slate/Violet palette matching mock_interview_hero) ── */
   * {
@@ -14,7 +15,8 @@
     --text-primary: #ffffff;
     --text-secondary: rgba(255, 255, 255, 0.6);
     --text-muted: rgba(255, 255, 255, 0.38);
-    --primary-glow: linear-gradient(135deg, #4fc3f7, #7e57c2);
+    /* DEPRECATED: old rainbow/neon gradients and borders (D.01 redesign) */
+    /* --primary-glow: linear-gradient(135deg, #4fc3f7, #7e57c2); */
     --primary-accent: #8b5cf6;
     --primary-accent-glow: rgba(139, 92, 246, 0.15);
     --error-color: #ef5350;
