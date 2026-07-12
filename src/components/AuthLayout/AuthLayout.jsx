@@ -20,11 +20,7 @@ export default function AuthLayout({ children }) {
         </nav>
 
         <div className="auth-hero">
-          <div className="hero-text">
-            <div className="hero-badge"><i className="fa-solid fa-video"></i> Realistic AI Video & Voice Interviews</div>
-            <h1>Ace your next<br/>interview!</h1>
-            <p>Talk face-to-face with our AI in a realistic video and voice chat interview. Get cutting-edge feedback with real-time eye tracking and deep performance analytics.</p>
-          </div>
+
           
           <div className="auth-card-wrapper">
             {children}
