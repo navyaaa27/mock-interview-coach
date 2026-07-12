@@ -4,7 +4,8 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'rec
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { useDashboardData } from '../hooks/useDashboardData';
-import ReadinessDial from '../components/ReadinessDial/ReadinessDial';
+import DashboardHero from '../components/DashboardHero/DashboardHero';
+import StatStrip from '../components/StatStrip/StatStrip';
 import './DashboardPage.css';
 
 /* ── Tier logic (kept exactly as in the legacy app) ── */
@@ -16,7 +17,7 @@ function getReadinessTier(score) {
   return { label: 'Just getting started', color: '#666666' };
 }
 
-/* ── Avatar dropdown ── */
+/* ── Avatar dropdown (kept for sign-out access) ── */
 function AvatarMenu({ initials, onSignOut, onProfile }) {
   const [open, setOpen] = useState(false);
   const ref = useRef(null);
@@ -48,7 +49,7 @@ function AvatarMenu({ initials, onSignOut, onProfile }) {
   );
 }
 
-/* ── Score Trend Chart (recharts port) ── */
+/* ── Score Trend Chart ── */
 function ScoreTrendSection({ trendData }) {
   if (!trendData || trendData.length < 2) {
     return (
@@ -98,13 +99,12 @@ export default function DashboardPage() {
   const { currentUser, signOut } = useAuth();
   const navigate = useNavigate();
   const { data, loading } = useDashboardData(currentUser?.id);
-  const [interviewDate, setInterviewDate] = useState('');
 
-  // Populate interview date from profile data
+  const [interviewDate, setInterviewDate] = useState('');
+  const [selectedType, setSelectedType] = useState('behavioral');
+
   useEffect(() => {
-    if (data?.profile?.interview_date) {
-      setInterviewDate(data.profile.interview_date);
-    }
+    if (data?.profile?.interview_date) setInterviewDate(data.profile.interview_date);
   }, [data]);
 
   const handleSaveInterviewDate = useCallback(async (value) => {
@@ -118,55 +118,24 @@ export default function DashboardPage() {
   }, [signOut, navigate]);
 
   const handleStartInterview = useCallback(() => {
-    // Navigate to session page with the setup hash
-    navigate('/#setup');
-    window.location.href = '/#setup';
-  }, [navigate]);
+    // Navigate to the legacy session setup — stays as-is per the port spec
+    window.location.href = `/?type=${selectedType}#setup`;
+  }, [selectedType]);
 
   const handleQuickStart = useCallback((type) => {
-    window.location.href = `/index-legacy.html#setup?type=${type}`;
+    window.location.href = `/?type=${type}#setup`;
   }, []);
 
-  // Greeting
-  const hour = new Date().getHours();
-  const timeGreeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  // User identifiers
   const fullName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
-  const firstName = fullName.split(' ')[0];
   const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
 
-  // Readiness
-  const score = data?.readinessScore ?? 0;
-  const { label: tierLabel } = getReadinessTier(score);
-
-  // Streak
+  // Data
+  const score   = data?.readinessScore ?? 0;
   const profile = data?.profile || {};
-  const currentStreak = profile.current_streak || 0;
-  const longestStreak = profile.longest_streak || 0;
-  const hasFreeze = profile.streak_freeze_available !== false;
-  const isNewPB = currentStreak > 0 && currentStreak > longestStreak;
-
-  // Streak warning
-  const today = new Date().toISOString().split('T')[0];
-  const showStreakWarning = !!(profile.last_session_date && currentStreak > 0 && profile.last_session_date < today && hour >= 18);
 
   // Storage warning
   const showStorageWarning = (data?.sessionCount || 0) >= 15;
-
-  // Countdown
-  let countdownText = 'No interview date set';
-  let countdownColor = 'var(--text-secondary, #999)';
-  if (interviewDate) {
-    const interviewDt = new Date(interviewDate + 'T00:00:00');
-    const todayDt = new Date(); todayDt.setHours(0, 0, 0, 0);
-    const diffDays = Math.ceil((interviewDt - todayDt) / (1000 * 60 * 60 * 24));
-    if (diffDays < 0) { countdownText = 'Interview date passed'; }
-    else if (diffDays <= 3) { countdownText = `⚡ ${diffDays} day${diffDays !== 1 ? 's' : ''} left — practice today`; countdownColor = '#f87171'; }
-    else {
-      const firstCompany = (profile.target_companies || [])[0] || 'your';
-      countdownText = `${diffDays} days until your ${firstCompany} interview`;
-      countdownColor = '#a78bfa';
-    }
-  }
 
   // Last session
   const lss = data?.lastSessionStats;
@@ -177,13 +146,14 @@ export default function DashboardPage() {
   // Suggestion
   const suggestion = data?.suggestion;
 
+  // Skeleton while loading
   if (loading) {
     return (
       <div className="dash-page">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, opacity: 0.4 }}>
-          {[280, 100, 88, 88, 200].map((h, i) => (
-            <div key={i} style={{ height: h, borderRadius: 12, background: '#141414' }} />
-          ))}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, opacity: 0.35 }}>
+          <div style={{ height: 260, borderRadius: 12, background: '#141414' }} />
+          <div style={{ height: 88,  borderRadius: 12, background: '#141414' }} />
+          <div style={{ height: 200, borderRadius: 12, background: '#141414' }} />
         </div>
       </div>
     );
@@ -192,130 +162,54 @@ export default function DashboardPage() {
   return (
     <div className="dash-page">
 
-      {/* ZONE 1: Header */}
-      <div className="dash-header-row">
-        <div>
-          <p className="dash-eyebrow">WORKSPACE DASHBOARD</p>
-          <h1 className="dash-greeting">{timeGreeting}, <span style={{ color: 'inherit' }}>{firstName}</span></h1>
-          <p className="dash-sub">Here's your practice overview for today.</p>
-        </div>
-        <AvatarMenu initials={initials} onSignOut={handleSignOut} onProfile={() => navigate('/progress')} />
+      {/* Top-right avatar (sign-out access) */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 8 }}>
+        <AvatarMenu
+          initials={initials}
+          onSignOut={handleSignOut}
+          onProfile={() => navigate('/progress')}
+        />
       </div>
 
-      {/* ZONE 1.5: Start Interview CTA */}
-      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
-        <button className="btn-start-interview" onClick={handleStartInterview} id="dash-start-btn">
-          <i className="fa-solid fa-circle-play" style={{ fontSize: 48 }} />
-          <div style={{ flex: 1 }}>
-            <div className="cta-title">START NEW INTERVIEW</div>
-            <div className="cta-sub">Behavioral, technical, DSA or system design.</div>
-          </div>
-          <i className="fa-solid fa-arrow-right" style={{ fontSize: 24, opacity: 0.7 }} />
-        </button>
-      </div>
+      {/* D.03 — Hero: dial + narrative + CTA + type tabs + inline strip */}
+      <DashboardHero
+        user={{
+          readiness_score: score,
+          current_streak:  profile.current_streak  ?? 0,
+          longest_streak:  profile.longest_streak  ?? 0,
+          email:           currentUser?.email,
+        }}
+        profile={{
+          full_name:        fullName,
+          target_companies: profile.target_companies || [],
+        }}
+        onStartInterview={handleStartInterview}
+        onSelectType={type => { setSelectedType(type); }}
+        selectedType={selectedType}
+        interviewDate={interviewDate}
+        onDateChange={handleSaveInterviewDate}
+      />
 
-      {/* Quick-start chips */}
-      <div className="quickstart-chips">
-        <button className="quickstart-chip" onClick={() => handleQuickStart('behavioral')}>💬 Behavioral</button>
-        <button className="quickstart-chip" onClick={() => handleQuickStart('technical')}>💻 Technical</button>
-        <button className="quickstart-chip" onClick={() => handleQuickStart('system_design')}>🏗️ System Design</button>
-        <button className="quickstart-chip" onClick={() => handleQuickStart('hr')}>🤝 HR</button>
-      </div>
-
-      {/* Warning banners */}
-      {showStreakWarning && (
-        <div className="dash-warning streak">
-          <i className="fa-solid fa-bolt" style={{ fontSize: 16, color: '#f87171' }} />
-          <span>⚡ Your {currentStreak}-day streak ends at midnight. Practice now to keep it alive.</span>
-        </div>
-      )}
+      {/* Storage warning (only when near limit) */}
       {showStorageWarning && (
-        <div className="dash-warning storage">
+        <div className="dash-warning storage" style={{ marginBottom: 24 }}>
           <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: 16 }} />
           <span>Your storage is getting full. Older sessions may be automatically cleaned up.</span>
         </div>
       )}
 
-      {/* ZONE 2: Widgets row */}
-      <div className="dash-widgets-row">
+      {/* D.03 — StatStrip: one connected row, hairline-divided */}
+      <StatStrip
+        sessionsCompleted={data?.sessionCount}
+        avgScore={data?.sessionCount ? data.avgScore : null}
+        bestScore={data?.sessionCount ? data.bestScore : null}
+        hoursPracticed={data?.hoursStr}
+      />
 
-        {/* D.02: Readiness Dial — hero element replacing the boxed card */}
-        <div className="dash-card dash-readiness-widget" onClick={() => navigate('/progress')} role="button" aria-label="View readiness details" id="dash-readiness-widget">
-          <ReadinessDial score={score} tierLabel={tierLabel} />
-          <a className="dash-readiness-link" href="/progress" onClick={e => { e.preventDefault(); navigate('/progress'); }}>
-            Interview Readiness <i className="fa-solid fa-arrow-right" style={{ fontSize: 10 }} />
-          </a>
-        </div>
-
-        {/* Streak widget */}
-        <div className="dash-card dash-streak-widget" id="dash-streak-widget">
-          <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-            <div style={{ fontSize: 40, textShadow: '0 0 20px rgba(245,158,11,0.5)' }}>🔥</div>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#fff' }} id="dash-streak-count">
-                {currentStreak === 0 ? '0 day streak' : `${currentStreak} day streak`}
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--text-secondary, #999)', marginTop: 4 }} id="dash-streak-sub">
-                {currentStreak === 0 ? 'Start your streak today →' : `Longest: ${longestStreak} days 🔥`}
-              </div>
-              {hasFreeze && (
-                <div style={{ marginTop: 8, fontSize: 11, fontWeight: 700, color: '#60a5fa', background: 'rgba(96,165,250,0.15)', padding: '2px 8px', borderRadius: 12, display: 'inline-block' }}>
-                  <i className="fa-solid fa-snowflake" style={{ marginRight: 4 }} /> Freeze available
-                </div>
-              )}
-            </div>
-          </div>
-          {isNewPB && (
-            <div style={{ background: 'rgba(74,222,128,0.15)', color: '#4ade80', padding: '6px 12px', borderRadius: 20, fontSize: 12, fontWeight: 700 }}>
-              🎉 New personal best!
-            </div>
-          )}
-        </div>
-
-        {/* Countdown widget */}
-        <div className="dash-card dash-countdown-widget" id="dash-countdown-widget">
-          <i className="fa-solid fa-calendar-day" style={{ fontSize: 24, color: '#a78bfa' }} />
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: countdownColor }}>{countdownText}</div>
-            <input
-              type="date"
-              className="dash-countdown-input"
-              value={interviewDate}
-              onChange={e => handleSaveInterviewDate(e.target.value)}
-              id="dash-interview-date"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* ZONE 3: Stats Row */}
-      <div className="dash-stats-row">
-        <div className="dash-card dash-stat-card">
-          <div className="dash-stat-value" id="dash-sessions-count">{data?.sessionCount ?? '—'}</div>
-          <div className="dash-stat-label">Sessions Completed</div>
-        </div>
-        <div className="dash-card dash-stat-card">
-          <div className="dash-stat-value" style={{ color: '#4fc3f7' }} id="dash-avg-score">
-            {data?.sessionCount ? data.avgScore.toFixed(1) : '—'}
-          </div>
-          <div className="dash-stat-label">Average Score</div>
-        </div>
-        <div className="dash-card dash-stat-card">
-          <div className="dash-stat-value" style={{ color: '#4ade80' }} id="dash-best-score">
-            {data?.sessionCount ? data.bestScore.toFixed(1) : '—'}
-          </div>
-          <div className="dash-stat-label">Best Score</div>
-        </div>
-        <div className="dash-card dash-stat-card">
-          <div className="dash-stat-value" id="dash-hours">{data?.hoursStr ?? '0'}</div>
-          <div className="dash-stat-label">Hours Practiced</div>
-        </div>
-      </div>
-
-      {/* ZONE 4: Score Trend */}
+      {/* Score Trend Chart */}
       <ScoreTrendSection trendData={data?.trendData} />
 
-      {/* ZONE 5: Two-column */}
+      {/* Two-column: Suggestion + Last Session */}
       <div className="dash-two-col">
 
         {/* Smart Suggestion */}

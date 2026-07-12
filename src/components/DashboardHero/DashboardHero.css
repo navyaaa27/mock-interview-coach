@@ -1,0 +1,166 @@
+.hero {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 56px;
+  align-items: center;
+  margin-bottom: 56px;
+  padding-bottom: 48px;
+  border-bottom: 1px solid var(--border-hairline);
+}
+
+@media (max-width: 700px) {
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    text-align: center;
+    justify-items: center;
+  }
+}
+
+.eyebrow {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.hero-narrative h1 {
+  font-family: var(--font-sans);
+  font-size: 32px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 0 0 10px 0;
+  color: var(--text-primary);
+}
+
+.hero-narrative h1 .italic {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 400;
+}
+
+.hero-narrative h1 .name {
+  font-weight: 700;
+}
+
+.hero-narrative .sub {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  max-width: 460px;
+  margin-bottom: 22px;
+  margin-top: 0;
+}
+
+/* ── Signature-gradient bordered CTA button ── */
+.hero-cta-border {
+  display: inline-block;
+  border-radius: 10px;
+  padding: 1px;
+  background: var(--gradient-signature);
+}
+
+.hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px 24px;
+  border-radius: 9px;
+  background: var(--bg-card);
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background 0.15s;
+}
+
+.hero-cta:hover {
+  background: var(--bg-card-hover);
+}
+
+/* The small gradient circle play icon */
+.play-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--gradient-signature);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+/* ── Interview type tabs ── */
+.type-tabs {
+  display: flex;
+  gap: 22px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+}
+
+.type-tab {
+  font-size: 12px;
+  color: var(--text-disabled);
+  padding-bottom: 6px;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: color 0.15s, border-bottom-color 0.15s;
+  white-space: nowrap;
+}
+
+.type-tab.selected {
+  color: var(--text-primary);
+  border-bottom-color: var(--accent-ember);
+}
+
+.type-tab:hover:not(.selected) {
+  color: var(--text-secondary);
+}
+
+/* ── Inline stat strip inside hero ── */
+.inline-strip {
+  display: flex;
+  gap: 28px;
+  margin-top: 22px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.inline-stat {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+
+.inline-stat strong {
+  color: var(--text-secondary);
+  font-weight: 600;
+}
+
+/* The ember accent dot for streak */
+.flame-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent-ember);
+  box-shadow: 0 0 8px var(--accent-ember);
+  flex-shrink: 0;
+}
+
+/* Countdown inline */
+.inline-countdown {
+  font-size: 12px;
+  color: var(--text-tertiary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
