@@ -5,7 +5,7 @@ function getSmartSuggestion(recentSessions) {
   if (!recentSessions || recentSessions.length === 0) {
     return {
       icon: '💬',
-      text: "Start with a Behavioral interview — it's the most common first round at any company.",
+      text: "Start with a behavioral round — it's the first thing almost every interviewer opens with, at any company. Twenty-five minutes, five questions, and you'll already know more about where you stand than a number can tell you.",
       type: 'behavioral',
       difficulty: 'medium',
     };
@@ -65,10 +65,12 @@ function getSmartSuggestion(recentSessions) {
   let suggestionText = '';
   if (lowestAvg < 6) {
     suggestionText = mostCommonWeak
-      ? `Your ${typeLabels[weakestType]} answers need work — especially on "${mostCommonWeak}". Practice it now.`
-      : `Your ${typeLabels[weakestType]} score is lowest. Focus on it today.`;
+      ? `'${mostCommonWeak}' has come up in your last few sessions. It's not a coincidence at this point — let's deal with it directly. A focused ${typeLabels[weakestType]} session today.`
+      : `Your last few ${typeLabels[weakestType]} answers landed around ${lowestAvg.toFixed(1)} — not bad, but you were rushing the structure. One focused session today would fix most of it.`;
   } else {
-    suggestionText = `You're doing well! Push your ${typeLabels[weakestType]} to the next level with a Hard session.`;
+    suggestionText = mostCommonWeak
+      ? `'${mostCommonWeak}' keeps appearing in your feedback. You're scoring well overall, but this is the thing holding you back from the next tier.`
+      : `You're doing well. Push your ${typeLabels[weakestType]} to the next level with a Hard session — that's where the real gap is now.`;
   }
 
   return {

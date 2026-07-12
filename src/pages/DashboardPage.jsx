@@ -6,6 +6,8 @@ import { supabase } from '../lib/supabase';
 import { useDashboardData } from '../hooks/useDashboardData';
 import DashboardHero from '../components/DashboardHero/DashboardHero';
 import StatStrip from '../components/StatStrip/StatStrip';
+import CoachCard from '../components/CoachCard/CoachCard';
+import EmptyState from '../components/EmptyState/EmptyState';
 import './DashboardPage.css';
 
 /* ── Tier logic (kept exactly as in the legacy app) ── */
@@ -57,10 +59,9 @@ function ScoreTrendSection({ trendData }) {
         <div className="dash-chart-title">
           <i className="fa-solid fa-chart-line" style={{ color: '#4fc3f7' }} /> Score Trend
         </div>
-        <div className="dash-chart-empty">
-          <i className="fa-solid fa-chart-line" style={{ fontSize: 28, opacity: 0.2 }} />
-          <div>Complete at least 3 sessions to see your score trend</div>
-        </div>
+        <EmptyState
+          message="Three sessions in and the pattern starts to show. You're not there yet."
+        />
       </div>
     );
   }
@@ -212,34 +213,11 @@ export default function DashboardPage() {
       {/* Two-column: Suggestion + Last Session */}
       <div className="dash-two-col">
 
-        {/* Smart Suggestion */}
-        <div className="dash-card dash-suggestion-card" id="dash-suggestion-card">
-          {suggestion ? (
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14 }}>
-              <div style={{ fontSize: 28, minWidth: 36, textAlign: 'center' }}>{suggestion.icon}</div>
-              <div style={{ flex: 1 }}>
-                <div className="dash-suggestion-label">Smart Suggestion</div>
-                <div style={{ fontSize: 13, color: 'var(--text-secondary, #999)', lineHeight: 1.5 }}>{suggestion.text}</div>
-                <button
-                  id="dash-suggestion-btn"
-                  onClick={() => handleQuickStart(suggestion.type)}
-                  style={{
-                    marginTop: 12, padding: '8px 16px', fontSize: 12,
-                    background: 'linear-gradient(135deg, var(--accent-ember, #ff7a45), var(--accent-blue, #4fc3f7))',
-                    border: 'none', borderRadius: 8, color: '#fff', cursor: 'pointer', fontFamily: 'inherit',
-                  }}
-                >
-                  Start this session <i className="fa-solid fa-arrow-right" style={{ marginLeft: 4 }} />
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="dash-empty-state">
-              <i className="fa-solid fa-lightbulb" style={{ fontSize: 24, opacity: 0.2 }} />
-              <div>No suggestion yet — complete a session first.</div>
-            </div>
-          )}
-        </div>
+        {/* D.04 — CoachCard replaces generic Smart Suggestion box */}
+        <CoachCard
+          suggestion={suggestion}
+          onStartSession={(type, difficulty) => handleQuickStart(type)}
+        />
 
         {/* Last Session Summary */}
         <div className="dash-card dash-last-session-card" id="dash-last-session-card">
@@ -279,11 +257,12 @@ export default function DashboardPage() {
             </>
           ) : (
             <div className="dash-empty-state">
-              <i className="fa-solid fa-folder-open" style={{ fontSize: 24, opacity: 0.2 }} />
-              <div>No sessions yet — start your first one!</div>
+              <EmptyState
+                message="Your interview history starts the moment you finish your first one."
+              />
               <button
                 onClick={handleStartInterview}
-                style={{ marginTop: 8, padding: '8px 20px', fontSize: 13, background: 'transparent', border: '1px solid var(--border-hairline)', borderRadius: 8, color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ marginTop: 16, padding: '8px 20px', fontSize: 13, background: 'transparent', border: '1px solid var(--border-hairline)', borderRadius: 8, color: 'var(--text-secondary)', cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Start Interview →
               </button>

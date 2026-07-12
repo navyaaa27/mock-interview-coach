@@ -1,0 +1,58 @@
+.coach-card {
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: 26px;
+  position: relative;
+  background: var(--bg-card);
+  overflow: hidden;
+}
+
+/* Left rail — signature gradient (1 of 4 allowed uses of --gradient-signature) */
+.coach-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gradient-signature-vertical);
+  border-radius: 2px 0 0 2px;
+}
+
+.coach-label {
+  font-size: 10px;
+  color: var(--accent-ember);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 10px;
+  font-family: var(--font-sans);
+}
+
+.coach-text {
+  font-size: 14px;
+  color: #bbb;
+  line-height: 1.65;
+  margin-bottom: 18px;
+  font-family: var(--font-sans);
+}
+
+.coach-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: var(--radius-small);
+  background: #111;
+  border: 1px solid #222;
+  font-family: var(--font-sans);
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.coach-btn:hover {
+  background: #1a1a1a;
+  border-color: #333;
+}

@@ -1,0 +1,25 @@
+.empty-state {
+  border-radius: var(--radius-card);
+  padding: 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  min-height: 100px;
+  background: var(--bg-card);
+}
+
+.empty-state.dashed {
+  border: 1px dashed var(--border-hairline-dashed);
+}
+
+.empty-state p {
+  font-size: 13px;
+  color: var(--text-disabled);
+  font-style: italic;
+  font-family: var(--font-display);
+  line-height: 1.6;
+  margin: 0;
+  max-width: 360px;
+}

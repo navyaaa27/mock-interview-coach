@@ -88,6 +88,7 @@ import TypeBreakdownChart from '../components/charts/TypeBreakdownChart';
 import DeliveryTrendChart from '../components/charts/DeliveryTrendChart';
 import StudyPlan from '../components/StudyPlan/StudyPlan';
 import ReadinessScore from '../components/ReadinessScore/ReadinessScore';
+import EmptyState from '../components/EmptyState/EmptyState';
 
 export default function ProgressPage() {
   const { currentUser } = useAuth();
@@ -121,7 +122,9 @@ export default function ProgressPage() {
           </div>
           <ReadinessScore />
         </div>
-        <ProgressEmptyState />
+        <EmptyState
+          message="Three sessions in and the pattern starts to show. You're not there yet."
+        />
       </div>
     );
   }

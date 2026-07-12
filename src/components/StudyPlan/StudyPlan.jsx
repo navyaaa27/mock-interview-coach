@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAuth } from '../../context/AuthContext';
 import { generateStudyPlan } from '../../lib/studyPlanService';
 import { useNavigate } from 'react-router-dom';
+import EmptyState from '../EmptyState/EmptyState';
 
 export default function StudyPlan({ studyPlanData }) {
   const { currentUser } = useAuth();
@@ -80,19 +81,31 @@ export default function StudyPlan({ studyPlanData }) {
     );
   }
 
-  // If no plan exists, show an empty state to generate the first one
+  // If no plan exists, show a voiced empty state to generate the first one
   if (!plan) {
     return (
-      <div style={{ background: '#111', padding: '3rem', borderRadius: '12px', textAlign: 'center', marginTop: '2rem' }}>
-        <h2 style={{ color: '#fff', marginBottom: '1rem' }}>No Study Plan Yet</h2>
-        <p style={{ color: '#9CA3AF', marginBottom: '2rem' }}>Generate your first AI-powered personalized study plan.</p>
-        <button 
-          onClick={handleRegenerate}
-          style={{ background: '#b06aff', color: '#fff', padding: '10px 24px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
-        >
-          Generate my study plan
-        </button>
-        {errorMsg && <p style={{ color: '#ff6b6b', marginTop: '1rem' }}>{errorMsg}</p>}
+      <div style={{ marginTop: '2rem' }}>
+        <EmptyState
+          message="No plan yet — generate one and Alex will map out exactly what to practice and when."
+        />
+        <div style={{ marginTop: 16, textAlign: 'center' }}>
+          <button
+            onClick={handleRegenerate}
+            style={{
+              background: 'transparent',
+              color: '#fff',
+              padding: '10px 24px',
+              borderRadius: '8px',
+              border: '1px solid #333',
+              cursor: 'pointer',
+              fontWeight: '600',
+              fontSize: 14,
+            }}
+          >
+            Generate my study plan
+          </button>
+          {errorMsg && <p style={{ color: '#ff6b6b', marginTop: '1rem' }}>{errorMsg}</p>}
+        </div>
       </div>
     );
   }
