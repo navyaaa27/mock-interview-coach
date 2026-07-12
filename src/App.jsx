@@ -7,6 +7,7 @@ const SignupPage = lazy(() => import('./pages/SignupPage'))
 const SessionPage = lazy(() => import('./pages/SessionPage'))
 const ProgressPage = lazy(() => import('./pages/ProgressPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const AppLayout = lazy(() => import('./components/AppLayout/AppLayout'))
 
 function PageSkeleton() {
   return (
@@ -44,7 +45,9 @@ function AppRoutes() {
         path="/progress" 
         element={
           <RequireAuth>
-            <ProgressPage />
+            <AppLayout>
+              <ProgressPage />
+            </AppLayout>
           </RequireAuth>
         } 
       />
@@ -54,7 +57,9 @@ function AppRoutes() {
         path="/dashboard"
         element={
           <RequireAuth>
-            <DashboardPage />
+            <AppLayout>
+              <DashboardPage />
+            </AppLayout>
           </RequireAuth>
         }
       />
