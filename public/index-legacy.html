@@ -3520,6 +3520,10 @@
       const url = new URL(window.location);
       url.searchParams.delete('autoStart');
       window.history.replaceState({}, '', url);
+    } else if (window.location.hash === '#setup') {
+      const type = urlParams.get('type') || 'behavioral';
+      openSetupView();
+      selectType(type);
     }
   }
   
