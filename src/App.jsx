@@ -7,6 +7,7 @@ const SignupPage = lazy(() => import('./pages/SignupPage'))
 const SessionPage = lazy(() => import('./pages/SessionPage'))
 const ProgressPage = lazy(() => import('./pages/ProgressPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
+const ReplayPage = lazy(() => import('./pages/ReplayPage'))
 const AppLayout = lazy(() => import('./components/AppLayout/AppLayout'))
 
 function PageSkeleton() {
@@ -59,6 +60,18 @@ function AppRoutes() {
           <RequireAuth>
             <AppLayout>
               <DashboardPage />
+            </AppLayout>
+          </RequireAuth>
+        }
+      />
+      
+      {/* React Replay Page */}
+      <Route
+        path="/replay/:sessionId"
+        element={
+          <RequireAuth>
+            <AppLayout>
+              <ReplayPage />
             </AppLayout>
           </RequireAuth>
         }

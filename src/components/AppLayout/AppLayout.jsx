@@ -41,9 +41,9 @@ export default function AppLayout({ children }) {
 
   const navItems = [
     { path: '/dashboard', icon: 'fa-solid fa-grip', label: 'Dashboard' },
-    { path: '/?history=1', icon: 'fa-solid fa-clock-rotate-left', label: 'History', isLegacy: true },
+    { path: '/?embedded=1&view=history', icon: 'fa-solid fa-clock-rotate-left', label: 'History', isLegacy: true },
     { path: '/progress', icon: 'fa-solid fa-chart-line', label: 'Progress' },
-    { path: '/?profile=1', icon: 'fa-solid fa-user-gear', label: 'Profile', isLegacy: true },
+    { path: '/?embedded=1&view=profile', icon: 'fa-solid fa-user-gear', label: 'Profile', isLegacy: true },
   ];
 
   return (
