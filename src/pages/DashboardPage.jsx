@@ -247,10 +247,10 @@ export default function DashboardPage() {
                 </div>
               )}
               <div style={{ display: 'flex', gap: 8 }}>
-                <button className="dash-action-btn" onClick={() => navigate(`/session/${lss.session.id}`)}>
+                <button className="dash-action-btn" onClick={() => navigate(`/replay/${lss.session.id}`)}>
                   View Report <i className="fa-solid fa-arrow-right" />
                 </button>
-                <button className="dash-action-btn blue" onClick={() => navigate(`/?replay=${lss.session.id}`)}>
+                <button className="dash-action-btn blue" onClick={() => navigate(`/replay/${lss.session.id}`)}>
                   <i className="fa-solid fa-play" style={{ marginRight: 4 }} /> Replay
                 </button>
               </div>
