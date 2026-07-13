@@ -97,12 +97,12 @@ export function useDashboardData(userId) {
         supabase.from('users').select('readiness_score, readiness_updated_at').eq('id', userId).maybeSingle(),
         supabase.from('profiles').select('job_role, experience_level, interview_goal, target_companies, current_streak, longest_streak, streak_freeze_available, last_session_date, interview_date').eq('user_id', userId).maybeSingle(),
         supabase.from('sessions')
-          .select('id, interview_type, difficulty, job_role, created_at, completed_at, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score, improvements, strengths))')
+          .select('id, interview_type, difficulty, job_role, created_at, completed_at, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score))')
           .eq('user_id', userId)
           .eq('status', 'completed')
           .order('created_at', { ascending: false }),
         supabase.from('sessions')
-          .select('id, interview_type, answers(feedback(overall_score, strengths, improvements))')
+          .select('id, interview_type, answers(feedback(overall_score))')
           .eq('user_id', userId)
           .eq('status', 'completed')
           .order('created_at', { ascending: false })
