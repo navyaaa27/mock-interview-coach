@@ -80,8 +80,8 @@
   }
   
   .card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid rgba(255, 255, 255, 0.05);
+    background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.02)) border-box;
+    border: 1px solid transparent;
     border-radius: 16px;
   }
   
@@ -171,13 +171,11 @@
   }
   
   .dashboard-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    background: linear-gradient(#0a0a0c, #0a0a0c) padding-box, linear-gradient(135deg, rgba(167,139,250,0.5), rgba(79,195,247,0.5)) border-box;
+    border: 1px solid transparent;
     border-radius: 24px;
     width: 100%;
-    max-width: 900px;
+    max-width: 100%;
     padding: 40px;
     box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     display: none; /* Controlled by router */
@@ -269,6 +267,12 @@
     background-repeat: no-repeat;
     background-position: right 12px center;
   }
+  
+  select option {
+    background-color: #1a1a2e; /* Dark background so white text is readable */
+    color: white;
+  }
+
   
   input:focus,
   select:focus {
@@ -815,6 +819,7 @@
   .question-card {
     margin: auto 0;
     max-width: 800px;
+    padding-right: 260px;
   }
 
   .question-text {
@@ -1103,11 +1108,11 @@
   }
 
   .pill-btn {
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 100px;
+    background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.02)) border-box;
+    border: 1px solid transparent;
+    border-radius: 12px;
     padding: 10px 20px;
-    color: var(--text-secondary);
+    color: rgba(255,255,255,0.6);
     cursor: pointer;
     transition: all 0.2s;
     font-size: 14px;
@@ -1117,12 +1122,12 @@
   }
 
   .pill-btn:hover {
-    background: rgba(255,255,255,0.1);
+    background: linear-gradient(#18181e, #18181e) padding-box, linear-gradient(135deg, rgba(255,255,255,0.2), rgba(255,255,255,0.05)) border-box;
+    color: white;
   }
 
   .pill-btn.selected {
-    background: rgba(79, 195, 247, 0.15);
-    border-color: #4fc3f7;
+    background: linear-gradient(#0d1a26, #0d1a26) padding-box, linear-gradient(135deg, #4fc3f7, rgba(167,139,250,0.6)) border-box;
     color: #4fc3f7;
   }
 
@@ -1644,7 +1649,7 @@
      P4.07: DASHBOARD WIDER LAYOUT
      ══════════════════════════════════════════ */
   .dashboard-card.full-width {
-    max-width: 1100px;
+    max-width: 100%;
   }
 </style>
 </head>
@@ -2258,7 +2263,7 @@
   <div id="history-view" class="dashboard-card" style="display: none; padding-bottom: 60px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
       <h1 class="welcome-title"><i class="fa-solid fa-clock-rotate-left"></i> Session History</h1>
-      <button class="btn btn-secondary" style="width: auto;" onclick="switchView('dashboard-view')">Back to Dashboard</button>
+      <button class="btn btn-secondary" style="width: auto;" onclick="navigateTo('dashboard')">Back to Dashboard</button>
     </div>
     
     <!-- SECTION 1: Summary Bar -->
@@ -2434,7 +2439,7 @@
         <h2 style="margin: 0; font-size: 28px; font-weight: 800; font-family: 'Inter', system-ui, sans-serif; color: #ffffff; line-height: 1.2;">Configure Interview</h2>
         <div style="font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 6px;">Adjust your settings before starting the interview.</div>
       </div>
-      <button onclick="switchView('dashboard-view')" style="background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 100px; padding: 10px 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">Cancel</button>
+      <button onclick="window.location.href='/dashboard'" style="background: transparent; border: 1px solid rgba(255,255,255,0.15); border-radius: 100px; padding: 10px 24px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); cursor: pointer; transition: all 0.2s;" onmouseover="this.style.background='rgba(255,255,255,0.05)'" onmouseout="this.style.background='transparent'">Cancel</button>
     </div>
 
     <div class="setup-container">
@@ -2509,15 +2514,15 @@
       <div style="margin-top: 32px;">
         <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 16px;">2. Difficulty</div>
         <div style="display: flex; gap: 12px;">
-          <div class="pill-btn" onclick="selectDifficulty('easy')" id="diff-easy" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 16px 12px;">
+          <div class="pill-btn" onclick="selectDifficulty('easy')" id="diff-easy" style="flex: 1; text-align: center; border-radius: 12px; padding: 16px 12px;">
             <div style="font-weight: 600; color: white; font-size: 14px;">Easy</div>
             <div style="font-size: 11px; margin-top: 4px; color: rgba(255,255,255,0.5);">Fresher</div>
           </div>
-          <div class="pill-btn selected" onclick="selectDifficulty('medium')" id="diff-medium" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 16px 12px;">
+          <div class="pill-btn selected" onclick="selectDifficulty('medium')" id="diff-medium" style="flex: 1; text-align: center; border-radius: 12px; padding: 16px 12px;">
             <div style="font-weight: 600; color: white; font-size: 14px;">Medium</div>
             <div style="font-size: 11px; margin-top: 4px; color: rgba(255,255,255,0.5);">Experienced</div>
           </div>
-          <div class="pill-btn" onclick="selectDifficulty('hard')" id="diff-hard" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 16px 12px;">
+          <div class="pill-btn" onclick="selectDifficulty('hard')" id="diff-hard" style="flex: 1; text-align: center; border-radius: 12px; padding: 16px 12px;">
             <div style="font-weight: 600; color: white; font-size: 14px;">Hard</div>
             <div style="font-size: 11px; margin-top: 4px; color: rgba(255,255,255,0.5);">Senior</div>
           </div>
@@ -2539,10 +2544,10 @@
         <div>
           <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 12px;">Interview Mode</div>
           <div style="display: flex; gap: 8px;">
-            <div class="pill-btn" onclick="selectMode('text')" id="mode-text" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 14px 12px; font-size: 13px;">
+            <div class="pill-btn" onclick="selectMode('text')" id="mode-text" style="flex: 1; text-align: center; border-radius: 12px; padding: 14px 12px; font-size: 13px;">
               <i class="fa-solid fa-keyboard" style="margin-right: 6px;"></i> Text Only
             </div>
-            <div class="pill-btn selected" onclick="selectMode('video')" id="mode-video" style="flex: 1; text-align: center; border-radius: 12px; background: linear-gradient(#111116, #111116) padding-box, linear-gradient(135deg, rgba(255,255,255,0.15), rgba(255,255,255,0.02)) border-box; border: 1px solid transparent; padding: 14px 12px; font-size: 13px;">
+            <div class="pill-btn selected" onclick="selectMode('video')" id="mode-video" style="flex: 1; text-align: center; border-radius: 12px; padding: 14px 12px; font-size: 13px;">
               <i class="fa-solid fa-video" style="margin-right: 6px;"></i> Voice/Video
             </div>
           </div>
@@ -2751,7 +2756,7 @@
       <div style="display: flex; gap: 16px; margin-top: 24px;">
         <button class="btn btn-primary" onclick="openSetupView()"><i class="fa-solid fa-rotate-right"></i> Practice Again</button>
         <button class="btn btn-secondary" onclick="window.print()"><i class="fa-solid fa-download"></i> Download PDF</button>
-        <button class="btn btn-secondary" onclick="switchView('dashboard-view')">Back to Dashboard</button>
+        <button class="btn btn-secondary" onclick="navigateTo('dashboard')">Back to Dashboard</button>
       </div>
 
     </div>
@@ -2823,10 +2828,15 @@
           loadDashboard(fullName, profile, userRecord);
           
           const urlParams = new URLSearchParams(window.location.search);
+          const viewParam = urlParams.get('view');
           if (window.location.hash === '#setup') {
             switchView('setup-view');
+          } else if (viewParam === 'history') {
+            navigateTo('history');
+          } else if (viewParam === 'profile') {
+            navigateTo('profile');
           } else if (urlParams.get('autoStart') !== 'true') {
-            switchView('dashboard');
+            window.location.href = '/dashboard';
           }
         } else {
           console.log("No profile record found! Launching onboarding wizard.");
@@ -2913,20 +2923,26 @@
       else mainEl.classList.remove('app-with-sidebar');
     }
     
-    // Hide the canvas orb on setup-view and feedback-view for cleaner UI
+    // Hide the canvas orb on most legacy views for cleaner UI. Keep it for onboarding and live interview.
     const canvas = document.getElementById('c');
     if (canvas) {
-      canvas.style.display = (targetId === 'setup-view' || targetId === 'feedback-view') ? 'none' : 'block';
+      canvas.style.display = (targetId === 'onboarding' || targetId === 'interview-view') ? 'block' : 'none';
     }
     
     // Update nav active states
     if (showNav && !isEmbedded) updateNavActiveState(targetId);
   }
   
-  // P4.07: Navigation functions
   function navigateTo(page) {
+    const isEmbedded = new URLSearchParams(window.location.search).get('embedded') === '1';
+    
     if (page === 'progress') {
       window.parent.location.href = '/progress';
+      return;
+    }
+    
+    if (page === 'dashboard') {
+      window.location.href = '/dashboard';
       return;
     }
 
@@ -3211,9 +3227,8 @@
       
       console.log("Onboarding profile saved successfully!");
       
-      // Fetch details and load the Dashboard
-      loadDashboard(name, profileData);
-      switchView('dashboard');
+      // Redirect to React Dashboard
+      navigateTo('dashboard');
       
     } catch (e) {
       console.error("Onboarding failed:", e.message);
@@ -3332,7 +3347,7 @@
     try {
       const { data: allSessions, error } = await sb
         .from('sessions')
-        .select('id, interview_type, difficulty, job_role, created_at, completed_at, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score, improvements, strengths))')
+        .select('id, interview_type, difficulty, job_role, created_at, completed_at, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score))')
         .eq('user_id', currentUser.id)
         .eq('status', 'completed')
         .order('created_at', { ascending: false });
@@ -3704,7 +3719,7 @@
       // Pull last 3 completed sessions with feedback
       const { data: recentSessions } = await sb
         .from('sessions')
-        .select('id, interview_type, answers(feedback(overall_score, strengths, improvements))')
+        .select('id, interview_type, answers(feedback(overall_score))')
         .eq('user_id', currentUser.id)
         .eq('status', 'completed')
         .order('created_at', { ascending: false })
@@ -5100,220 +5115,10 @@ SESSION CONTEXT:
   
   async function displayFeedbackReport() {
     document.getElementById('feedback-loading').style.display = 'none';
-    const fView = document.getElementById('feedback-view');
-    fView.style.display = 'block';
-    
-    // Fetch all feedback data
-    // Bypass DB query which is blocked by RLS, use memory state instead
-    const answersData = activeSession.messages
-      .filter(m => m.role === 'candidate' && m.answerId)
-      .map(m => ({
-        id: m.answerId,
-        custom_question_text: m.questionText,
-        answer_text: m.answerText
-      }));
-
-    if (!answersData || answersData.length === 0) {
-       alert("No feedback was generated because no questions were answered.");
-       return;
-    }
-
-    const answerIds = answersData.map(a => a.id);
-    const { data: feedbackData } = await sb.from('feedback').select('*').in('answer_id', answerIds);
-    
-    if (!feedbackData || feedbackData.length === 0) {
-       alert("No feedback was generated.");
-       return;
-    }
-    
-    // Calculate Overall Averages
-    let sumO = 0, sumC = 0, sumD = 0, sumS = 0;
-    feedbackData.forEach(f => {
-      sumO += f.overall_score;
-      sumC += f.clarity_score;
-      sumD += f.depth_score;
-      sumS += f.structure_score;
-    });
-    const len = feedbackData.length;
-    
-    document.getElementById('fb-overall').textContent = (sumO / len).toFixed(1);
-    document.getElementById('fb-clarity').textContent = (sumC / len).toFixed(1);
-    document.getElementById('fb-depth').textContent = (sumD / len).toFixed(1);
-    document.getElementById('fb-structure').textContent = (sumS / len).toFixed(1);
-    
-    // Chips
-    const dateStr = new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    document.getElementById('fb-chip-type').textContent = setupState.type.toUpperCase();
-    document.getElementById('fb-chip-diff').textContent = setupState.difficulty.toUpperCase();
-    document.getElementById('fb-chip-date').textContent = dateStr;
-    
-    // Difficulty Progression
-    const { data: sessionData } = await sb.from('sessions').select('difficulty_history').eq('id', activeSession.id).single();
-    if (sessionData && sessionData.difficulty_history && sessionData.difficulty_history.length > 0) {
-      const histContainer = document.getElementById('fb-difficulty-history');
-      histContainer.innerHTML = '';
-      sessionData.difficulty_history.forEach((diff, idx) => {
-        let color = '#4ade80'; // easy (green)
-        let bg = 'rgba(74, 222, 128, 0.2)';
-        if (diff === 'medium') { color = '#4fc3f7'; bg = 'rgba(79, 195, 247, 0.2)'; }
-        if (diff === 'hard') { color = '#f59e0b'; bg = 'rgba(245, 158, 11, 0.2)'; }
-        
-        histContainer.innerHTML += `<span style="background: ${bg}; color: ${color}; padding: 4px 10px; border-radius: 12px; font-size: 11px; font-weight: bold; text-transform: uppercase; border: 1px solid ${color}44;">${diff}</span>`;
-        if (idx < sessionData.difficulty_history.length - 1) {
-          histContainer.innerHTML += `<i class="fa-solid fa-arrow-right" style="color: var(--text-secondary); font-size: 10px;"></i>`;
-        }
-      });
-    }
-    
-    // Pull Strengths & Weaknesses from Progress table
-    const { data: prog } = await sb.from('progress').select('*').eq('user_id', currentUser.id).single();
-    if (prog) {
-      const sList = document.getElementById('fb-strengths-list');
-      const wList = document.getElementById('fb-improvements-list');
-      sList.innerHTML = ''; wList.innerHTML = '';
-      
-      (prog.strong_areas || []).forEach(s => sList.innerHTML += `<li>${s}</li>`);
-      (prog.weak_areas || []).forEach(w => wList.innerHTML += `<li>${w}</li>`);
-    }
-    
-    // Question Breakdown
-    const container = document.getElementById('fb-questions-container');
-    container.innerHTML = '';
-    
-    const renderPaceBadge = (fb) => {
-      if (!fb.words_per_minute) return '';
-      let color = fb.pace_rating === 'normal' ? '#4ade80' : (fb.pace_rating === 'fast' || fb.pace_rating === 'slow' ? '#f59e0b' : '#ef4444');
-      return `<div style="background: ${color}22; border: 1px solid ${color}44; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px;">
-        <span style="font-size: 11px; color: ${color}; font-weight: bold; text-transform: uppercase;">Speaking Pace</span>
-        <span style="font-size: 14px; color: white;">${fb.words_per_minute} wpm</span>
-      </div>`;
-    };
-
-    const renderEyeContactBadge = (fb) => {
-      if (fb.eye_contact_rating === 'not_measured') return '';
-      let color = fb.eye_contact_rating === 'strong' ? '#4ade80' : (fb.eye_contact_rating === 'moderate' ? '#f59e0b' : '#ef4444');
-      let tip = fb.eye_contact_rating === 'weak' ? `<div style="font-size: 10px; color: ${color}; margin-top: 4px; max-width: 140px;">Tip: Look directly at the camera.</div>` : '';
-      return `<div style="background: ${color}22; border: 1px solid ${color}44; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px;">
-        <span style="font-size: 11px; color: ${color}; font-weight: bold; text-transform: uppercase;">Eye Contact</span>
-        <span style="font-size: 14px; color: white;">${fb.eye_contact_percent}%</span>
-        ${tip}
-      </div>`;
-    };
-
-    const renderFillerBadge = (fb) => {
-      if (fb.filler_word_count === undefined) return '';
-      if (fb.filler_word_count === 0) {
-        return `<div style="background: #4ade8022; border: 1px solid #4ade8044; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; justify-content: center;">
-          <span style="font-size: 12px; color: #4ade80; font-weight: bold;">No filler words detected ✓</span>
-        </div>`;
-      }
-      const foundStr = fb.filler_words_found && fb.filler_words_found.length > 0 ? fb.filler_words_found.join(', ') : '';
-      return `<div style="background: #f59e0b22; border: 1px solid #f59e0b44; padding: 8px 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 4px;">
-        <span style="font-size: 11px; color: #f59e0b; font-weight: bold; text-transform: uppercase;">Filler Words: ${fb.filler_word_count}</span>
-        <span style="font-size: 12px; color: rgba(255,255,255,0.8); max-width: 200px; line-height: 1.4;">${foundStr}</span>
-      </div>`;
-    };
-
-    answersData.forEach((ans, i) => {
-      const fb = feedbackData.find(f => f.answer_id === ans.id);
-      if(!fb) return;
-      
-      // Color coding
-      let bColor = '#ef4444'; // red
-      if (fb.overall_score >= 8) bColor = '#4ade80'; // green
-      else if (fb.overall_score >= 5) bColor = '#fbbf24'; // amber
-      
-      const qTextShort = ans.question_text ? ans.question_text.substring(0, 60) + '...' : 'Custom Question...';
-      
-      const card = document.createElement('div');
-      card.className = 'q-breakdown-card';
-      card.innerHTML = `
-        <div class="q-header" onclick="this.nextElementSibling.classList.toggle('open')">
-          <div style="display: flex; align-items: center; gap: 16px;">
-            <div style="background: rgba(255,255,255,0.1); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold;">${i+1}</div>
-            <div style="font-weight: 600; color: var(--text-primary);">${qTextShort}</div>
-          </div>
-          <div style="background: ${bColor}22; color: ${bColor}; padding: 4px 12px; border-radius: 100px; font-weight: 700;">${fb.overall_score.toFixed(1)}</div>
-        </div>
-        <div class="q-content">
-          <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Your Answer</p>
-          <div style="background: rgba(0,0,0,0.2); padding: 16px; border-radius: 8px; color: white; margin-bottom: 24px;">
-            <div style="font-style: italic; margin-bottom: ${ans.answer_video_url ? '16px' : '0'};">"${ans.answer_text}"</div>
-            ${ans.answer_video_url ? `<video src="${ans.answer_video_url}" controls style="width: 100%; max-width: 480px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); background: #000;"></video>` : ''}
-          </div>
-          
-          <div style="display: flex; gap: 24px; margin-bottom: 24px;">
-            <div style="flex: 1;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Clarity ${fb.clarity_score}/10</div><div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div style="width: ${fb.clarity_score*10}%; height: 100%; background: #4fc3f7; border-radius: 2px;"></div></div></div>
-            <div style="flex: 1;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Depth ${fb.depth_score}/10</div><div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div style="width: ${fb.depth_score*10}%; height: 100%; background: #a78bfa; border-radius: 2px;"></div></div></div>
-            <div style="flex: 1;"><div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Structure ${fb.structure_score}/10</div><div style="height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px;"><div style="width: ${fb.structure_score*10}%; height: 100%; background: #4ade80; border-radius: 2px;"></div></div></div>
-          </div>
-          
-          <p style="color: var(--text-secondary); margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Coach Feedback</p>
-          <p style="color: white; line-height: 1.6;">${fb.feedback_text}</p>
-          
-          <div class="model-answer">
-            <p style="color: #4fc3f7; margin-top: 0; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">How a strong candidate might answer</p>
-            <p style="margin: 0; line-height: 1.6; color: rgba(255,255,255,0.9);">${fb.model_answer}</p>
-          </div>
-          
-          <p style="color: var(--text-secondary); margin-top: 24px; margin-bottom: 8px; font-size: 12px; text-transform: uppercase; font-weight: bold;">Delivery & Pacing</p>
-          <div style="display: flex; gap: 16px; flex-wrap: wrap;">
-            ${renderPaceBadge(fb)}
-            ${renderEyeContactBadge(fb)}
-            ${renderFillerBadge(fb)}
-          </div>
-        </div>
-      `;
-      container.appendChild(card);
-    });
-
-    // Aggregate company_fit
-    const companyFitMap = {};
-    if (activeCompanyProfile && activeCompanyProfile.key_values) {
-      activeCompanyProfile.key_values.forEach(kv => companyFitMap[kv.toLowerCase()] = false);
-    }
-    
-    feedbackData.forEach(f => {
-      if (f.company_fit) {
-        Object.keys(f.company_fit).forEach(key => {
-          const lowerKey = key.toLowerCase();
-          if (f.company_fit[key] === true || f.company_fit[key] === "true") {
-             companyFitMap[lowerKey] = true;
-          }
-        });
-      }
-    });
-
-    const fitListContainer = document.getElementById('fb-company-fit-list');
-    if (fitListContainer) {
-      fitListContainer.innerHTML = '';
-      const allKeys = Object.keys(companyFitMap);
-      
-      if (allKeys.length > 0 && activeCompanyProfile) {
-        document.getElementById('fb-company-fit-name').textContent = `(${activeCompanyProfile.company_name})`;
-        document.getElementById('fb-company-tip').innerHTML = activeCompanyProfile.tip_for_candidate || "Keep these values in mind during all interviews.";
-        
-        allKeys.forEach(key => {
-          const demonstrated = companyFitMap[key];
-          const icon = demonstrated ? '<i class="fa-solid fa-check" style="color: #4ade80;"></i>' : '<i class="fa-solid fa-xmark" style="color: #ef4444;"></i>';
-          const textColor = demonstrated ? 'rgba(255,255,255,0.9)' : 'var(--text-secondary)';
-          const bg = demonstrated ? 'rgba(74, 222, 128, 0.1)' : 'rgba(255,255,255,0.05)';
-          const badgeText = demonstrated ? '<span style="font-size: 10px; color: #4ade80; background: rgba(74,222,128,0.2); padding: 2px 8px; border-radius: 12px; font-weight: bold; text-transform: uppercase;">Demonstrated</span>' : '<span style="font-size: 10px; color: #ef4444; background: rgba(239,68,68,0.2); padding: 2px 8px; border-radius: 12px; font-weight: bold; text-transform: uppercase;">Missing</span>';
-          
-          fitListContainer.innerHTML += `
-            <div style="display: flex; align-items: center; justify-content: space-between; background: ${bg}; padding: 12px 16px; border-radius: 8px;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                ${icon}
-                <span style="color: ${textColor}; font-weight: 500; text-transform: capitalize;">${key}</span>
-              </div>
-              ${badgeText}
-            </div>
-          `;
-        });
-      } else {
-        document.getElementById('fb-company-fit-name').textContent = '';
-        fitListContainer.innerHTML = '<div style="color: var(--text-secondary); font-style: italic;">No specific company values tracked for this session.</div>';
-      }
+    if (window.parent !== window) {
+      window.parent.location.href = '/replay/' + activeSession.id;
+    } else {
+      window.location.href = '/replay/' + activeSession.id;
     }
   }
 
@@ -5514,7 +5319,11 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     const body = {
       system_instruction: { parts: [{ text: systemPrompt }] },
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-      generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+      generationConfig: { 
+        temperature: 0.3, 
+        maxOutputTokens: 1024,
+        responseMimeType: "application/json"
+      }
     };
     
     let lastError = null;
@@ -5751,7 +5560,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
 
     const { error } = await sb
       .from('sessions')
-      .update({ status: 'completed' })
+      .update({ status: 'completed', completed_at: new Date().toISOString() })
       .eq('id', activeSession.id);
 
     if (error) {
@@ -6096,80 +5905,11 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
   let currentReplayIndex = 0;
 
   async function loadReplayView(sessionId) {
-    switchView('replay-view');
-    document.getElementById('replay-video-loader').style.display = 'flex';
-    document.getElementById('replay-tabs').innerHTML = '';
-    
-    // Fetch session data
-    const { data: sessionData, error } = await sb
-      .from('sessions')
-      .select('*, answers(*, feedback(*))')
-      .eq('id', sessionId)
-      .single();
-      
-    if (error || !sessionData) {
-      console.error("Failed to load replay session", error);
-      return;
+    if (window.parent !== window) {
+      window.parent.location.href = '/replay/' + sessionId;
+    } else {
+      window.location.href = '/replay/' + sessionId;
     }
-    
-    // Sort answers by created_at (assuming we have one or use id fallback)
-    const answers = sessionData.answers.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    
-    // Refresh signed URLs for all answers that have a video
-    for (let i = 0; i < answers.length; i++) {
-      const ans = answers[i];
-      if (ans.answer_video_url) {
-        try {
-          const urlObj = new URL(ans.answer_video_url);
-          const pathSegments = urlObj.pathname.split('interview-videos/');
-          if (pathSegments.length > 1) {
-            const filePath = pathSegments[1];
-            const { data: newUrlData } = await sb.storage.from('interview-videos').createSignedUrl(filePath, 604800);
-            if (newUrlData && newUrlData.signedUrl) {
-              ans.fresh_video_url = newUrlData.signedUrl;
-            } else {
-              ans.fresh_video_url = null;
-            }
-          }
-        } catch (e) {
-          console.error("Error refreshing URL", e);
-          ans.fresh_video_url = null;
-        }
-      }
-    }
-    
-    currentReplayData = {
-      session: sessionData,
-      answers: answers
-    };
-    
-    // Populate header
-    let company = sessionData.target_company || 'General';
-    const dateObj = new Date(sessionData.created_at);
-    const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-    
-    document.getElementById('replay-header-info').innerHTML = `
-      <span><i class="fa-solid fa-building" style="margin-right: 6px;"></i>${company}</span>
-      <span>•</span>
-      <span style="text-transform: uppercase;">${sessionData.interview_type}</span>
-      <span>•</span>
-      <span>${dateStr}</span>
-    `;
-    
-    // Build tabs
-    const tabsContainer = document.getElementById('replay-tabs');
-    tabsContainer.innerHTML = '';
-    for (let i = 0; i < answers.length; i++) {
-      const btn = document.createElement('button');
-      btn.className = 'btn btn-secondary';
-      btn.style.padding = '8px 16px';
-      btn.textContent = `Q${i + 1}`;
-      btn.onclick = () => renderReplayQuestion(i);
-      tabsContainer.appendChild(btn);
-    }
-    
-    // Load first question
-    renderReplayQuestion(0);
   }
 
   function renderReplayQuestion(index) {
