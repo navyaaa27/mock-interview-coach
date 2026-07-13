@@ -1,37 +1,71 @@
 # Mock Interview Coach
 
-An AI-powered, browser-based mock interview platform that simulates realistic technical and behavioral interviews using real-time video, audio, and generative AI feedback.
+> **AI-powered mock interviews** — face-to-face with a voice AI interviewer, scored by Gemini 2.5 Flash, transcribed by Deepgram, and spoken by ElevenLabs.
+
+A browser-based interview simulator that puts you in a realistic interview with an AI interviewer named Alex. You answer out loud, Alex scores every answer using the **Gemini 2.5 Flash API**, and you get detailed feedback on Clarity, Depth, and Structure — plus a model answer for every question.
+
+---
+
+## AI Stack
+
+| What | Which AI | Used for |
+|---|---|---|
+| Answer scoring & feedback | **Google Gemini 2.5 Flash** | Scores each answer 1–10 across Clarity, Depth, and Structure. Returns strengths, improvements, and a model answer. |
+| Interviewer voice | **ElevenLabs TTS** | Speaks questions out loud in a realistic voice so it feels like a real interview. |
+| Your speech → text | **Deepgram** | Real-time transcription of your verbal answers during the session. |
+| Study plan generation | **Claude API (Anthropic)** | Generates a personalised week-by-week study plan targeting your weak areas. |
+| Eye contact tracking | **MediaPipe Face Mesh** | Detects face landmarks to calculate your eye contact % during video interviews. |
+
+---
 
 ## Features
 
-- **Interactive AI Interviewer (Alex)**: Ask questions, listen to your answers, and adapt the difficulty on the fly.
-- **Interview Readiness Score**: A dynamically calculated 0-100 score indicating your overall preparedness based on 6 core signals, displayed natively across both the dashboard and progress views.
-- **AI-Powered Study Plan**: Generates a week-by-week personalized practice schedule using the Claude API, specifically tailored to target your weak areas.
-- **Progress & Analytics Hub**: A dedicated React-based hub featuring visual trend charts (Recharts) to track your delivery, weak areas, and score trajectories.
-- **Real-time Video & Audio**: Uses MediaDevices API and local MediaRecorder to capture and upload your interview responses.
-- **Comprehensive Feedback**: Provides detailed scores on Clarity, Depth, and Structure. Analyzes delivery metrics like Words Per Minute (WPM), Filler Words, and Eye Contact percentage.
-- **Session History & Analytics**: Tracks your interview performance over time with visual trend charts.
-- **Video Replay**: Re-watch your interview answers side-by-side with AI coaching feedback and model answers to learn exactly where you can improve.
-- **Company Profiles**: Interviews dynamically adapt to the style of top tech companies (e.g., Google, Amazon, Stripe).
+- **AI Interviewer (Alex)** — asks questions, adapts difficulty, and responds to your answers in real time
+- **Per-answer AI Scoring** — Gemini scores every answer on Clarity, Depth, and Structure with specific, actionable feedback
+- **Model Answers** — see exactly how a strong candidate would have answered each question
+- **Company Profiles** — interviews adapt to the style of Google, Amazon, Stripe, and other top companies
+- **Interview Readiness Score** — a 0–100 score across 6 signals shown on the dashboard
+- **AI Study Plan** — Claude generates a personalised week-by-week practice schedule based on your weak areas
+- **Video Replay** — re-watch your answers side-by-side with AI coaching notes
+- **Progress Analytics** — trend charts for score, delivery (WPM, filler words, eye contact %), and weak areas
+
+---
 
 ## Tech Stack
 
-- **Frontend Architecture**: Hybrid approach combining a legacy Vanilla HTML/JS app (Dashboard & Session Engine) with a modern **React & Vite** integration for rich analytics and study planning.
-- **Styling**: Custom CSS with glassmorphism, dynamic animations, and responsive design.
-- **Data Visualization**: Recharts (React) and Chart.js (Legacy) for interactive data displays.
-- **Backend & Database**: [Supabase](https://supabase.com/) (PostgreSQL, Auth, and Storage).
-- **AI Integrations**: Gemini / Claude (for study plans and feedback), ElevenLabs (for voice), and Deepgram (for speech-to-text).
-- **Video Processing**: MediaPipe Face Mesh for eye contact tracking.
+- **Frontend**: Hybrid React + Vite (analytics, dashboard) + Vanilla JS (interview session engine)
+- **Database & Auth**: [Supabase](https://supabase.com/) (PostgreSQL + RLS + Storage)
+- **Charts**: Recharts (React) · Chart.js (legacy)
+- **AI APIs**: Gemini 2.5 Flash · ElevenLabs · Deepgram · Claude
+- **Computer Vision**: MediaPipe Face Mesh
 
-## Setup Instructions
+---
 
-1. Clone this repository.
-2. Ensure you have a Supabase project set up.
-3. Configure your local Supabase database with the required SQL schemas.
-4. Add your API keys (`VITE_CLAUDE_API_KEY`, Gemini, Deepgram, etc.) to a `.env` file.
-5. Run `npm install` to install dependencies.
-6. Run `npm run dev` to start the Vite development server.
+## Setup
 
-## Security & Privacy
+```bash
+git clone https://github.com/navyaaa27/mock-interview-coach.git
+cd mock-interview-coach
+npm install
+```
 
-We strongly advise **against** committing `.env` files or any sensitive backend API keys to this repository. The `anonKey` included in the frontend is a Supabase public publishable key, which is safe for client-side use assuming proper Row Level Security (RLS) policies are active on the database.
+Create a `.env` file at the root:
+
+```env
+VITE_SUPABASE_URL=your_supabase_url
+VITE_SUPABASE_ANON_KEY=your_supabase_anon_key
+VITE_GEMINI_API_KEY=your_gemini_api_key
+VITE_ELEVENLABS_API_KEY=your_elevenlabs_key
+VITE_DEEPGRAM_API_KEY=your_deepgram_key
+VITE_CLAUDE_API_KEY=your_claude_key
+```
+
+```bash
+npm run dev
+```
+
+---
+
+## Security
+
+Never commit `.env`. The Supabase `anonKey` in the frontend is safe for client-side use **only if** proper Row Level Security (RLS) policies are active on your database.
