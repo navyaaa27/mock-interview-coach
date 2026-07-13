@@ -100,79 +100,51 @@ export default function ProgressPage() {
   
   if (!data?.sessionChartData?.length || data.sessionChartData.length < 3) {
     return (
-      <div>
-        <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-            <button
-              onClick={() => navigate('/dashboard')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                background: 'rgba(255,255,255,0.08)',
-                border: '1px solid rgba(255,255,255,0.15)',
-                color: '#fff', padding: '8px 16px', borderRadius: '10px',
-                fontSize: '14px', fontWeight: '500', cursor: 'pointer',
-                transition: 'all 0.2s ease', backdropFilter: 'blur(8px)'
-              }}
-              onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-              onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-            >
-              <i className="fa-solid fa-arrow-left" style={{ fontSize: '12px' }}></i> Back
-            </button>
-            <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff', margin: 0 }}>Progress Analytics</h1>
-          </div>
+      <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1400px', margin: '0 auto' }}>
+        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', alignItems: 'start' }}>
           <ReadinessScore />
+          <div style={{ background: '#111', padding: '2rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+            <EmptyState
+              message="Three sessions in and the pattern starts to show. You're not there yet."
+            />
+          </div>
         </div>
-        <EmptyState
-          message="Three sessions in and the pattern starts to show. You're not there yet."
-        />
       </div>
     );
   }
 
   return (
-    <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
-        <button
-          onClick={() => navigate('/dashboard')}
-          style={{
-            display: 'flex', alignItems: 'center', gap: '8px',
-            background: 'rgba(255,255,255,0.08)',
-            border: '1px solid rgba(255,255,255,0.15)',
-            color: '#fff', padding: '8px 16px', borderRadius: '10px',
-            fontSize: '14px', fontWeight: '500', cursor: 'pointer',
-            transition: 'all 0.2s ease', backdropFilter: 'blur(8px)'
-          }}
-          onMouseOver={e => e.currentTarget.style.background = 'rgba(255,255,255,0.15)'}
-          onMouseOut={e => e.currentTarget.style.background = 'rgba(255,255,255,0.08)'}
-        >
-          <i className="fa-solid fa-arrow-left" style={{ fontSize: '12px' }}></i> Back
-        </button>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: 0 }}>Progress Analytics</h1>
-      </div>
+    <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1400px', margin: '0 auto' }}>
+      <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
       
-      <ReadinessScore />
+      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem', marginBottom: '2rem', alignItems: 'start' }}>
+        {/* Left Column */}
+        <div>
+          <ReadinessScore />
+          <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px', marginTop: '-1rem' }}>
+            <TypeBreakdownChart data={data.typeData} />
+          </div>
+        </div>
 
-      {/* Row 1: Full width */}
-      <div style={{ marginBottom: '2rem', background: '#111', padding: '1.5rem', borderRadius: '12px' }}>
-        <ScoreTrendChart data={data.sessionChartData} />
+        {/* Right Column */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+          <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
+            <ScoreTrendChart data={data.sessionChartData} />
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
+            <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
+              <SkillRadarChart data={data.sessionChartData} />
+            </div>
+            <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
+              <WeakAreaChart data={data.weakAreaData} />
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Row 2: 50% / 50% */}
-      <div style={{ display: 'flex', gap: '2rem', marginBottom: '2rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 45%', background: '#111', padding: '1.5rem', borderRadius: '12px' }}>
-          <SkillRadarChart data={data.sessionChartData} />
-        </div>
-        <div style={{ flex: '1 1 45%', background: '#111', padding: '1.5rem', borderRadius: '12px' }}>
-          <TypeBreakdownChart data={data.typeData} />
-        </div>
-      </div>
-
-      {/* Row 3: 50% / 50% */}
-      <div style={{ display: 'flex', gap: '2rem', flexWrap: 'wrap' }}>
-        <div style={{ flex: '1 1 45%', background: '#111', padding: '1.5rem', borderRadius: '12px' }}>
-          <WeakAreaChart data={data.weakAreaData} />
-        </div>
-        <div style={{ flex: '1 1 45%', background: '#111', padding: '1.5rem', borderRadius: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
+        <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
           <DeliveryTrendChart data={data.sessionChartData} />
         </div>
       </div>
