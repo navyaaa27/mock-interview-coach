@@ -8,6 +8,7 @@ const SessionPage = lazy(() => import('./pages/SessionPage'))
 const ProgressPage = lazy(() => import('./pages/ProgressPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const ReplayPage = lazy(() => import('./pages/ReplayPage'))
+const OnboardingPage = lazy(() => import('./pages/OnboardingPage'))
 const AppLayout = lazy(() => import('./components/AppLayout/AppLayout'))
 
 function PageSkeleton() {
@@ -34,6 +35,22 @@ function RedirectIfAuth({ children }) {
   return children
 }
 
+// Redirect logged-in users without a profile to /onboarding
+function RequireProfile({ children }) {
+  const { currentUser, profile } = useAuth()
+  if (!currentUser) return <Navigate to="/login" replace />
+  if (profile === null) return <Navigate to="/onboarding" replace />
+  return children
+}
+
+// Onboarding is only for logged-in users who have NOT completed setup
+function OnboardingGuard({ children }) {
+  const { currentUser, profile } = useAuth()
+  if (!currentUser) return <Navigate to="/login" replace />
+  if (profile)      return <Navigate to="/dashboard" replace />
+  return children
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -41,15 +58,18 @@ function AppRoutes() {
       <Route path="/login" element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
       <Route path="/signup" element={<RedirectIfAuth><SignupPage /></RedirectIfAuth>} />
 
+      {/* Onboarding — standalone, no AppLayout sidebar */}
+      <Route path="/onboarding" element={<OnboardingGuard><OnboardingPage /></OnboardingGuard>} />
+
       {/* New React Pages */}
       <Route 
         path="/progress" 
         element={
-          <RequireAuth>
+          <RequireProfile>
             <AppLayout>
               <ProgressPage />
             </AppLayout>
-          </RequireAuth>
+          </RequireProfile>
         } 
       />
 
@@ -57,11 +77,11 @@ function AppRoutes() {
       <Route
         path="/dashboard"
         element={
-          <RequireAuth>
+          <RequireProfile>
             <AppLayout>
               <DashboardPage />
             </AppLayout>
-          </RequireAuth>
+          </RequireProfile>
         }
       />
       
@@ -69,11 +89,11 @@ function AppRoutes() {
       <Route
         path="/replay/:sessionId"
         element={
-          <RequireAuth>
+          <RequireProfile>
             <AppLayout>
               <ReplayPage />
             </AppLayout>
-          </RequireAuth>
+          </RequireProfile>
         }
       />
 
