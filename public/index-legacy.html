@@ -5313,7 +5313,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     constructor(msg) { super(msg); this.name = 'RateLimitError'; this.isRateLimit = true; }
   }
 
-  async function callGeminiAPI(systemPrompt, userMessage) {
+  async function callGeminiAPI(systemPrompt, userMessage, isJson = false) {
     if (!AI_CONFIG.geminiApiKey) {
       console.error("Gemini API key is required for feedback. Please add VITE_GEMINI_API_KEY to your .env file.");
       throw new Error("Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.");
@@ -5324,10 +5324,13 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
       contents: [{ role: 'user', parts: [{ text: userMessage }] }],
       generationConfig: { 
         temperature: 0.3, 
-        maxOutputTokens: 1024,
-        responseMimeType: "application/json"
+        maxOutputTokens: 1024
       }
     };
+    
+    if (isJson) {
+      body.generationConfig.responseMimeType = "application/json";
+    }
     
     let lastError = null;
     for (let attempt = 1; attempt <= 3; attempt++) {
@@ -5395,7 +5398,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
     };
     
     try {
-      const rawResponse = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, userMessage);
+      const rawResponse = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, userMessage, true);
       feedbackData = parseFeedback(rawResponse);
     } catch (firstErr) {
       if (firstErr.isRateLimit) {
@@ -5407,7 +5410,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
         console.warn(`  First parse failed for answer ${answerId}:`, firstErr.message);
         try {
           const retryMessage = `You must respond with ONLY a valid JSON object. No markdown. No explanation. Start your response with { and end with }. Here is the answer to evaluate:\n\n${userMessage}`;
-          const rawRetry = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, retryMessage);
+          const rawRetry = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, retryMessage, true);
           feedbackData = parseFeedback(rawRetry);
         } catch (retryErr) {
           if (retryErr.isRateLimit) {
