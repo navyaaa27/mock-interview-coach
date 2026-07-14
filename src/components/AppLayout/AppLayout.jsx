@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import './AppLayout.css';
 
@@ -65,16 +65,14 @@ export default function AppLayout({ children }) {
         
         <div className="sidebar-nav">
           {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-              
             return (
-              <button 
+              <NavLink 
                 key={item.label}
-                className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => navigate(item.path)}
+                to={item.path}
+                className={({ isActive }) => `sidebar-nav-item ${isActive ? 'active' : ''}`}
               >
                 <i className={item.icon}></i> {item.label}
-              </button>
+              </NavLink>
             );
           })}
         </div>
@@ -82,7 +80,7 @@ export default function AppLayout({ children }) {
         <div className="sidebar-bottom" style={{ position: 'relative' }}>
           {dropdownOpen && (
             <div className="avatar-dropdown" ref={dropdownRef} style={{ display: 'block' }}>
-              <button className="avatar-dropdown-item" onClick={() => window.location.href = '/?profile=1'}>
+              <button className="avatar-dropdown-item" onClick={() => { setDropdownOpen(false); navigate('/profile'); }}>
                 <i className="fa-solid fa-user-gear"></i> Profile Settings
               </button>
               <button className="avatar-dropdown-item danger" onClick={handleSignOut}>

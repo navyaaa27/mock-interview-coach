@@ -122,9 +122,9 @@ function AppRoutes() {
         }
       />
 
-      {/* Legacy App Wrapper — session, interview, setup etc. */}
+      {/* Legacy App Wrapper — interview engine */}
       <Route 
-        path="*" 
+        path="/session" 
         element={
           <RequireAuth>
             <AppLayout>
@@ -133,6 +133,9 @@ function AppRoutes() {
           </RequireAuth>
         } 
       />
+
+      {/* Catch-all redirects to dashboard if logged in, or login if not */}
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
 }

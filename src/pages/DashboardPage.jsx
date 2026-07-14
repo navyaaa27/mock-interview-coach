@@ -119,13 +119,13 @@ export default function DashboardPage() {
   }, [signOut, navigate]);
 
   const handleStartInterview = useCallback(() => {
-    // Navigate to the legacy session setup — stays as-is per the port spec
-    window.location.href = `/?type=${selectedType}#setup`;
-  }, [selectedType]);
+    // Navigate to the legacy session setup cleanly via React Router
+    navigate(`/session?type=${selectedType}#setup`);
+  }, [selectedType, navigate]);
 
   const handleQuickStart = useCallback((type) => {
-    window.location.href = `/?type=${type}#setup`;
-  }, []);
+    navigate(`/session?type=${type}#setup`);
+  }, [navigate]);
 
   // User identifiers
   const fullName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
