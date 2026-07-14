@@ -19,7 +19,7 @@ export function useHistoryData(userId) {
     try {
       const [sessionsRes, profileRes] = await Promise.all([
         supabase.from('sessions')
-          .select('id, interview_type, difficulty, job_role, target_company, created_at, completed_at, difficulty_history, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score))')
+          .select('*, answers(id, feedback(overall_score, clarity_score, depth_score, structure_score))')
           .eq('user_id', userId)
           .eq('status', 'completed')
           .order('created_at', { ascending: false }),
