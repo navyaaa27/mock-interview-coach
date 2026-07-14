@@ -4729,6 +4729,14 @@ SESSION CONTEXT:
       console.error("Deepgram WS error:", err);
       onTranscript(null, false, true);
     };
+    
+    socket.onclose = (event) => {
+      // 1000 is normal closure. If closed for other reasons (e.g., 400x for invalid auth or balance), fallback
+      if (event.code !== 1000) {
+        console.warn("Deepgram WS closed unexpectedly with code", event.code, event.reason);
+        onTranscript(null, false, true);
+      }
+    };
 
     return {
       stop: () => {
