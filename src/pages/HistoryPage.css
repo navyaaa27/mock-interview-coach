@@ -1,0 +1,256 @@
+/* ── HistoryPage.css ─────────────────────────────────────────────────────────
+   All values reference design tokens from tokens.css.
+   ─────────────────────────────────────────────────────────────────────────── */
+
+.hist-page {
+  min-height: 100vh;
+  background: var(--bg-app);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  padding: 32px 32px 80px;
+  box-sizing: border-box;
+}
+
+.hist-heading {
+  font-family: var(--font-display);
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0 0 28px;
+}
+
+/* ── Section 1: Summary stats ──────────────────────────────────────────── */
+.hist-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.hist-stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: 18px 16px;
+  text-align: center;
+}
+
+.hist-stat-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.hist-stat-value {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+/* ── Section 2: Filter bar ─────────────────────────────────────────────── */
+.hist-filter-row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+}
+
+.hist-select {
+  appearance: none;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-small);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  padding: 10px 32px 10px 14px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color 0.2s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23666' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 5.5l6.5 6.5 6.5-6.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  min-width: 140px;
+}
+.hist-select:focus { border-color: #a78bfa; }
+
+/* ── Section 3: Session cards ──────────────────────────────────────────── */
+.hist-session-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 32px;
+}
+
+.hist-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  transition: border-color 0.15s;
+}
+.hist-card:hover { border-color: #222; }
+
+/* Left column */
+.hist-card-left {
+  min-width: 140px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  border-right: 1px solid var(--border-hairline);
+  padding-right: 16px;
+}
+.hist-card-date {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+.hist-card-dur {
+  font-size: 12px;
+  color: var(--text-tertiary);
+}
+.hist-chip-row {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.hist-chip {
+  padding: 2px 8px;
+  border-radius: 12px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Centre column */
+.hist-card-centre {
+  flex: 1;
+  min-width: 0;
+}
+.hist-card-company {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hist-card-role {
+  font-size: 13px;
+  color: var(--accent-blue);
+  margin-bottom: 6px;
+}
+.hist-sub-scores {
+  display: flex;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.hist-sub-scores strong { color: var(--text-primary); }
+
+/* Score ring */
+.hist-card-score {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  border: 3px solid color-mix(in srgb, var(--ring) 35%, transparent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 17px;
+  font-weight: 800;
+  color: var(--ring);
+}
+
+/* Right column */
+.hist-card-right {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-end;
+  min-width: 150px;
+  padding-left: 16px;
+  border-left: 1px solid var(--border-hairline);
+}
+
+.hist-btn {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-small);
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 7px 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: border-color 0.15s, color 0.15s;
+}
+.hist-btn:hover { border-color: #333; color: var(--text-primary); }
+.hist-btn.blue { color: var(--accent-blue); border-color: rgba(79,195,247,0.25); }
+.hist-btn.blue:hover { border-color: rgba(79,195,247,0.5); }
+
+.hist-diff-prog {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 2px;
+}
+.hist-chip-tiny {
+  padding: 1px 5px;
+  border-radius: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* No-match message */
+.hist-no-match {
+  color: var(--text-secondary);
+  text-align: center;
+  padding: 24px;
+  font-size: 14px;
+}
+
+/* ── Section 4: Chart wrapper ──────────────────────────────────────────── */
+.hist-chart-wrap {
+  background: var(--bg-card);
+  border: 1px solid var(--border-hairline);
+  border-radius: var(--radius-card);
+  padding: 24px;
+}
+
+/* ── Skeleton ──────────────────────────────────────────────────────────── */
+.hist-skeleton { display: flex; flex-direction: column; gap: 16px; padding: 32px 0; }
+.hist-skel-row  { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.hist-skel-stat { height: 90px; background: #111; border-radius: 12px; animation: pulse 1.8s infinite; }
+.hist-skel-bar  { height: 44px; background: #111; border-radius: 8px;  animation: pulse 1.8s infinite; }
+.hist-skel-card { height: 100px; background: #111; border-radius: 12px; animation: pulse 1.8s infinite; }
+
+/* ── Responsive ────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .hist-card { flex-wrap: wrap; }
+  .hist-card-left { border-right: none; padding-right: 0; min-width: auto; }
+  .hist-card-right { border-left: none; padding-left: 0; flex-direction: row; min-width: auto; width: 100%; }
+  .hist-card-right .hist-btn { flex: 1; }
+}
+@media (max-width: 600px) {
+  .hist-stats-row { grid-template-columns: 1fr 1fr; }
+  .hist-card-score { width: 48px; height: 48px; font-size: 15px; }
+}
