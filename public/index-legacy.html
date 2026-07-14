@@ -5242,11 +5242,10 @@ SESSION CONTEXT:
      PHASE 2 — FEEDBACK ENGINE (Gemini API · Runs after session ends)
      ══════════════════════════════════════════════════════════════════ */
 
-  /* ── AI CONFIGURATION ── */
   const AI_CONFIG = {
     // Gemini API key for feedback generation
     geminiApiKey: new URLSearchParams(window.location.search).get('geminiKey') || localStorage.getItem('geminiApiKey') || '',
-    model: 'gemini-2.5-pro',
+    model: 'gemini-2.5-flash',
     
     // ElevenLabs API key and Voice ID for premium TTS
     elevenLabsApiKey: new URLSearchParams(window.location.search).get('elevenLabsKey') || '', 
