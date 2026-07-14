@@ -2839,8 +2839,11 @@
             window.location.href = '/dashboard';
           }
         } else {
-          console.log("No profile record found! Launching onboarding wizard.");
-          switchView('onboarding');
+          console.log("No profile record found! Redirecting to React /onboarding.");
+          // R.01: Onboarding is now a real React page — redirect there instead.
+          // Legacy switchView('onboarding') is intentionally disconnected.
+          // Do NOT delete the HTML/JS below — kept for rollback if needed.
+          window.location.href = '/onboarding';
         }
       } else {
         console.log("No active session found. Redirecting to Log In screen.");
