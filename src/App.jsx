@@ -10,6 +10,7 @@ const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const ReplayPage = lazy(() => import('./pages/ReplayPage'))
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'))
 const HistoryPage = lazy(() => import('./pages/HistoryPage'))
+const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const AppLayout = lazy(() => import('./components/AppLayout/AppLayout'))
 
 function PageSkeleton() {
@@ -115,7 +116,7 @@ function AppRoutes() {
         element={
           <RequireProfile>
             <AppLayout>
-              <SessionPage view="profile" />
+              <ProfilePage />
             </AppLayout>
           </RequireProfile>
         }
