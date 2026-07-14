@@ -1,11 +1,15 @@
 import React, { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
 
-export default function SessionPage() {
+export default function SessionPage({ view }) {
   const location = useLocation()
   
   // Pass env variables securely to the iframe without exposing them in git
   const searchParams = new URLSearchParams(location.search);
+
+  // If a named view was supplied via props (e.g. from /history route), inject it
+  if (view) searchParams.set('view', view);
+
   if (import.meta.env.VITE_GEMINI_API_KEY && !import.meta.env.VITE_GEMINI_API_KEY.includes('goes_here')) {
     searchParams.set('geminiKey', import.meta.env.VITE_GEMINI_API_KEY);
   }
@@ -37,3 +41,4 @@ export default function SessionPage() {
     </div>
   )
 }
+

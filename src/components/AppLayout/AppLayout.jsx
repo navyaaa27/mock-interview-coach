@@ -40,10 +40,10 @@ export default function AppLayout({ children }) {
   }, [location.pathname]);
 
   const navItems = [
-    { path: '/dashboard', icon: 'fa-solid fa-grip', label: 'Dashboard' },
-    { path: '/?embedded=1&view=history', icon: 'fa-solid fa-clock-rotate-left', label: 'History', isLegacy: true },
-    { path: '/progress', icon: 'fa-solid fa-chart-line', label: 'Progress' },
-    { path: '/?embedded=1&view=profile', icon: 'fa-solid fa-user-gear', label: 'Profile', isLegacy: true },
+    { path: '/dashboard', icon: 'fa-solid fa-grip',              label: 'Dashboard' },
+    { path: '/history',   icon: 'fa-solid fa-clock-rotate-left', label: 'History'   },
+    { path: '/progress',  icon: 'fa-solid fa-chart-line',        label: 'Progress'  },
+    { path: '/profile',   icon: 'fa-solid fa-user-gear',         label: 'Profile'   },
   ];
 
   return (
@@ -65,18 +65,13 @@ export default function AppLayout({ children }) {
         
         <div className="sidebar-nav">
           {navItems.map((item) => {
-            const isActive = item.isLegacy 
-              ? false 
-              : location.pathname === item.path;
+            const isActive = location.pathname === item.path;
               
             return (
               <button 
                 key={item.label}
                 className={`sidebar-nav-item ${isActive ? 'active' : ''}`}
-                onClick={() => {
-                  if (item.isLegacy) window.location.href = item.path;
-                  else navigate(item.path);
-                }}
+                onClick={() => navigate(item.path)}
               >
                 <i className={item.icon}></i> {item.label}
               </button>

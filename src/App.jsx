@@ -97,7 +97,30 @@ function AppRoutes() {
         }
       />
 
-      {/* Legacy App Wrapper (/session, history, replay, setup) */}
+      {/* Legacy views — named routes so the sidebar nav uses navigate() not window.location.href */}
+      <Route
+        path="/history"
+        element={
+          <RequireProfile>
+            <AppLayout>
+              <SessionPage view="history" />
+            </AppLayout>
+          </RequireProfile>
+        }
+      />
+
+      <Route
+        path="/profile"
+        element={
+          <RequireProfile>
+            <AppLayout>
+              <SessionPage view="profile" />
+            </AppLayout>
+          </RequireProfile>
+        }
+      />
+
+      {/* Legacy App Wrapper — session, interview, setup etc. */}
       <Route 
         path="*" 
         element={
