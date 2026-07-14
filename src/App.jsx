@@ -9,6 +9,7 @@ const ProgressPage = lazy(() => import('./pages/ProgressPage'))
 const DashboardPage = lazy(() => import('./pages/DashboardPage'))
 const ReplayPage = lazy(() => import('./pages/ReplayPage'))
 const OnboardingPage = lazy(() => import('./pages/OnboardingPage'))
+const HistoryPage = lazy(() => import('./pages/HistoryPage'))
 const AppLayout = lazy(() => import('./components/AppLayout/AppLayout'))
 
 function PageSkeleton() {
@@ -97,13 +98,13 @@ function AppRoutes() {
         }
       />
 
-      {/* Legacy views — named routes so the sidebar nav uses navigate() not window.location.href */}
+      {/* History — native React page */}
       <Route
         path="/history"
         element={
           <RequireProfile>
             <AppLayout>
-              <SessionPage view="history" />
+              <HistoryPage />
             </AppLayout>
           </RequireProfile>
         }
