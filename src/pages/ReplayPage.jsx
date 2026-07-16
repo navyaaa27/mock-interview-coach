@@ -227,11 +227,10 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
             } else {
               const { error: insErr } = await supabase.from('feedback').insert({ 
                 ...payload, 
-                answer_id: ans.id,
-                user_id: currentUser.id,
-                session_id: sessionData.id
+                answer_id: ans.id
               });
-              if (insErr) alert("DB Insert Error: " + insErr.message);
+              
+              if (insErr) {alert("DB Insert Error: " + insErr.message);}
             }
           } catch (e) {
             console.error("Parse error", e);

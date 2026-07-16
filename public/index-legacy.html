@@ -4318,7 +4318,8 @@ SESSION CONTEXT:
     currentAIQuestionText: '',
     recognition: null,
     isRecording: false,
-    transcript: ''
+    transcript: '',
+    askedQuestionIds: []
   };
 
   // --- Analytics State (P3.05, P3.06) ---
@@ -4681,20 +4682,38 @@ SESSION CONTEXT:
     startTimer();
     document.getElementById('current-question-text').textContent = "Connecting to Alex...";
     
-    // System instruction for the intro
-    const prompt = `The interview has started. Introduce yourself as Alex, say exactly 1-2 sentences of introduction, and then immediately ask the first question for a ${setupState.difficulty}-level ${document.getElementById('dash-role').textContent}. Do not break character.`;
-    
     try {
-      const aiResponse = await callGeminiAPI(activeSession.systemPrompt, prompt);
-      interviewState.currentAIQuestionText = aiResponse;
-      document.getElementById('current-question-text').textContent = aiResponse;
-      interviewState.chatHistory.push({ role: 'user', parts: [{ text: prompt }] });
-      interviewState.chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] });
+      const FALLBACK_QUESTIONS = {
+        behavioral: "Tell me about a challenging project you worked on recently.",
+        technical: "Walk me through how you would approach solving a problem you haven't seen before.",
+        system_design: "How would you design a system to handle a sudden 10x increase in traffic?",
+        hr: "What are you looking for in your next role?"
+      };
+
+      const { data: nextQuestionData, error: nextQErr } = await sb
+        .from('questions')
+        .select('*')
+        .eq('interview_type', activeSession.interviewType)
+        .eq('experience_level', activeSession.currentDifficulty);
+
+      let nextQText = FALLBACK_QUESTIONS[activeSession.interviewType] || "What are your greatest strengths?";
       
-      playAlexSpeech(aiResponse);
+      if (nextQuestionData && !nextQErr && nextQuestionData.length > 0) {
+        const randomQ = nextQuestionData[Math.floor(Math.random() * nextQuestionData.length)];
+        nextQText = randomQ.question_text;
+        interviewState.askedQuestionIds.push(randomQ.id);
+      }
+
+      const introText = `Hi, I'm Alex. Let's get started. ${nextQText}`;
+      
+      interviewState.currentAIQuestionText = nextQText;
+      document.getElementById('current-question-text').textContent = introText;
+      interviewState.chatHistory.push({ role: 'model', parts: [{ text: introText }] });
+      
+      playAlexSpeech(introText);
     } catch (e) {
       console.error(e);
-      document.getElementById('current-question-text').textContent = "AI Error: " + (e.message || "Failed to connect to AI");
+      document.getElementById('current-question-text').textContent = "Error starting interview.";
     }
   }
 
@@ -4935,6 +4954,124 @@ SESSION CONTEXT:
     }
   }
 
+  async function handleAnswerSubmission(answerText) {
+    const qBox = document.getElementById('current-question-text');
+    qBox.textContent = "Alex is processing your answer...";
+    
+    // Update dot
+    document.getElementById(`dot-${interviewState.currentQ}`).classList.add('filled');
+    
+    // Save to DB
+    const answerId = await saveAnswer(interviewState.currentAIQuestionText, answerText);
+    
+    if (answerId) {
+      // Calculate P3.05 & P3.06 delivery metrics
+      const durationSeconds = Math.max(1, Math.round((performance.now() - answerStartTs) / 1000));
+      const wordCount = answerText.split(/\s+/).filter(w => w.length > 0).length;
+      
+      const paceResult = analyzePace(wordCount, durationSeconds);
+      const fillerResult = analyzeFillers(answerText);
+      
+      const eyeContactPercent = totalFrames > 0 ? Math.round((lookingAtCameraFrames / totalFrames) * 100) : 0;
+      let eyeContactRating = 'not_measured';
+      if (!isEyeTrackingDisabled && totalFrames > 0) {
+        if (eyeContactPercent >= 70) eyeContactRating = 'strong';
+        else if (eyeContactPercent >= 45) eyeContactRating = 'moderate';
+        else eyeContactRating = 'weak';
+      }
+
+      deliveryMetricsMap[answerId] = {
+        filler_word_count: fillerResult.count,
+        filler_words_found: fillerResult.found,
+        words_per_minute: paceResult.wpm,
+        answer_duration_seconds: durationSeconds,
+        pace_rating: paceResult.rating,
+        eye_contact_percent: eyeContactPercent,
+        eye_contact_rating: eyeContactRating
+      };
+      
+      stopAndUploadVideo(answerId, interviewState.currentQ);
+      // B1.01: Fire-and-forget background feedback generation
+      sb.functions.invoke('generate-feedback', { body: { answer_id: answerId, metrics: deliveryMetricsMap[answerId] } })
+        .then(res => {
+          if (res.data && res.data.score && interviewState.currentQ <= interviewState.totalQuestions) {
+            // Eventually adaptive difficulty
+            let currentDiff = activeSession.currentDifficulty;
+            let newDiff = currentDiff;
+            if (res.data.score >= 8) {
+              if (currentDiff === 'easy') newDiff = 'medium';
+              else if (currentDiff === 'medium') newDiff = 'hard';
+            } else if (res.data.score <= 4) {
+              if (currentDiff === 'hard') newDiff = 'medium';
+              else if (currentDiff === 'medium') newDiff = 'easy';
+            }
+            activeSession.currentDifficulty = newDiff;
+          }
+        })
+        .catch(err => console.error('Feedback generation failed, will retry via edge function later:', err));
+    }
+    
+    if (interviewState.currentQ >= interviewState.totalQuestions) {
+      qBox.textContent = "Wrapping up...";
+      const closingText = "Thank you for your time. That concludes our interview today. I'm saving your answers and generating your feedback report now.";
+      qBox.textContent = closingText;
+      playAlexSpeech(closingText);
+      
+      setTimeout(async () => {
+        await endInterviewSession('completed');
+      }, 5000);
+    } else {
+      qBox.textContent = "Alex is preparing your next question...";
+      
+      // NEXT Q
+      interviewState.currentQ++;
+      document.getElementById('current-q-num').textContent = interviewState.currentQ;
+      
+      try {
+        const FALLBACK_QUESTIONS = {
+          behavioral: "Tell me about a challenging project you worked on recently.",
+          technical: "Walk me through how you would approach solving a problem you haven't seen before.",
+          system_design: "How would you design a system to handle a sudden 10x increase in traffic?",
+          hr: "What are you looking for in your next role?"
+        };
+
+        let { data: allQuestions, error: qErr } = await sb
+          .from('questions')
+          .select('*')
+          .eq('interview_type', activeSession.interviewType);
+
+        let nextQText = FALLBACK_QUESTIONS[activeSession.interviewType] || "What are your greatest strengths?";
+        
+        if (allQuestions && !qErr && allQuestions.length > 0) {
+          // Filter by difficulty and exclude asked questions
+          let availableQs = allQuestions.filter(q => 
+            q.experience_level === activeSession.currentDifficulty && 
+            !interviewState.askedQuestionIds.includes(q.id)
+          );
+          
+          // Fallback to ANY difficulty if we run out for this specific difficulty
+          if (availableQs.length === 0) {
+            availableQs = allQuestions.filter(q => !interviewState.askedQuestionIds.includes(q.id));
+          }
+
+          if (availableQs.length > 0) {
+            const randomQ = availableQs[Math.floor(Math.random() * availableQs.length)];
+            nextQText = randomQ.question_text;
+            interviewState.askedQuestionIds.push(randomQ.id);
+          }
+        }
+
+        interviewState.currentAIQuestionText = nextQText;
+        qBox.textContent = nextQText;
+        interviewState.chatHistory.push({ role: 'model', parts: [{ text: nextQText }] });
+        playAlexSpeech(nextQText);
+      } catch (e) {
+        console.error(e);
+        qBox.textContent = "Error getting next question.";
+      }
+    }
+  }
+
   async function submitVoiceAnswer() {
     const ans = interviewState.transcript.trim();
     if (!ans) { alert("Recording empty. Please record again."); return; }
@@ -4965,137 +5102,6 @@ SESSION CONTEXT:
       interviewState.isRecording = true; // For eye tracking
     }
   });
-
-  async function handleAnswerSubmission(answerText) {
-    const qBox = document.getElementById('current-question-text');
-    qBox.textContent = "Alex is processing your answer...";
-    
-    // Update dot
-    document.getElementById(`dot-${interviewState.currentQ}`).classList.add('filled');
-    
-    // Save to DB
-    const answerId = await saveAnswer(interviewState.currentAIQuestionText, answerText);
-    
-    if (answerId) {
-      // Calculate P3.05 & P3.06 delivery metrics
-      const durationSeconds = Math.max(1, Math.round((performance.now() - answerStartTs) / 1000));
-      const wordCount = answerText.split(/\\s+/).filter(w => w.length > 0).length;
-      
-      const paceResult = analyzePace(wordCount, durationSeconds);
-      const fillerResult = analyzeFillers(answerText);
-      
-      const eyeContactPercent = totalFrames > 0 ? Math.round((lookingAtCameraFrames / totalFrames) * 100) : 0;
-      let eyeContactRating = 'not_measured';
-      if (!isEyeTrackingDisabled && totalFrames > 0) {
-        if (eyeContactPercent >= 70) eyeContactRating = 'strong';
-        else if (eyeContactPercent >= 45) eyeContactRating = 'moderate';
-        else eyeContactRating = 'weak';
-      }
-
-      deliveryMetricsMap[answerId] = {
-        filler_word_count: fillerResult.count,
-        filler_words_found: fillerResult.found,
-        words_per_minute: paceResult.wpm,
-        answer_duration_seconds: durationSeconds,
-        pace_rating: paceResult.rating,
-        eye_contact_percent: eyeContactPercent,
-        eye_contact_rating: eyeContactRating
-      };
-      
-      stopAndUploadVideo(answerId, interviewState.currentQ);
-    }
-    
-    // Evaluate answer and adjust difficulty
-    let score = null;
-    if (answerId) {
-      qBox.textContent = "Alex is analyzing your answer...";
-      score = await generateSingleAnswerFeedback(answerId, interviewState.currentAIQuestionText, answerText);
-    }
-    
-    if (score !== null && interviewState.currentQ < interviewState.totalQuestions) {
-      let currentDiff = activeSession.currentDifficulty;
-      let newDiff = currentDiff;
-      if (score >= 8) {
-        if (currentDiff === 'easy') newDiff = 'medium';
-        else if (currentDiff === 'medium') newDiff = 'hard';
-      } else if (score <= 4) {
-        if (currentDiff === 'hard') newDiff = 'medium';
-        else if (currentDiff === 'medium') newDiff = 'easy';
-      }
-      
-      if (newDiff !== currentDiff) {
-        activeSession.currentDifficulty = newDiff;
-        activeSession.difficultyHistory.push(newDiff);
-        
-        // Fire-and-forget DB update
-        sb.from('sessions').update({
-          current_difficulty: newDiff,
-          difficulty_history: activeSession.difficultyHistory
-        }).eq('id', activeSession.id).then();
-        
-        // Update prompt
-        activeSession.systemPrompt = buildInterviewerSystemPrompt({
-          candidateName: activeSession.candidateName,
-          jobRole: activeSession.jobRole,
-          experienceLevel: activeSession.experienceLevel,
-          interviewType: activeSession.interviewType,
-          difficulty: activeSession.difficulty,
-          currentDifficulty: newDiff,
-          targetCompany: activeSession.targetCompany,
-          sessionId: activeSession.id
-        });
-        
-        // Update UI chip
-        document.getElementById('int-diff-chip').textContent = newDiff.charAt(0).toUpperCase() + newDiff.slice(1);
-        
-        // Show Badge if difficulty increased
-        if ((currentDiff === 'easy' && newDiff === 'medium') || (currentDiff === 'medium' && newDiff === 'hard')) {
-          const badge = document.getElementById('difficulty-up-badge');
-          if (badge) {
-            badge.style.display = 'block';
-            badge.style.opacity = '1';
-            setTimeout(() => {
-              badge.style.opacity = '0';
-              setTimeout(() => badge.style.display = 'none', 500);
-            }, 3000);
-          }
-        }
-      }
-    }
-    
-    if (interviewState.currentQ >= interviewState.totalQuestions) {
-      // END
-      qBox.textContent = "Wrapping up...";
-      const endPrompt = `Candidate answered: "${answerText}". The session time is up. Give your exact closing line ending the interview. Do not ask any more questions.`;
-      
-      const aiResponse = await callGeminiAPI(activeSession.systemPrompt, endPrompt);
-      qBox.textContent = aiResponse;
-      playAlexSpeech(aiResponse);
-      
-      setTimeout(async () => {
-        await endInterviewSession('completed');
-      }, 5000);
-      
-    } else {
-      // NEXT Q
-      interviewState.currentQ++;
-      document.getElementById('current-q-num').textContent = interviewState.currentQ;
-      
-      const nextPrompt = `Candidate answered: "${answerText}". Acknowledge briefly and ask the next interview question. Keep it professional.`;
-      interviewState.chatHistory.push({ role: 'user', parts: [{ text: nextPrompt }] });
-      
-      try {
-        const aiResponse = await callGeminiAPI(activeSession.systemPrompt, nextPrompt);
-        interviewState.currentAIQuestionText = aiResponse;
-        qBox.textContent = aiResponse;
-        interviewState.chatHistory.push({ role: 'model', parts: [{ text: aiResponse }] });
-        playAlexSpeech(aiResponse);
-      } catch (e) {
-        console.error(e);
-        qBox.textContent = "Error getting next question.";
-      }
-    }
-  }
 
   async function endInterviewEarly() {
     if (confirm("Are you sure? This will end the session early and generate feedback for what you've done so far.")) {
@@ -5251,249 +5257,14 @@ SESSION CONTEXT:
      ══════════════════════════════════════════════════════════════════ */
 
   const AI_CONFIG = {
-    // Gemini API key for feedback generation
-    geminiApiKey: new URLSearchParams(window.location.search).get('geminiKey') || localStorage.getItem('geminiApiKey') || '',
-    model: 'gemini-2.5-flash',
-    
     // ElevenLabs API key and Voice ID for premium TTS
     elevenLabsApiKey: new URLSearchParams(window.location.search).get('elevenLabsKey') || '', 
     elevenLabsVoiceId: 'SXuKWBhKoIoAHKlf6Gt3',
     
     // Deepgram API key for real-time transcription
-    deepgramApiKey: new URLSearchParams(window.location.search).get('deepgramKey') || '',
-    
-    feedbackSystemPrompt: `You are an expert interview coach who has reviewed thousands of interview transcripts. Your job is to analyse a candidate's answer and give structured, honest, specific feedback.
-
-You receive one answer at a time. For each answer you must return a JSON object with exactly these fields — no extra text, no preamble, no markdown:
-
-{
-  "overall_score": <number 1-10>,
-  "clarity_score": <number 1-10>,
-  "depth_score": <number 1-10>,
-  "structure_score": <number 1-10>,
-  "feedback_text": "<3-5 sentences of specific, actionable feedback. Reference what they actually said. Do not be vague.>",
-  "model_answer": "<a concise model answer for this question, 3-6 sentences>",
-  "strengths": ["<specific strength 1>", "<specific strength 2>"],
-  "improvements": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"],
-  "company_fit": {
-    "<key_value_1>": <true if demonstrated, false if not>,
-    "<key_value_2>": <true if demonstrated, false if not>
-  }
-}
-
-Scoring rubric:
-- overall_score: weighted average of the three sub-scores
-- clarity_score: Was the answer easy to follow? Clear structure, no rambling, no filler?
-- depth_score: Did they go deep enough? Did they explain WHY, not just WHAT? Did they use specifics?
-- structure_score (behavioral only): Did they follow STAR format — Situation, Task, Action, Result? For technical: did they think aloud, state assumptions, and explain complexity?
-
-Be honest. A score of 7 means genuinely good. Reserve 9-10 for exceptional answers. Most answers should score 5-7.
-
-CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra text. Just the JSON.`
+    deepgramApiKey: new URLSearchParams(window.location.search).get('deepgramKey') || ''
   };
 
-  /**
-   * callGeminiAPI()
-   * Sends a prompt to the Gemini API and returns the text response.
-   * P6.01: Shows retry toast on 429 errors with exponential backoff.
-   */
-  // P6.01: Toast helpers
-  function showRetryToast(attempt, delayMs) {
-    const toast = document.getElementById('retry-toast');
-    const msg   = document.getElementById('retry-toast-msg');
-    if (toast && msg) {
-      msg.textContent = `⏳ AI is busy — retrying in ${Math.round(delayMs / 1000)}s… (attempt ${attempt}/3)`;
-      toast.style.display = 'block';
-      toast.style.opacity = '1';
-    }
-  }
-  function hideRetryToast() {
-    const toast = document.getElementById('retry-toast');
-    if (toast) {
-      toast.style.opacity = '0';
-      setTimeout(() => { toast.style.display = 'none'; }, 350);
-    }
-  }
-
-  // Custom error class so callers know this was a real API failure (not a JSON parse error)
-  class RateLimitError extends Error {
-    constructor(msg) { super(msg); this.name = 'RateLimitError'; this.isRateLimit = true; }
-  }
-
-  async function callGeminiAPI(systemPrompt, userMessage, isJson = false) {
-    if (!AI_CONFIG.geminiApiKey) {
-      console.error("Gemini API key is required for feedback. Please add VITE_GEMINI_API_KEY to your .env file.");
-      throw new Error("Gemini API key is missing. Add VITE_GEMINI_API_KEY to your .env file.");
-    }
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${AI_CONFIG.model}:generateContent?key=${AI_CONFIG.geminiApiKey}`;
-    const body = {
-      system_instruction: { parts: [{ text: systemPrompt }] },
-      contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-      generationConfig: { 
-        temperature: 0.3, 
-        maxOutputTokens: 1024
-      }
-    };
-    
-    if (isJson) {
-      body.generationConfig.responseMimeType = "application/json";
-    }
-    
-    let lastError = null;
-    for (let attempt = 1; attempt <= 3; attempt++) {
-      try {
-        const response = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(body)
-        });
-        
-        if (!response.ok) {
-          if (response.status === 429 && attempt < 3) {
-            // Exponential backoff: 3s, 6s with jitter
-            const delay = 3000 * attempt + Math.random() * 1000;
-            console.warn(`Gemini 429 — retrying in ${Math.round(delay/1000)}s (attempt ${attempt}/3)…`);
-            showRetryToast(attempt, delay);
-            await new Promise(r => setTimeout(r, delay));
-            continue;
-          }
-          if (response.status === 429) {
-            hideRetryToast();
-            throw new RateLimitError(`Gemini rate limited after 3 attempts (429)`);
-          }
-          if (response.status >= 500 && attempt < 3) {
-            const delay = 1500 * attempt;
-            await new Promise(r => setTimeout(r, delay));
-            continue;
-          }
-          throw new Error(`${response.status}`);
-        }
-        
-        hideRetryToast();
-        const result = await response.json();
-        return result.candidates?.[0]?.content?.parts?.[0]?.text || '';
-      } catch (err) {
-        lastError = err;
-        // Don't retry RateLimitError — we already exhausted retries
-        if (err.isRateLimit) throw err;
-        if (attempt < 3 && err.message && err.message.includes('fetch')) {
-          await new Promise(r => setTimeout(r, 1500 * attempt));
-          continue;
-        }
-        if (attempt === 3) throw err;
-      }
-    }
-    throw lastError;
-  }
-
-  async function generateSingleAnswerFeedback(answerId, questionText, answerText) {
-    console.log(`  Analysing answer for: "${questionText.substring(0, 60)}..."`);
-    
-    let kvString = activeCompanyProfile?.key_values ? activeCompanyProfile.key_values.join(', ') : 'standard tech values';
-    const userMessage = `Question: ${questionText}\nAnswer: ${answerText || '(no answer provided)'}\nInterview type: ${activeSession.interviewType || 'behavioral'}\nExperience level: ${activeSession.experienceLevel || 'mid'}\nEvaluate the answer against these company key values for the company_fit object: ${kvString}`;
-    let feedbackData = null;
-    let isRateLimited = false;
-    
-    const parseFeedback = (raw) => {
-      let cleaned = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
-      const firstBrace = cleaned.indexOf('{');
-      const lastBrace = cleaned.lastIndexOf('}');
-      if (firstBrace !== -1 && lastBrace !== -1) {
-        cleaned = cleaned.substring(firstBrace, lastBrace + 1);
-      }
-      return JSON.parse(cleaned);
-    };
-    
-    try {
-      const rawResponse = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, userMessage, true);
-      feedbackData = parseFeedback(rawResponse);
-    } catch (firstErr) {
-      if (firstErr.isRateLimit) {
-        // True 429 — do NOT use fake defaults. Save a pending_retry row instead.
-        isRateLimited = true;
-        console.warn(`  Rate limited for answer ${answerId} — saving pending_retry row.`);
-      } else {
-        // Parse / network error — try once more with a stricter prompt
-        console.warn(`  First parse failed for answer ${answerId}:`, firstErr.message);
-        try {
-          const retryMessage = `You must respond with ONLY a valid JSON object. No markdown. No explanation. Start your response with { and end with }. Here is the answer to evaluate:\n\n${userMessage}`;
-          const rawRetry = await callGeminiAPI(AI_CONFIG.feedbackSystemPrompt, retryMessage, true);
-          feedbackData = parseFeedback(rawRetry);
-        } catch (retryErr) {
-          if (retryErr.isRateLimit) {
-            isRateLimited = true;
-            console.warn(`  Rate limited on retry for answer ${answerId} — saving pending_retry row.`);
-          } else {
-            console.error(`  Second parse failed. Using safe defaults.`);
-          }
-        }
-      }
-    }
-
-    // P6.01 FIX 3: If rate limited, save a pending_retry placeholder row
-    if (isRateLimited) {
-      const { error: pendingErr } = await sb.from('feedback').insert({
-        answer_id:         answerId,
-        overall_score:     null,
-        clarity_score:     null,
-        depth_score:       null,
-        structure_score:   null,
-        feedback_text:     'Feedback is being generated — please check back in a few minutes.',
-        model_answer:      null,
-        company_fit:       {},
-        generation_status: 'pending_retry'
-      });
-      if (pendingErr) {
-        console.error(`  pending_retry insert failed for answer ${answerId}:`, pendingErr.message);
-      } else {
-        console.log(`  ⏳ Saved pending_retry placeholder for answer ${answerId}`);
-      }
-      return null; // Signal: no real score yet
-    }
-
-    if (!feedbackData) feedbackData = {};
-    const safeInt = (val) => (typeof val === 'number' && val >= 1 && val <= 10) ? val : 5;
-    const safeStr = (val, fallback) => (typeof val === 'string' && val.trim().length > 0) ? val : fallback;
-    
-    feedbackData.overall_score = safeInt(feedbackData.overall_score);
-    feedbackData.clarity_score = safeInt(feedbackData.clarity_score);
-    feedbackData.depth_score = safeInt(feedbackData.depth_score);
-    feedbackData.structure_score = safeInt(feedbackData.structure_score);
-    feedbackData.feedback_text = safeStr(feedbackData.feedback_text, "Feedback could not be generated for this answer.");
-    feedbackData.model_answer = safeStr(feedbackData.model_answer, "Model answer unavailable.");
-    if (!feedbackData.company_fit) feedbackData.company_fit = {};
-    
-    const { error: feedbackErr } = await sb.from('feedback').insert({
-      answer_id:        answerId,
-      overall_score:    feedbackData.overall_score,
-      clarity_score:    feedbackData.clarity_score,
-      depth_score:      feedbackData.depth_score,
-      structure_score:  feedbackData.structure_score,
-      feedback_text:    feedbackData.feedback_text,
-      model_answer:     feedbackData.model_answer,
-      company_fit:      feedbackData.company_fit,
-      generation_status: 'complete'
-    });
-
-    if (feedbackErr) {
-      console.error(`  Feedback insert failed for answer ${answerId}:`, feedbackErr.message);
-    } else {
-      console.log(`  ✅ Feedback saved | overall: ${feedbackData.overall_score}/10`);
-      const metrics = deliveryMetricsMap[answerId];
-      if (metrics) {
-        await sb.from('feedback').update({
-          filler_word_count: metrics.filler_word_count,
-          filler_words_found: metrics.filler_words_found,
-          words_per_minute: metrics.words_per_minute,
-          answer_duration_seconds: metrics.answer_duration_seconds,
-          pace_rating: metrics.pace_rating,
-          eye_contact_percent: metrics.eye_contact_percent,
-          eye_contact_rating: metrics.eye_contact_rating
-        }).eq('answer_id', answerId);
-      }
-    }
-    return feedbackData.overall_score;
-  }
 
   /**
    * runFeedbackEngine()
