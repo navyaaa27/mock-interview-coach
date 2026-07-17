@@ -4690,11 +4690,18 @@ SESSION CONTEXT:
         hr: "What are you looking for in your next role?"
       };
 
+      const diffToLevel = {
+        'easy': ['entry', 'any'],
+        'medium': ['mid', 'any'],
+        'hard': ['senior', 'staff', 'any']
+      };
+      const targetLevels = diffToLevel[activeSession.currentDifficulty] || ['mid', 'any'];
+
       const { data: nextQuestionData, error: nextQErr } = await sb
         .from('questions')
         .select('*')
         .eq('interview_type', activeSession.interviewType)
-        .eq('experience_level', activeSession.currentDifficulty);
+        .in('experience_level', targetLevels);
 
       let nextQText = FALLBACK_QUESTIONS[activeSession.interviewType] || "What are your greatest strengths?";
       
@@ -5043,9 +5050,16 @@ SESSION CONTEXT:
         let nextQText = FALLBACK_QUESTIONS[activeSession.interviewType] || "What are your greatest strengths?";
         
         if (allQuestions && !qErr && allQuestions.length > 0) {
+          const diffToLevel = {
+            'easy': ['entry', 'any'],
+            'medium': ['mid', 'any'],
+            'hard': ['senior', 'staff', 'any']
+          };
+          const targetLevels = diffToLevel[activeSession.currentDifficulty] || ['mid', 'any'];
+
           // Filter by difficulty and exclude asked questions
           let availableQs = allQuestions.filter(q => 
-            q.experience_level === activeSession.currentDifficulty && 
+            targetLevels.includes(q.experience_level) && 
             !interviewState.askedQuestionIds.includes(q.id)
           );
           
