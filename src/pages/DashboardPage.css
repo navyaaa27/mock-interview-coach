@@ -2,7 +2,7 @@
 
 .dash-page {
   min-height: 100vh;
-  background: var(--bg-app, #07080a);
+  background: transparent;
   color: var(--text-primary, #fff);
   font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   padding: 32px 32px 80px;
@@ -165,7 +165,9 @@
 
 /* ── Hairline card (D.01) ── */
 .dash-card {
-  background: var(--bg-card, #0a0a0a);
+  background: rgba(10, 10, 12, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-hairline, #141414);
   border-radius: var(--radius-card, 12px);
   transition: border-color 0.2s, transform 0.2s;

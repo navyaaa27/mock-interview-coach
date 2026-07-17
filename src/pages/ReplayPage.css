@@ -2,7 +2,7 @@
 
 .replay-page {
   min-height: 100vh;
-  background: var(--bg-app, #07080a);
+  background: transparent;
   color: var(--text-primary, #fff);
   font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   padding: 32px 32px 80px;
@@ -50,7 +50,9 @@
 
 /* ── Top Score Card ── */
 .score-card {
-  background: linear-gradient(135deg, rgba(20,20,30,0.8), rgba(10,10,15,0.9));
+  background: rgba(10, 10, 12, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-hairline, #141414);
   border-radius: var(--radius-card, 16px);
   padding: 40px;
@@ -166,7 +168,9 @@
 }
 
 .fb-card {
-  background: var(--bg-card, #0a0a0a);
+  background: rgba(10, 10, 12, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-hairline, #141414);
   border-radius: var(--radius-card, 12px);
   padding: 24px;
@@ -200,7 +204,9 @@
 }
 
 .q-card {
-  background: var(--bg-card, #0a0a0a);
+  background: rgba(10, 10, 12, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-hairline, #141414);
   border-radius: var(--radius-card, 12px);
   padding: 24px;
@@ -320,7 +326,9 @@
 
 /* -- Horizontal Score Card -- */
 .horizontal-score-card {
-  background: var(--bg-card, #0a0a0a);
+  background: rgba(10, 10, 12, 0.4);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--border-hairline, #141414);
   border-radius: var(--radius-card, 16px);
   padding: 32px 40px;

@@ -98,51 +98,52 @@ export default function HistoryPage() {
   return (
     <div className="hist-page">
       {/* ── Page title ─────────────────────────────────────────────────── */}
-      <h1 className="hist-heading">Session History</h1>
+      <h1 className="hist-heading">Session history.</h1>
 
       {/* ── SECTION 1: Summary bar ─────────────────────────────────────── */}
       <div className="hist-stats-row">
         <div className="hist-stat-card">
-          <div className="hist-stat-label">Total Sessions</div>
           <div className="hist-stat-value">{stats.totalSessions}</div>
+          <div className="hist-stat-label">Total Sessions</div>
         </div>
         <div className="hist-stat-card">
-          <div className="hist-stat-label">Average Score</div>
           <div className="hist-stat-value">{stats.avgScore}</div>
+          <div className="hist-stat-label">Average Score</div>
         </div>
         <div className="hist-stat-card">
-          <div className="hist-stat-label">Best Score</div>
           <div className="hist-stat-value" style={{ color: '#2dd4a0' }}>{stats.bestScore}</div>
+          <div className="hist-stat-label">Best Score</div>
         </div>
         <div className="hist-stat-card">
-          <div className="hist-stat-label">Current Streak</div>
           <div className="hist-stat-value" style={{ color: '#f59e0b' }}>
             {stats.streak} <i className="fa-solid fa-fire" style={{ fontSize: 18 }} />
           </div>
+          <div className="hist-stat-label">Current Streak</div>
         </div>
       </div>
 
       {/* ── SECTION 2: Filter bar ──────────────────────────────────────── */}
       <div className="hist-filter-row">
-        <select className="hist-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
-          <option value="all">All Types</option>
+        <select className="hist-select-minimal" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+          <option value="all">All types</option>
           <option value="behavioral">Behavioral</option>
           <option value="technical">Technical</option>
           <option value="system_design">System Design</option>
           <option value="hr">HR</option>
         </select>
-        <select className="hist-select" value={diffFilter} onChange={e => setDiffFilter(e.target.value)}>
-          <option value="all">All Difficulties</option>
+        <select className="hist-select-minimal" value={diffFilter} onChange={e => setDiffFilter(e.target.value)}>
+          <option value="all">All difficulties</option>
           <option value="easy">Easy</option>
           <option value="medium">Medium</option>
           <option value="hard">Hard</option>
         </select>
-        <select className="hist-select" value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
-          <option value="all">All Time</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
+        <select className="hist-select-minimal" value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
+          <option value="all">All time</option>
+          <option value="week">This week</option>
+          <option value="month">This month</option>
         </select>
       </div>
+      <div className="hist-divider-line"></div>
 
       {/* ── SECTION 3: Session cards ───────────────────────────────────── */}
       <div className="hist-session-list">
@@ -157,58 +158,48 @@ export default function HistoryPage() {
             const company = s.target_company || 'General';
 
             return (
-              <div key={s.id} className="hist-card">
+              <div key={s.id} className="hist-list-item">
                 {/* Left — date / duration / chips */}
-                <div className="hist-card-left">
-                  <div className="hist-card-date">{date}</div>
-                  <div className="hist-card-dur"><i className="fa-regular fa-clock" /> {s.durationStr}</div>
-                  <div className="hist-chip-row">
-                    <span className="hist-chip" style={{ color: tColor, background: `${tColor}18` }}>
+                <div className="hist-item-left">
+                  <div className="hist-item-date">{date}</div>
+                  <div className="hist-item-dur">{s.durationStr}</div>
+                  <div className="hist-item-chip-row">
+                    <span className="hist-item-chip" style={{ color: '#fff', borderColor: 'rgba(255,255,255,0.15)' }}>
                       {TYPE_LABELS[s.interview_type] || s.interview_type}
                     </span>
-                    <span className="hist-chip" style={{ color: dColor, background: `${dColor}18` }}>
+                    <span className="hist-item-chip" style={{ color: dColor, borderColor: 'rgba(255,255,255,0.15)' }}>
                       {s.difficulty}
                     </span>
                   </div>
                 </div>
 
                 {/* Centre — company, role, sub-scores */}
-                <div className="hist-card-centre">
-                  <div className="hist-card-company">{company}</div>
-                  <div className="hist-card-role">{s.job_role || 'Software Engineer'}</div>
-                  <div className="hist-sub-scores">
-                    <span><strong>C</strong> {s.avgClarity.toFixed(1)}</span>
-                    <span><strong>D</strong> {s.avgDepth.toFixed(1)}</span>
-                    <span><strong>S</strong> {s.avgStructure.toFixed(1)}</span>
+                <div className="hist-item-centre">
+                  <div className="hist-item-company">{company}</div>
+                  <div className="hist-item-role">{s.job_role || 'Software Engineer'}</div>
+                  <div className="hist-item-sub-scores">
+                    <span><strong>C</strong> {(s.avgClarity || 0).toFixed(1)}</span>
+                    <span><strong>D</strong> {(s.avgDepth || 0).toFixed(1)}</span>
+                    <span><strong>S</strong> {(s.avgStructure || 0).toFixed(1)}</span>
                   </div>
                 </div>
 
                 {/* Score ring */}
-                <div className="hist-card-score" style={{ '--ring': sc }}>
-                  {s.avgOverall.toFixed(1)}
+                <div className="hist-item-score-col">
+                  <div className="hist-item-score" style={{ '--ring': s.avgOverall > 0 ? sc : '#333' }}>
+                    {s.avgOverall > 0 ? s.avgOverall.toFixed(1) : '–'}
+                  </div>
+                  {s.avgOverall === 0 && <div className="hist-item-pending">PENDING RETRY</div>}
                 </div>
 
-                {/* Right — buttons & difficulty progression */}
-                <div className="hist-card-right">
-                  <button className="hist-btn" onClick={() => navigate(`/replay/${s.id}`)}>
-                    View Report <i className="fa-solid fa-arrow-right" />
+                {/* Right — buttons */}
+                <div className="hist-item-right">
+                  <button className="hist-item-btn" onClick={() => navigate(`/replay/${s.id}`)}>
+                    View report &rarr;
                   </button>
-                  <button className="hist-btn blue" onClick={() => navigate(`/replay/${s.id}`)}>
-                    <i className="fa-solid fa-play" style={{ marginRight: 4 }} /> Replay
+                  <button className="hist-item-btn play" onClick={() => navigate(`/replay/${s.id}`)}>
+                    <i className="fa-solid fa-play" style={{ marginRight: 6 }} /> Replay
                   </button>
-                  {s.difficulty_history?.length > 0 && (
-                    <div className="hist-diff-prog">
-                      {s.difficulty_history.map((d, i) => {
-                        const dc = DIFF_COLORS[d] || '#4fc3f7';
-                        return (
-                          <React.Fragment key={i}>
-                            {i > 0 && <i className="fa-solid fa-caret-right" style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }} />}
-                            <span className="hist-chip-tiny" style={{ color: dc, background: `${dc}18` }}>{d}</span>
-                          </React.Fragment>
-                        );
-                      })}
-                    </div>
-                  )}
                 </div>
               </div>
             );
