@@ -101,7 +101,7 @@ export default function ProgressPage() {
   if (!data?.sessionChartData?.length || data.sessionChartData.length < 3) {
     return (
       <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1400px', margin: '0 auto' }}>
-        <h1 style={{ fontSize: '2rem', fontWeight: 'bold', color: '#fff', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
+        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 'bold', color: '#fff', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', alignItems: 'start' }}>
           <ReadinessScore />
           <div style={{ background: '#111', padding: '2rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
@@ -116,7 +116,7 @@ export default function ProgressPage() {
 
   return (
     <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1400px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '2rem', fontWeight: 'bold', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
+      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 'bold', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
       
       <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem', marginBottom: '2rem', alignItems: 'start' }}>
         {/* Left Column */}
