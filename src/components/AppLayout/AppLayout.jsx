@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation, NavLink } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import Aurora from '../Aurora/Aurora';
+import GridScan from '../GridScan/GridScan';
 import './AppLayout.css';
 
 export default function AppLayout({ children }) {
@@ -50,12 +51,34 @@ export default function AppLayout({ children }) {
   return (
     <div className="layout-wrapper">
       
-      {location.pathname !== '/session' && (
+      {location.pathname === '/dashboard' && (
         <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none' }}>
           <Aurora 
             colorStops={["#7C3AED", "#EC4899", "#5227FF"]}
             amplitude={0.6}
             blend={0.5}
+          />
+        </div>
+      )}
+
+      {(location.pathname === '/history' || location.pathname === '/profile' || location.pathname === '/progress') && (
+        <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 0, pointerEvents: 'none' }}>
+          <GridScan
+            sensitivity={0.55}
+            lineThickness={1}
+            linesColor="#2F293A"
+            scanColor="#FF9FFC"
+            scanOpacity={0.4}
+            gridScale={0.1}
+            lineStyle="solid"
+            lineJitter={0.1}
+            scanDirection="pingpong"
+            noiseIntensity={0.01}
+            scanGlow={0.5}
+            scanSoftness={2}
+            scanDuration={2}
+            scanDelay={2}
+            scanOnClick={false}
           />
         </div>
       )}
