@@ -25,7 +25,6 @@ void main() {
 const fragmentShader = `
 precision highp float;
 
-varying vec2 vUv;
 uniform float uTime;
 uniform vec3 uResolution;
 uniform float uSpeed;
@@ -49,7 +48,7 @@ uniform bool uEnableMouse;
 #define PI 3.14159265359
 
 void main() {
-  vec2 st = vUv;
+  vec2 st = gl_FragCoord.xy / uResolution.xy;
   st = st * 2.0 - 1.0;
   st.x *= uResolution.x / uResolution.y;
 
@@ -58,7 +57,6 @@ void main() {
     mShift.x *= uResolution.x / uResolution.y;
     st -= mShift * uMouseInfluence;
   }
-
 
   st *= uScale;
 
@@ -130,17 +128,13 @@ export default function Radar({
     }
 
     function resize() {
-      if (!container) return;
       renderer.setSize(container.offsetWidth, container.offsetHeight);
       if (program) {
         program.uniforms.uResolution.value = [gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height];
       }
     }
-
-    const resizeObserver = new ResizeObserver(() => {
-      resize();
-    });
-    resizeObserver.observe(container);
+    window.addEventListener('resize', resize);
+    resize();
 
     const geometry = new Triangle(gl);
     program = new Program(gl, {
@@ -198,14 +192,12 @@ export default function Radar({
 
     return () => {
       cancelAnimationFrame(animationFrameId);
-      resizeObserver.disconnect();
+      window.removeEventListener('resize', resize);
       if (enableMouseInteraction) {
         gl.canvas.removeEventListener('mousemove', handleMouseMove);
         gl.canvas.removeEventListener('mouseleave', handleMouseLeave);
       }
-      if (container.contains(gl.canvas)) {
-        container.removeChild(gl.canvas);
-      }
+      container.removeChild(gl.canvas);
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
   }, [speed, scale, ringCount, spokeCount, ringThickness, spokeThickness, sweepSpeed, sweepWidth, sweepLobes, color, backgroundColor, falloff, brightness, enableMouseInteraction, mouseInfluence]);

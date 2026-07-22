@@ -2,7 +2,7 @@
 
 .prof-page {
   min-height: 100vh;
-  background: transparent;
+  background: var(--bg-app);
   color: var(--text-primary);
   font-family: var(--font-sans);
   padding: 32px 32px 80px;
@@ -39,9 +39,7 @@
 
 /* Cards */
 .prof-card {
-  background: rgba(10, 10, 12, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--bg-card);
   border: 1px solid var(--border-hairline);
   border-radius: var(--radius-card);
   padding: 24px;

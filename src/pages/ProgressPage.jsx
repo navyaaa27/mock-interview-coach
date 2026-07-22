@@ -104,7 +104,7 @@ export default function ProgressPage() {
         <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 'bold', color: '#fff', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', alignItems: 'start' }}>
           <ReadinessScore />
-          <div style={{ background: 'rgba(10, 10, 12, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--border-hairline)', padding: '2rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+          <div style={{ background: '#111', padding: '2rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
             <EmptyState
               message="Three sessions in and the pattern starts to show. You're not there yet."
             />
@@ -122,21 +122,21 @@ export default function ProgressPage() {
         {/* Left Column */}
         <div>
           <ReadinessScore />
-          <div style={{ background: 'rgba(10, 10, 12, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--border-hairline)', padding: '1.5rem', borderRadius: '16px', marginTop: '-1rem' }}>
+          <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px', marginTop: '-1rem' }}>
             <TypeBreakdownChart data={data.typeData} />
           </div>
         </div>
 
         {/* Right Column */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div style={{ background: 'rgba(10, 10, 12, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--border-hairline)', padding: '1.5rem', borderRadius: '16px' }}>
+          <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
             <ScoreTrendChart data={data.sessionChartData} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-            <div style={{ background: 'rgba(10, 10, 12, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--border-hairline)', padding: '1.5rem', borderRadius: '16px' }}>
+            <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
               <SkillRadarChart data={data.sessionChartData} />
             </div>
-            <div style={{ background: 'rgba(10, 10, 12, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--border-hairline)', padding: '1.5rem', borderRadius: '16px' }}>
+            <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
               <WeakAreaChart data={data.weakAreaData} />
             </div>
           </div>
@@ -144,7 +144,7 @@ export default function ProgressPage() {
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
-        <div style={{ background: 'rgba(10, 10, 12, 0.4)', backdropFilter: 'blur(16px)', WebkitBackdropFilter: 'blur(16px)', border: '1px solid var(--border-hairline)', padding: '1.5rem', borderRadius: '16px' }}>
+        <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
           <DeliveryTrendChart data={data.sessionChartData} />
         </div>
       </div>

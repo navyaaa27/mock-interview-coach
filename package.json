@@ -19,14 +19,16 @@
     "@supabase/supabase-js": "^2.107.0",
     "@vitejs/plugin-react": "^6.0.2",
     "canvas-confetti": "^1.9.4",
+    "face-api.js": "^0.22.2",
     "framer-motion": "^12.42.2",
     "ogl": "^1.0.11",
     "pg": "^8.22.0",
     "playwright": "^1.60.0",
+    "postprocessing": "^6.39.3",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-router-dom": "^7.17.0",
-    "recharts": "^3.9.0",
+    "recharts": "^2.13.0",
     "vite": "^8.0.16"
   },
   "type": "module"

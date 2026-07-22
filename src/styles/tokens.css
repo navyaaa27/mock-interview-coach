@@ -22,8 +22,8 @@
   --accent-blue: #4fc3f7;
 
   /* Typography */
-  --font-display: 'Times New Roman', Times, serif;
-  --font-sans: 'Times New Roman', Times, serif;
+  --font-display: Georgia, 'Times New Roman', serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
   --font-mono: 'SF Mono', 'JetBrains Mono', monospace;
 
   /* Radius */

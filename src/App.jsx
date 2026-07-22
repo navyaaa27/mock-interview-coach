@@ -53,9 +53,19 @@ function OnboardingGuard({ children }) {
   return children
 }
 
+function RootRedirect() {
+  const { currentUser, profile } = useAuth()
+  if (!currentUser) return <Navigate to="/login" replace />
+  if (profile === null) return <Navigate to="/onboarding" replace />
+  return <Navigate to="/dashboard" replace />
+}
+
 function AppRoutes() {
   return (
     <Routes>
+      {/* Root — smart redirect based on auth state */}
+      <Route path="/" element={<RootRedirect />} />
+
       {/* Auth Routes */}
       <Route path="/login" element={<RedirectIfAuth><LoginPage /></RedirectIfAuth>} />
       <Route path="/signup" element={<RedirectIfAuth><SignupPage /></RedirectIfAuth>} />
@@ -134,7 +144,7 @@ function AppRoutes() {
         } 
       />
 
-      {/* Catch-all redirects to dashboard if logged in, or login if not */}
+      {/* Catch-all redirects to root */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   )
