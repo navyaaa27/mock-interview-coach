@@ -41,7 +41,8 @@ function RedirectIfAuth({ children }) {
 function RequireProfile({ children }) {
   const { currentUser, profile } = useAuth()
   if (!currentUser) return <Navigate to="/login" replace />
-  if (profile === null) return <Navigate to="/onboarding" replace />
+  if (profile === false) return <Navigate to="/onboarding" replace />
+  if (profile === null) return <div style={{ color: 'white', padding: '2rem', textAlign: 'center' }}>Error loading profile. Please refresh the page.</div>
   return children
 }
 
@@ -56,7 +57,8 @@ function OnboardingGuard({ children }) {
 function RootRedirect() {
   const { currentUser, profile } = useAuth()
   if (!currentUser) return <Navigate to="/login" replace />
-  if (profile === null) return <Navigate to="/onboarding" replace />
+  if (profile === false) return <Navigate to="/onboarding" replace />
+  if (profile === null) return <div style={{ color: 'white', padding: '2rem', textAlign: 'center' }}>Error loading profile. Please refresh the page.</div>
   return <Navigate to="/dashboard" replace />
 }
 

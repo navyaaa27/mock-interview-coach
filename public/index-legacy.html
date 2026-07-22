@@ -3335,7 +3335,7 @@
     // Streak Warning
     if (profile.last_session_date && currentStreak > 0) {
       const today = new Date().toISOString().split('T')[0];
-      if (profile.last_session_date < today && hour >= 18) {
+      if (new Date(profile.last_session_date).toISOString().split('T')[0] < today && hour >= 18) {
         document.getElementById('streak-warning').style.display = 'flex';
         document.getElementById('streak-warning-text').textContent = `⚡ Your ${currentStreak}-day streak ends at midnight. Practice now to keep it alive.`;
       } else {
@@ -3388,8 +3388,8 @@
         const avgScore = totalFeedbackCount > 0 ? (totalOverall / totalFeedbackCount) : 0;
         const hoursStr = totalMinutes >= 60 ? `${(totalMinutes / 60).toFixed(1)}` : `${totalMinutes}m`;
         
-        document.getElementById('dash-avg-score').textContent = avgScore.toFixed(1);
-        document.getElementById('dash-best-score').textContent = bestScore.toFixed(1);
+        document.getElementById('dash-avg-score').textContent = totalFeedbackCount > 0 ? avgScore.toFixed(1) : '—';
+        document.getElementById('dash-best-score').textContent = totalFeedbackCount > 0 ? bestScore.toFixed(1) : '—';
         document.getElementById('dash-hours-practiced').textContent = hoursStr;
         
         // ZONE 4: Score Trend Chart
@@ -3867,7 +3867,7 @@
       }
       
       switchView('interview-view');
-      initWebcam();
+      await initWebcam();
       document.getElementById('voice-mode-ui').style.display = 'flex';
       document.getElementById('text-mode-ui').style.display = 'none';
       document.getElementById('toggle-input-mode').textContent = 'Switch to Text Chat';
@@ -4295,7 +4295,7 @@ SESSION CONTEXT:
       
       // Kick off WebRTC and Interview Loop
       if (setupState.mode === 'video') {
-        initWebcam();
+        await initWebcam();
         document.getElementById('voice-mode-ui').style.display = 'flex';
         document.getElementById('text-mode-ui').style.display = 'none';
         document.getElementById('toggle-input-mode').textContent = 'Switch to Text Chat';
@@ -6101,14 +6101,6 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
   frame();
 </script>
 
-<script type="module">
-  import { initOrb } from './orb.js';
-  initOrb(document.getElementById('orb-bg-layer'), {
-    hue: 327,
-    hoverIntensity: 2,
-    rotateOnHover: true,
-    backgroundColor: '#000000'
-  });
-</script>
+
 </body>
 </html>

@@ -26,7 +26,10 @@ export default function ReplayPage() {
         // This bypasses the RLS bug in the legacy code since the join works securely.
         const { data: sess, error: sessErr } = await supabase
           .from('sessions')
-          .select('*, answers(*, feedback(*))')
+          // BUG 5 FIX: Join the questions table so ans.question.question_text is available.
+          // Previously `answers(*)` did NOT include the joined question text, so all question
+          // text appeared as undefined in the replay view.
+          .select('*, answers(*, question:question_id(question_text), feedback(*))')
           .eq('id', sessionId)
           .single();
 
@@ -53,8 +56,9 @@ export default function ReplayPage() {
           }
         }
         
-        // Sort answers chronologically
-        sess.answers = answers.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        // BUG 19 FIX: Sort by submitted_at — that's what saveAnswer() actually writes.
+        // Sorting by created_at was wrong because answers may not have that column.
+        sess.answers = answers.sort((a, b) => new Date(a.submitted_at || 0) - new Date(b.submitted_at || 0));
         setSessionData(sess);
       } catch (err) {
         console.error("Error loading replay", err);
@@ -142,7 +146,9 @@ export default function ReplayPage() {
     }
   });
 
-  const avg = (sum, c) => c > 0 ? (sum / c).toFixed(1) : '0.0';
+  // BUG 9 FIX: Return '—' instead of '0.0' when there is no feedback data.
+  // Previously sessions without feedback showed 0.0 which looked like a real bad score.
+  const avg = (sum, c) => c > 0 ? (sum / c).toFixed(1) : '—';
 
   const retryPendingFeedback = async () => {
     if (isRetrying || pendingCount === 0 || !GEMINI_API_KEY) return;
@@ -405,7 +411,8 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
                 )}
               </div>
               
-              <div className="q-text">"{ans.question_text}"</div>
+              {/* BUG 5 FIX: Resolve question text from the joined questions table or custom_question_text */}
+              <div className="q-text">"{ans.custom_question_text || ans.question?.question_text || 'Question text unavailable.'}"</div>
               
               {ans.fresh_video_url && (
                 <video className="q-video" src={ans.fresh_video_url} controls playsInline preload="metadata"></video>

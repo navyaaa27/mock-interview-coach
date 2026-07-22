@@ -69,9 +69,33 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function fetchProfile(userId) {
-    const { data } = await supabase.from('profiles').select('*').eq('user_id', userId).single()
-    setProfile(data)
-    setLoading(false)
+    try {
+      // BUG 7 FIX: Use maybeSingle() instead of single() so 0 rows returns null (not an error).
+      // Distinguish three states:
+      //   null  → still loading (initial state)
+      //   false → confirmed no profile — user needs onboarding
+      //   object → profile found — user is set up
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      if (error) {
+        // DB error: keep profile as null so RequireProfile shows an error state,
+        // NOT redirect to onboarding (which would overwrite an existing user's data).
+        console.error('fetchProfile error:', error.message)
+        setProfile(null)
+      } else {
+        // data is null when no row exists (new user) — signal with false
+        setProfile(data || false)
+      }
+    } catch (e) {
+      console.error('fetchProfile exception:', e.message)
+      setProfile(null)
+    } finally {
+      setLoading(false)
+    }
   }
 
   const signOut = async () => {
