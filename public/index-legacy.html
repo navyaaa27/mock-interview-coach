@@ -2926,43 +2926,6 @@
       else mainEl.classList.remove('app-with-sidebar');
     }
     
-    // Make background transparent for embedded setup view to show React backgrounds
-    if (isEmbedded && targetId === 'setup-view') {
-      document.body.style.background = 'transparent';
-      const setupView = document.getElementById('setup-view');
-      if (setupView) {
-        setupView.style.background = 'transparent';
-        setupView.style.position = 'relative';
-        setupView.style.boxShadow = 'none';
-        setupView.style.border = 'none'; // we will use a pseudo element for the gradient border
-        
-        // Remove old pseudo element if it exists
-        const oldStyle = document.getElementById('setup-border-style');
-        if (oldStyle) oldStyle.remove();
-        
-        // Add style for gradient border using a pseudo element
-        const style = document.createElement('style');
-        style.id = 'setup-border-style';
-        style.innerHTML = `
-          #setup-view::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            border-radius: 24px;
-            padding: 1px; /* border thickness */
-            background: linear-gradient(135deg, rgba(167,139,250,0.5), rgba(79,195,247,0.5));
-            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
-            -webkit-mask-composite: xor;
-            mask-composite: exclude;
-            pointer-events: none;
-          }
-        `;
-        document.head.appendChild(style);
-      }
-    } else if (isEmbedded) {
-      document.body.style.background = 'transparent';
-    }
-    
     // Hide the canvas orb on most legacy views for cleaner UI. Keep it for onboarding and live interview.
     const canvas = document.getElementById('c');
     if (canvas) {
@@ -3888,6 +3851,9 @@
       
       await startInterviewSession(setupState.type, setupState.difficulty);
       
+      // BUG 2 FIX: Reset asked question IDs right before the loop starts
+      interviewState.askedQuestionIds = [];
+      
       // Set up interview view with 15-min config (4 questions)
       document.getElementById('int-type-chip').textContent = setupState.type.toUpperCase();
       document.getElementById('int-diff-chip').textContent = setupState.difficulty.toUpperCase();
@@ -4145,6 +4111,8 @@ SESSION CONTEXT:
     activeSession.messages        = [];
     activeSession.questionCount   = 0;
     activeSession.isComplete      = false;
+    // NOTE: Do NOT reset askedQuestionIds here — it is reset in beginInterview()
+    // and startQuickPractice() right before the loop starts, not during context setup.
 
     // 5. Create the session row in Supabase → get session UUID
     const sessionId = await createInterviewSession(interviewType, difficulty);
@@ -4302,6 +4270,10 @@ SESSION CONTEXT:
     
     try {
       await startInterviewSession(setupState.type, setupState.difficulty);
+      
+      // BUG 2 FIX: Reset asked question IDs here — once per interview start, not inside
+      // startInterviewSession() which can be called independently for context setup.
+      interviewState.askedQuestionIds = [];
       
       // Navigate to the live interview screen
       document.getElementById('int-type-chip').textContent = setupState.type.toUpperCase();
@@ -5035,24 +5007,26 @@ SESSION CONTEXT:
       };
       
       stopAndUploadVideo(answerId, interviewState.currentQ);
-      // B1.01: Fire-and-forget background feedback generation
-      sb.functions.invoke('generate-feedback', { body: { answer_id: answerId, metrics: deliveryMetricsMap[answerId] } })
-        .then(res => {
-          if (res.data && res.data.score && interviewState.currentQ <= interviewState.totalQuestions) {
-            // Eventually adaptive difficulty
+      // BUG 3 FIX: Generate feedback client-side via Gemini API directly.
+      // Previously this called sb.functions.invoke('generate-feedback') which required
+      // a deployed Supabase Edge Function — replaced with a direct browser-side call.
+      generateFeedbackClientSide(answerId, interviewState.currentAIQuestionText, answerText, deliveryMetricsMap[answerId])
+        .then(score => {
+          if (score !== null && interviewState.currentQ <= interviewState.totalQuestions) {
+            // Adaptive difficulty based on score
             let currentDiff = activeSession.currentDifficulty;
             let newDiff = currentDiff;
-            if (res.data.score >= 8) {
+            if (score >= 8) {
               if (currentDiff === 'easy') newDiff = 'medium';
               else if (currentDiff === 'medium') newDiff = 'hard';
-            } else if (res.data.score <= 4) {
+            } else if (score <= 4) {
               if (currentDiff === 'hard') newDiff = 'medium';
               else if (currentDiff === 'medium') newDiff = 'easy';
             }
             activeSession.currentDifficulty = newDiff;
           }
         })
-        .catch(err => console.error('Feedback generation failed, will retry via edge function later:', err));
+        .catch(err => console.error('Client-side feedback generation error:', err));
     }
     
     if (interviewState.currentQ >= interviewState.totalQuestions) {
@@ -5166,8 +5140,12 @@ SESSION CONTEXT:
     if (interviewState.recognition) interviewState.recognition.stop();
     if (webcamStream) webcamStream.getTracks().forEach(track => track.stop());
     
-    // Update DB Session Status
-    await sb.from('sessions').update({ status: finalStatus }).eq('id', activeSession.id);
+    // BUG 15 FIX: Always set completed_at regardless of status (abandoned or completed).
+    // Without this, abandoned sessions show 'Unknown' duration in History.
+    await sb.from('sessions').update({
+      status: finalStatus,
+      completed_at: new Date().toISOString()
+    }).eq('id', activeSession.id);
     activeSession.status = finalStatus;
     
     // Trigger Feedback pipeline
@@ -5237,28 +5215,24 @@ SESSION CONTEXT:
 
     let finalQuestionId = questionId;
     if (!finalQuestionId) {
-      // Supabase schema demands a valid foreign key for question_id.
-      // First, try to insert this new dynamic question into the bank.
+      // Try to insert the dynamic AI question into the question bank.
       const { data: newQ, error: qErr } = await sb.from('questions').insert({
         question_text: questionText || 'Dynamic AI Question'
       }).select('id').maybeSingle();
       
       if (!qErr && newQ) {
         finalQuestionId = newQ.id;
-      } else {
-        // If RLS blocks inserts, pull ANY existing valid question_id to satisfy the FK constraint.
-        // We still store the REAL AI text in custom_question_text.
-        const { data: fallbackQ } = await sb.from('questions').select('id').limit(1).maybeSingle();
-        if (fallbackQ) {
-          finalQuestionId = fallbackQ.id;
-        }
       }
+      // BUG 11 FIX: If insert is blocked by RLS, do NOT use a random fallback question_id.
+      // That corrupted historical joins by linking answers to the wrong question.
+      // Instead, leave question_id as null — the schema must allow nullable question_id.
+      // The real text is always preserved in custom_question_text below.
     }
     
     const payload = {
       session_id:            activeSession.id,
-      question_id:           finalQuestionId,               // bypass NOT NULL constraint
-      custom_question_text:  questionId ? null : questionText, // store text if no bank match
+      question_id:           finalQuestionId || null,        // null is safe — see custom_question_text
+      custom_question_text:  questionId ? null : questionText, // always stores real question text
       answer_text:           answerText,
       answer_audio_url:      audioUrl,
       answer_video_url:      videoUrl,
@@ -5313,8 +5287,129 @@ SESSION CONTEXT:
     elevenLabsVoiceId: 'SXuKWBhKoIoAHKlf6Gt3',
     
     // Deepgram API key for real-time transcription
-    deepgramApiKey: new URLSearchParams(window.location.search).get('deepgramKey') || ''
+    deepgramApiKey: new URLSearchParams(window.location.search).get('deepgramKey') || '',
+    
+    // Gemini API key for feedback generation (passed from React SessionPage via URL param)
+    geminiApiKey: new URLSearchParams(window.location.search).get('geminiKey') || ''
   };
+
+  /* ── BUG 3 FIX: Client-side feedback generation via Gemini API ── */
+  const FEEDBACK_SYSTEM_PROMPT_TEXT = `You are an expert interview coach who has reviewed thousands of interview transcripts. Your job is to analyse a candidate's answer and give structured, honest, specific feedback.
+
+You receive one answer at a time. For each answer you must return a JSON object with exactly these fields — no extra text, no preamble, no markdown:
+
+{
+  "overall_score": <number 1-10>,
+  "clarity_score": <number 1-10>,
+  "depth_score": <number 1-10>,
+  "structure_score": <number 1-10>,
+  "feedback_text": "<3-5 sentences of specific, actionable feedback. Reference what they actually said. Do not be vague.>",
+  "model_answer": "<a concise model answer for this question, 3-6 sentences>",
+  "strengths": ["<specific strength 1>", "<specific strength 2>"],
+  "improvements": ["<specific improvement 1>", "<specific improvement 2>", "<specific improvement 3>"]
+}
+
+Scoring rubric:
+- overall_score: weighted average of the three sub-scores
+- clarity_score: Was the answer easy to follow? Clear structure, no rambling, no filler?
+- depth_score: Did they go deep enough? Did they explain WHY, not just WHAT? Did they use specifics?
+- structure_score: Did they follow STAR format (for behavioral)? Logical structure for others?
+
+Be honest. A score of 7 means genuinely good. Reserve 9-10 for exceptional answers. Most answers should score 5-7.
+
+CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra text.`;
+
+  /**
+   * generateFeedbackClientSide()
+   * Calls Gemini directly from the browser to generate per-answer feedback.
+   * Writes the result to the feedback table in Supabase.
+   * Returns the overall_score (number) on success, null on failure.
+   */
+  async function generateFeedbackClientSide(answerId, questionText, answerText, deliveryMetrics) {
+    const key = AI_CONFIG.geminiApiKey;
+    if (!key) {
+      console.warn('generateFeedbackClientSide: No Gemini API key — skipping feedback generation.');
+      return null;
+    }
+
+    const interviewType = activeSession.interviewType || 'behavioral';
+    const experienceLevel = activeSession.experienceLevel || 'mid';
+
+    const userMessage = `Question: ${questionText}\nAnswer: ${answerText}\nInterview type: ${interviewType}\nExperience level: ${experienceLevel}\nEvaluate the answer.`;
+
+    try {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${key}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            system_instruction: { parts: [{ text: FEEDBACK_SYSTEM_PROMPT_TEXT }] },
+            contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 1024,
+              responseMimeType: 'application/json'
+            }
+          })
+        }
+      );
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error(`generateFeedbackClientSide: Gemini API error ${res.status}:`, errText);
+        return null;
+      }
+
+      const data = await res.json();
+      let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+      raw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
+      const firstBrace = raw.indexOf('{');
+      const lastBrace = raw.lastIndexOf('}');
+      if (firstBrace === -1 || lastBrace === -1) throw new Error('No JSON object in Gemini response');
+      raw = raw.substring(firstBrace, lastBrace + 1);
+
+      const parsed = JSON.parse(raw);
+      const safeInt = (v) => (typeof v === 'number' && v >= 1 && v <= 10) ? Math.round(v) : 5;
+      const safeArr = (v) => Array.isArray(v) ? v.filter(s => typeof s === 'string') : [];
+
+      const feedbackPayload = {
+        answer_id:        answerId,
+        overall_score:    safeInt(parsed.overall_score),
+        clarity_score:    safeInt(parsed.clarity_score),
+        depth_score:      safeInt(parsed.depth_score),
+        structure_score:  safeInt(parsed.structure_score),
+        feedback_text:    parsed.feedback_text   || 'Feedback generated.',
+        model_answer:     parsed.model_answer    || '',
+        strengths:        safeArr(parsed.strengths),
+        improvements:     safeArr(parsed.improvements),
+        company_fit:      {},
+        generation_status: 'complete',
+        // Delivery metrics from the recording
+        ...(deliveryMetrics ? {
+          filler_word_count:     deliveryMetrics.filler_word_count,
+          filler_words_used:     deliveryMetrics.filler_words_found,
+          words_per_minute:      deliveryMetrics.words_per_minute,
+          answer_duration_seconds: deliveryMetrics.answer_duration_seconds,
+          eye_contact_percent:   deliveryMetrics.eye_contact_percent,
+          eye_contact_rating:    deliveryMetrics.eye_contact_rating
+        } : {})
+      };
+
+      const { error: insertErr } = await sb.from('feedback').insert(feedbackPayload);
+      if (insertErr) {
+        console.error('generateFeedbackClientSide: DB insert failed:', insertErr.message);
+        return null;
+      }
+
+      console.log(`✅ Feedback generated for answer ${answerId} → score: ${feedbackPayload.overall_score}/10`);
+      return feedbackPayload.overall_score;
+
+    } catch (err) {
+      console.error('generateFeedbackClientSide error:', err.message);
+      return null;
+    }
+  }
 
 
   /**
