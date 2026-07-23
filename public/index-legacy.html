@@ -5375,6 +5375,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
 
       const feedbackPayload = {
         answer_id:        answerId,
+        user_id:          currentUser.id,
         overall_score:    safeInt(parsed.overall_score),
         clarity_score:    safeInt(parsed.clarity_score),
         depth_score:      safeInt(parsed.depth_score),
