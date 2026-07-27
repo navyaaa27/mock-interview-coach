@@ -13,6 +13,7 @@ export default function ReplayPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRetrying, setIsRetrying] = useState(false);
+  const [retryStatus, setRetryStatus] = useState('');
 
   const GEMINI_API_KEY = import.meta.env.VITE_GEMINI_API_KEY || localStorage.getItem('geminiApiKey');
 
@@ -138,8 +139,8 @@ export default function ReplayPage() {
         sumS += fb.structure_score || 0;
         count++;
         
-        if (fb.overall_score >= 8 && Array.isArray(fb.strengths)) allStrengths.push(...fb.strengths);
-        if (fb.overall_score < 6 && Array.isArray(fb.improvements)) allImprovements.push(...fb.improvements);
+        if (Array.isArray(fb.strengths)) allStrengths.push(...fb.strengths);
+        if (Array.isArray(fb.improvements)) allImprovements.push(...fb.improvements);
       }
     } else {
       pendingCount++;
@@ -153,10 +154,35 @@ export default function ReplayPage() {
   const retryPendingFeedback = async () => {
     if (isRetrying || pendingCount === 0 || !GEMINI_API_KEY) return;
     setIsRetrying(true);
+    setRetryStatus('');
+
+    const sleep = (ms) => new Promise(r => setTimeout(r, ms));
+
+    // Fetch with exponential backoff for transient 503/429 errors
+    const fetchWithBackoff = async (url, options) => {
+      const MAX_ATTEMPTS = 3;
+      for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+        const res = await fetch(url, options);
+        if (res.ok) return res;
+        if ((res.status === 503 || res.status === 429) && attempt < MAX_ATTEMPTS) {
+          const delay = 2000 * attempt;
+          setRetryStatus(`Gemini is busy — retrying in ${delay / 1000}s... (attempt ${attempt}/${MAX_ATTEMPTS})`);
+          await sleep(delay);
+          continue;
+        }
+        // Non-retryable error or max attempts reached
+        const errText = await res.text();
+        throw new Error(`Gemini API ${res.status}: ${errText}`);
+      }
+    };
+
     try {
       const pendingAnswers = sessionData.answers.filter(a => !a.feedback || a.feedback.length === 0 || a.feedback[0].generation_status === 'pending_retry' || a.feedback[0].generation_status === 'pending');
       
-      for (const ans of pendingAnswers) {
+      for (let i = 0; i < pendingAnswers.length; i++) {
+        const ans = pendingAnswers[i];
+        setRetryStatus(`Generating feedback for question ${i + 1} of ${pendingAnswers.length}...`);
+
         const qText = ans.custom_question_text || ans.question?.question_text || 'Tell me about yourself.';
         const aText = ans.answer_text || '(no answer provided)';
         const interviewType = sessionData.interview_type || 'behavioral';
@@ -188,73 +214,66 @@ Be honest. A score of 7 means genuinely good. Reserve 9-10 for exceptional answe
 
 CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra text. Just the JSON.`;
 
-        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: systemPrompt }] },
-            contents: [{ role: 'user', parts: [{ text: userMessage }] }],
-            generationConfig: { 
-              temperature: 0.3, 
-              maxOutputTokens: 2048,
-              responseMimeType: "application/json"
+        try {
+          const res = await fetchWithBackoff(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}`,
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                system_instruction: { parts: [{ text: systemPrompt }] },
+                contents: [{ role: 'user', parts: [{ text: userMessage }] }],
+                generationConfig: { 
+                  temperature: 0.3, 
+                  maxOutputTokens: 2048,
+                  responseMimeType: "application/json"
+                }
+              })
             }
-          })
-        });
+          );
 
-        if (res.ok) {
           const data = await res.json();
           let raw = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
           raw = raw.replace(/```json/gi, '').replace(/```/g, '').trim();
           const firstBrace = raw.indexOf('{');
           const lastBrace = raw.lastIndexOf('}');
-          if (firstBrace !== -1 && lastBrace !== -1) {
-            raw = raw.substring(firstBrace, lastBrace + 1);
-          }
+          if (firstBrace !== -1 && lastBrace !== -1) raw = raw.substring(firstBrace, lastBrace + 1);
           
-          try {
-            const parsed = JSON.parse(raw);
-            const safeInt = (val) => (typeof val === 'number' && val >= 1 && val <= 10) ? Math.round(val) : 5;
-            
-            const payload = {
-              overall_score: safeInt(parsed.overall_score),
-              clarity_score: safeInt(parsed.clarity_score),
-              depth_score: safeInt(parsed.depth_score),
-              structure_score: safeInt(parsed.structure_score),
-              feedback_text: parsed.feedback_text || 'Feedback generated.',
-              model_answer: parsed.model_answer || '',
-              company_fit: parsed.company_fit || {},
-              generation_status: 'complete'
-            };
-            
-            if (ans.feedback && ans.feedback.length > 0) {
-              const { error: updErr } = await supabase.from('feedback').update(payload).eq('id', ans.feedback[0].id);
-              if (updErr) alert("DB Update Error: " + updErr.message);
-            } else {
-              const { error: insErr } = await supabase.from('feedback').insert({ 
-                ...payload, 
-                answer_id: ans.id
-              });
-              
-              if (insErr) {alert("DB Insert Error: " + insErr.message);}
-            }
-          } catch (e) {
-            console.error("Parse error", e);
-            alert("Failed to parse Gemini response: " + e.message + "\nRaw: " + raw);
+          const parsed = JSON.parse(raw);
+          const safeInt = (val) => (typeof val === 'number' && val >= 1 && val <= 10) ? Math.round(val) : 5;
+          
+          const payload = {
+            overall_score: safeInt(parsed.overall_score),
+            clarity_score: safeInt(parsed.clarity_score),
+            depth_score: safeInt(parsed.depth_score),
+            structure_score: safeInt(parsed.structure_score),
+            feedback_text: parsed.feedback_text || 'Feedback generated.',
+            model_answer: parsed.model_answer || '',
+            company_fit: parsed.company_fit || {},
+            generation_status: 'complete'
+          };
+          
+          if (ans.feedback && ans.feedback.length > 0) {
+            const { error: updErr } = await supabase.from('feedback').update(payload).eq('id', ans.feedback[0].id);
+            if (updErr) console.error('DB Update Error:', updErr.message);
+          } else {
+            const { error: insErr } = await supabase.from('feedback').insert({ ...payload, answer_id: ans.id });
+            if (insErr) console.error('DB Insert Error:', insErr.message);
           }
-        } else {
-          const errText = await res.text();
-          alert("Gemini API Error: " + res.status + " " + errText);
-          if (res.status === 429) {
-            break; // Stop spamming if rate limited
-          }
+        } catch (e) {
+          console.error(`Feedback generation failed for answer ${ans.id}:`, e.message);
+          setRetryStatus(`⚠️ Question ${i + 1} failed: ${e.message}. Continuing...`);
+          await sleep(1000);
         }
       }
+
+      setRetryStatus('Done! Reloading...');
     } catch (err) {
-      alert("Error regenerating: " + err.message);
+      console.error('Error regenerating feedback:', err.message);
+      setRetryStatus(`Error: ${err.message}`);
     } finally {
       setIsRetrying(false);
-      window.location.reload();
+      setTimeout(() => window.location.reload(), 800);
     }
   };
   
