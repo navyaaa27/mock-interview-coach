@@ -135,8 +135,6 @@ export default function DashboardPage() {
   const score   = data?.readinessScore ?? 0;
   const profile = data?.profile || {};
 
-  // Storage warning
-  const showStorageWarning = (data?.sessionCount || 0) >= 15;
 
   // Last session
   const lss = data?.lastSessionStats;
@@ -191,13 +189,6 @@ export default function DashboardPage() {
         onDateChange={handleSaveInterviewDate}
       />
 
-      {/* Storage warning (only when near limit) */}
-      {showStorageWarning && (
-        <div className="dash-warning storage" style={{ marginBottom: 24 }}>
-          <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: 16 }} />
-          <span>Your storage is getting full. Older sessions may be automatically cleaned up.</span>
-        </div>
-      )}
 
       {/* D.03 — StatStrip: one connected row, hairline-divided */}
       <StatStrip
