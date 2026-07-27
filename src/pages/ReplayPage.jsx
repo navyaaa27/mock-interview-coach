@@ -157,7 +157,7 @@ export default function ReplayPage() {
       const pendingAnswers = sessionData.answers.filter(a => !a.feedback || a.feedback.length === 0 || a.feedback[0].generation_status === 'pending_retry' || a.feedback[0].generation_status === 'pending');
       
       for (const ans of pendingAnswers) {
-        const qText = ans.custom_question_text || 'Tell me about yourself.';
+        const qText = ans.custom_question_text || ans.question?.question_text || 'Tell me about yourself.';
         const aText = ans.answer_text || '(no answer provided)';
         const interviewType = sessionData.interview_type || 'behavioral';
         
