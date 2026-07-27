@@ -50,14 +50,16 @@
 
 /* ── Top Score Card ── */
 .score-card {
-  background: linear-gradient(135deg, rgba(20,20,30,0.8), rgba(10,10,15,0.9));
-  border: 1px solid var(--border-hairline, #141414);
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card, 16px);
   padding: 40px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  box-shadow: 0 20px 60px rgba(0,0,0,0.5);
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
@@ -166,10 +168,18 @@
 }
 
 .fb-card {
-  background: var(--bg-card, #0a0a0a);
-  border: 1px solid var(--border-hairline, #141414);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card, 12px);
   padding: 24px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.fb-card:hover {
+  border-color: var(--glass-border-bright);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .fb-card h3 {
@@ -200,11 +210,19 @@
 }
 
 .q-card {
-  background: var(--bg-card, #0a0a0a);
-  border: 1px solid var(--border-hairline, #141414);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card, 12px);
   padding: 24px;
   margin-bottom: 24px;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.q-card:hover {
+  border-color: var(--glass-border-bright);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .q-header {
@@ -320,8 +338,11 @@
 
 /* -- Horizontal Score Card -- */
 .horizontal-score-card {
-  background: var(--bg-card, #0a0a0a);
-  border: 1px solid var(--border-hairline, #141414);
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card, 16px);
   padding: 32px 40px;
   display: flex;
@@ -330,7 +351,6 @@
   margin-bottom: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 40px rgba(0,0,0,0.5);
 }
 
 .horizontal-score-card::before {

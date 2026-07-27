@@ -30,6 +30,48 @@
   --radius-card: 12px;
   --radius-pill: 100px;
   --radius-small: 8px;
+
+  /* ── Frosted Glass System ──
+     Three tiers of glass intensity for layering depth.
+     All cards, panels and widgets use one of these. */
+  --glass-bg:          rgba(255, 255, 255, 0.04);
+  --glass-bg-medium:   rgba(255, 255, 255, 0.06);
+  --glass-bg-strong:   rgba(255, 255, 255, 0.09);
+  --glass-border:      rgba(255, 255, 255, 0.08);
+  --glass-border-bright: rgba(255, 255, 255, 0.14);
+  --glass-blur:        blur(20px);
+  --glass-blur-strong: blur(32px);
+  --glass-shadow:      0 8px 32px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255,255,255,0.06);
+  --glass-shadow-hover: 0 16px 48px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+/* ── Reusable frosted glass utility ──
+   Apply .glass to any card/panel. Combine with .glass--medium or .glass--strong for more intensity. */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass--medium {
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
+}
+.glass--strong {
+  background: var(--glass-bg-strong);
+  backdrop-filter: var(--glass-blur-strong);
+  -webkit-backdrop-filter: var(--glass-blur-strong);
+  border: 1px solid var(--glass-border-bright);
+  box-shadow: var(--glass-shadow);
+}
+.glass:hover, .glass--medium:hover, .glass--strong:hover {
+  box-shadow: var(--glass-shadow-hover);
+  border-color: var(--glass-border-bright);
+  transition: box-shadow 0.25s ease, border-color 0.25s ease;
 }
 
 /* ── Global: prefers-reduced-motion kill-switch ──

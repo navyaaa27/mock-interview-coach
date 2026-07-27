@@ -27,11 +27,19 @@
 }
 
 .hist-stat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border-hairline);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card);
   padding: 18px 16px;
   text-align: center;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+.hist-stat-card:hover {
+  border-color: var(--glass-border-bright);
+  box-shadow: var(--glass-shadow-hover);
 }
 
 .hist-stat-label {
@@ -92,13 +100,19 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  background: var(--bg-card);
-  border: 1px solid var(--border-hairline);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card);
   padding: 20px;
-  transition: border-color 0.15s;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
-.hist-card:hover { border-color: #222; }
+.hist-card:hover {
+  border-color: var(--glass-border-bright);
+  box-shadow: var(--glass-shadow-hover);
+}
 
 /* Left column */
 .hist-card-left {
@@ -230,8 +244,11 @@
 
 /* ── Section 4: Chart wrapper ──────────────────────────────────────────── */
 .hist-chart-wrap {
-  background: var(--bg-card);
-  border: 1px solid var(--border-hairline);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card);
   padding: 24px;
 }

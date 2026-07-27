@@ -513,12 +513,16 @@
   }
   
   .profile-summary-card {
-    background: rgba(255, 255, 255, 0.02);
-    border: 1px solid var(--card-border);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     border-radius: 20px;
     padding: 24px;
     text-align: left;
     height: 100%;
+    transition: box-shadow 0.2s, border-color 0.2s;
   }
   
   .section-title {
@@ -1480,16 +1484,20 @@
     .stats-row { grid-template-columns: repeat(2, 1fr); }
   }
   .stat-card {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     border-radius: 16px;
     padding: 18px;
     text-align: center;
-    transition: border-color 0.2s, transform 0.2s;
+    transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
   }
   .stat-card:hover {
-    border-color: rgba(255, 255, 255, 0.1);
+    border-color: var(--glass-border-bright);
     transform: translateY(-2px);
+    box-shadow: var(--glass-shadow-hover);
   }
   .stat-card .stat-value {
     font-size: 28px;
@@ -1510,8 +1518,11 @@
      P4.07: DASHBOARD CHART CONTAINER
      ══════════════════════════════════════════ */
   .dash-chart-container {
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     border-radius: 20px;
     padding: 24px;
     margin-bottom: 24px;
@@ -1544,13 +1555,19 @@
      P4.07: LAST SESSION SUMMARY
      ══════════════════════════════════════════ */
   .last-session-card {
-    background: rgba(255,255,255,0.025);
-    border: 1px solid rgba(255,255,255,0.06);
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    -webkit-backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
     border-radius: 16px;
     padding: 20px;
-    transition: border-color 0.2s;
+    transition: border-color 0.2s, box-shadow 0.2s;
   }
-  .last-session-card:hover { border-color: rgba(79, 195, 247, 0.2); }
+  .last-session-card:hover {
+    border-color: rgba(79, 195, 247, 0.3);
+    box-shadow: var(--glass-shadow-hover);
+  }
   .last-session-header {
     display: flex;
     justify-content: space-between;

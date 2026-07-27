@@ -91,12 +91,15 @@
   align-items: center;
   gap: 24px;
   padding: 24px 32px;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-  border: 1px solid rgba(167,139,250,0.3);
+  background: var(--glass-bg-medium);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid rgba(167,139,250,0.25);
+  box-shadow: var(--glass-shadow), 0 0 0 1px rgba(167,139,250,0.08) inset;
   border-radius: 20px;
   color: white;
   cursor: pointer;
-  transition: transform 0.2s, border-color 0.2s;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
   font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
   text-align: left;
 }
@@ -165,15 +168,19 @@
 
 /* ── Hairline card (D.01) ── */
 .dash-card {
-  background: rgba(10, 10, 12, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid var(--border-hairline, #141414);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow);
   border-radius: var(--radius-card, 12px);
-  transition: border-color 0.2s, transform 0.2s;
+  transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
   position: relative;
 }
-.dash-card:hover { border-color: rgba(255,255,255,0.08); }
+.dash-card:hover {
+  border-color: var(--glass-border-bright);
+  box-shadow: var(--glass-shadow-hover);
+}
 
 /* ── Readiness hero area ── */
 .dash-readiness-widget {
