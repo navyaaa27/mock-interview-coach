@@ -2,30 +2,108 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useHistoryData } from '../hooks/useHistoryData';
-import ScoreTrendChart from '../components/charts/ScoreTrendChart';
 import EmptyState from '../components/EmptyState/EmptyState';
 import './HistoryPage.css';
 
-/* ── Colour helpers ─────────────────────────────────────────────────────── */
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
 function scoreColor(v) {
   if (v >= 7.5) return '#2dd4a0';
   if (v >= 5)   return '#f59e0b';
   return '#ef4444';
 }
-const TYPE_COLORS  = { behavioral: '#4fc3f7', technical: '#a78bfa', system_design: '#f59e0b', hr: '#4ade80' };
-const DIFF_COLORS  = { easy: '#4ade80', medium: '#f59e0b', hard: '#ef4444' };
-const TYPE_LABELS  = { behavioral: 'Behavioral', technical: 'Technical', system_design: 'System Design', hr: 'HR' };
 
-/* ── Skeleton while loading ─────────────────────────────────────────────── */
+const TYPE_COLORS = { behavioral: '#4fc3f7', technical: '#a78bfa', system_design: '#f59e0b', hr: '#4ade80' };
+const DIFF_COLORS = { easy: '#4ade80', medium: '#f59e0b', hard: '#ef4444' };
+const TYPE_LABELS = { behavioral: 'Behavioral', technical: 'Technical', system_design: 'System Design', hr: 'HR' };
+
+/* ── Circular SVG score gauge ────────────────────────────────────────────── */
+function ScoreGauge({ score }) {
+  const color = scoreColor(score);
+  const radius = 30;
+  const circ   = 2 * Math.PI * radius;
+  const filled = (score / 10) * circ;
+
+  return (
+    <svg width="80" height="80" viewBox="0 0 80 80" className="hist-gauge">
+      <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+      <circle
+        cx="40" cy="40" r={radius} fill="none"
+        stroke={color} strokeWidth="6"
+        strokeDasharray={`${filled} ${circ}`}
+        strokeLinecap="round"
+        transform="rotate(-90 40 40)"
+        style={{ transition: 'stroke-dasharray 0.6s ease' }}
+      />
+      <text x="40" y="45" textAnchor="middle" fill="#fff" fontSize="16" fontWeight="700" fontFamily="inherit">
+        {score.toFixed(1)}
+      </text>
+    </svg>
+  );
+}
+
+/* ── Alex's motivational note ────────────────────────────────────────────── */
+function AlexNote({ sessions, stats }) {
+  const best = sessions.find(s => s.avgOverall.toFixed(1) === stats.bestScore);
+  const lastSess = sessions[0];
+
+  let note = "Complete your first interview and Alex will have something to say.";
+
+  if (sessions.length >= 1 && lastSess) {
+    const dur = lastSess.durationStr;
+    const scoreVal = lastSess.avgOverall.toFixed(1);
+    const isBest = lastSess.id === best?.id;
+
+    if (sessions.length === 1) {
+      note = `First one's done. ${dur}, ${scoreVal} — that's your baseline. Everything from here is progress.`;
+    } else if (isBest) {
+      note = `${sessions.length} sessions in. Your last one — ${dur}, full effort — landed at ${scoreVal}, your best score yet. That's not luck. That's the session before it, and the one before that, doing their job.`;
+    } else if (lastSess.avgOverall >= 7) {
+      note = `${sessions.length} sessions in and you're finding your rhythm. ${scoreVal} last time out. Keep pushing — the ceiling is higher than you think.`;
+    } else {
+      note = `${sessions.length} sessions in. Last one clocked at ${scoreVal}. The work's happening — you just can't always see it yet. Show up again.`;
+    }
+  }
+
+  return (
+    <div className="hist-alex-note">
+      <div className="hist-alex-avatar">A</div>
+      <div className="hist-alex-body">
+        <div className="hist-alex-label">Alex's Note</div>
+        <p className="hist-alex-text"
+          dangerouslySetInnerHTML={{
+            __html: note.replace(
+              /(\d+\.\d+)/g,
+              '<strong>$1</strong>'
+            )
+          }}
+        />
+      </div>
+    </div>
+  );
+}
+
+/* ── Skeleton loader ─────────────────────────────────────────────────────── */
 function HistorySkeleton() {
   return (
-    <div className="hist-skeleton">
-      <style>{`@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}`}</style>
-      <div className="hist-skel-row">
-        {[1,2,3,4].map(i => <div key={i} className="hist-skel-stat" />)}
+    <div className="hist-page">
+      <div className="hist-skel-title" />
+      <div className="hist-skel-note" />
+      <div className="hist-skel-strip" />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}>
+        {[1, 2, 3].map(i => <div key={i} className="hist-skel-card" />)}
       </div>
-      <div className="hist-skel-bar" />
-      {[1,2,3].map(i => <div key={i} className="hist-skel-card" />)}
+    </div>
+  );
+}
+
+/* ── Filter pill ─────────────────────────────────────────────────────────── */
+function FilterPill({ label, value, options, onChange }) {
+  return (
+    <div className="hist-filter-pill">
+      <select value={value} onChange={e => onChange(e.target.value)}>
+        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+      <span>{options.find(o => o.value === value)?.label || label} ▾</span>
     </div>
   );
 }
@@ -38,12 +116,32 @@ export default function HistoryPage() {
   const navigate = useNavigate();
   const { sessions, profile, loading, error } = useHistoryData(currentUser?.id);
 
-  // ── Filter state ───────────────────────────────────────────────────────
   const [typeFilter, setTypeFilter] = useState('all');
   const [diffFilter, setDiffFilter] = useState('all');
   const [dateFilter, setDateFilter] = useState('all');
 
-  // ── Derived data ───────────────────────────────────────────────────────
+  /* ── Derived stats ─────────────────────────────────────────────────── */
+  const stats = useMemo(() => {
+    let total = 0, count = 0, best = 0;
+    sessions.forEach(s => {
+      if (s.avgOverall > 0) { total += s.avgOverall; count++; }
+      if (s.avgOverall > best) best = s.avgOverall;
+    });
+    return {
+      totalSessions: sessions.length,
+      avgScore:  count > 0 ? (total / count).toFixed(1) : '—',
+      bestScore: best  > 0 ? best.toFixed(1)            : '—',
+      streak:    profile?.current_streak || 0,
+    };
+  }, [sessions, profile]);
+
+  /* ── Best session id ───────────────────────────────────────────────── */
+  const bestSessionId = useMemo(() => {
+    if (!sessions.length) return null;
+    return sessions.reduce((best, s) => s.avgOverall > (best?.avgOverall ?? 0) ? s : best, null)?.id;
+  }, [sessions]);
+
+  /* ── Filtered list ─────────────────────────────────────────────────── */
   const filtered = useMemo(() => {
     let list = [...sessions];
     if (typeFilter !== 'all') list = list.filter(s => s.interview_type === typeFilter);
@@ -60,36 +158,13 @@ export default function HistoryPage() {
     return list;
   }, [sessions, typeFilter, diffFilter, dateFilter]);
 
-  const stats = useMemo(() => {
-    let total = 0, count = 0, best = 0;
-    sessions.forEach(s => {
-      if (s.avgOverall > 0) { total += s.avgOverall; count++; }
-      if (s.avgOverall > best) best = s.avgOverall;
-    });
-    return {
-      totalSessions: sessions.length,
-      avgScore: count > 0 ? (total / count).toFixed(1) : '—',
-      bestScore: best > 0 ? best.toFixed(1) : '—',
-      streak: profile?.current_streak || 0,
-    };
-  }, [sessions, profile]);
-
-  // ScoreTrendChart expects { date, overall, type }
-  const trendData = useMemo(() => {
-    return [...filtered].reverse().map(s => ({
-      date: new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      overall: Number(s.avgOverall.toFixed(1)),
-      type: s.interview_type,
-    }));
-  }, [filtered]);
-
-  // ── Loading / Error / Empty ────────────────────────────────────────────
-  if (loading) return <div className="hist-page"><HistorySkeleton /></div>;
+  /* ── Guards ────────────────────────────────────────────────────────── */
+  if (loading) return <HistorySkeleton />;
   if (error)   return <div className="hist-page"><p style={{ color: '#f87171' }}>Error loading history.</p></div>;
   if (sessions.length === 0) {
     return (
       <div className="hist-page">
-        <h1 className="hist-heading">Session History</h1>
+        <h1 className="hist-title">Your training log.</h1>
         <EmptyState message="Your interview history starts the moment you finish your first one." />
       </div>
     );
@@ -97,118 +172,149 @@ export default function HistoryPage() {
 
   return (
     <div className="hist-page">
-      {/* ── Page title ─────────────────────────────────────────────────── */}
-      <h1 className="hist-heading">Session History</h1>
 
-      {/* ── SECTION 1: Summary bar ─────────────────────────────────────── */}
-      <div className="hist-stats-row">
-        <div className="hist-stat-card">
-          <div className="hist-stat-label">Total Sessions</div>
-          <div className="hist-stat-value">{stats.totalSessions}</div>
+      {/* ── Title ────────────────────────────────────────────────────── */}
+      <h1 className="hist-title">Your training log.</h1>
+
+      {/* ── Alex's Note ──────────────────────────────────────────────── */}
+      <AlexNote sessions={sessions} stats={stats} />
+
+      {/* ── Stats strip ──────────────────────────────────────────────── */}
+      <div className="hist-strip">
+        <div className="hist-strip-item">
+          <div className="hist-strip-value">{stats.totalSessions}</div>
+          <div className="hist-strip-label">Total Sessions</div>
         </div>
-        <div className="hist-stat-card">
-          <div className="hist-stat-label">Average Score</div>
-          <div className="hist-stat-value">{stats.avgScore}</div>
+        <div className="hist-strip-divider" />
+        <div className="hist-strip-item">
+          <div className="hist-strip-value">{stats.avgScore}</div>
+          <div className="hist-strip-label">Average Score</div>
         </div>
-        <div className="hist-stat-card">
-          <div className="hist-stat-label">Best Score</div>
-          <div className="hist-stat-value" style={{ color: '#2dd4a0' }}>{stats.bestScore}</div>
+        <div className="hist-strip-divider" />
+        <div className="hist-strip-item">
+          <div className="hist-strip-value" style={{ color: '#4fc3f7' }}>{stats.bestScore}</div>
+          <div className="hist-strip-label">Best Score</div>
         </div>
-        <div className="hist-stat-card">
-          <div className="hist-stat-label">Current Streak</div>
-          <div className="hist-stat-value" style={{ color: '#f59e0b' }}>
-            {stats.streak} <i className="fa-solid fa-fire" style={{ fontSize: 18 }} />
+        <div className="hist-strip-divider" />
+        <div className="hist-strip-item">
+          <div className="hist-strip-value" style={{ color: '#ff7a45' }}>
+            {stats.streak} <span style={{ fontSize: 20 }}>🔥</span>
           </div>
+          <div className="hist-strip-label">Current Streak</div>
         </div>
       </div>
 
-      {/* ── SECTION 2: Filter bar ──────────────────────────────────────── */}
+      {/* ── Filter row ───────────────────────────────────────────────── */}
       <div className="hist-filter-row">
-        <select className="hist-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
-          <option value="all">All Types</option>
-          <option value="behavioral">Behavioral</option>
-          <option value="technical">Technical</option>
-          <option value="system_design">System Design</option>
-          <option value="hr">HR</option>
-        </select>
-        <select className="hist-select" value={diffFilter} onChange={e => setDiffFilter(e.target.value)}>
-          <option value="all">All Difficulties</option>
-          <option value="easy">Easy</option>
-          <option value="medium">Medium</option>
-          <option value="hard">Hard</option>
-        </select>
-        <select className="hist-select" value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
-          <option value="all">All Time</option>
-          <option value="week">This Week</option>
-          <option value="month">This Month</option>
-        </select>
+        <FilterPill
+          label="All types"
+          value={typeFilter}
+          onChange={setTypeFilter}
+          options={[
+            { value: 'all',          label: 'All types' },
+            { value: 'behavioral',   label: 'Behavioral' },
+            { value: 'technical',    label: 'Technical' },
+            { value: 'system_design',label: 'System Design' },
+            { value: 'hr',           label: 'HR' },
+          ]}
+        />
+        <FilterPill
+          label="All difficulties"
+          value={diffFilter}
+          onChange={setDiffFilter}
+          options={[
+            { value: 'all',    label: 'All difficulties' },
+            { value: 'easy',   label: 'Easy' },
+            { value: 'medium', label: 'Medium' },
+            { value: 'hard',   label: 'Hard' },
+          ]}
+        />
+        <FilterPill
+          label="All time"
+          value={dateFilter}
+          onChange={setDateFilter}
+          options={[
+            { value: 'all',   label: 'All time' },
+            { value: 'week',  label: 'This week' },
+            { value: 'month', label: 'This month' },
+          ]}
+        />
       </div>
 
-      {/* ── SECTION 3: Session cards ───────────────────────────────────── */}
-      <div className="hist-session-list">
+      {/* ── Session list ─────────────────────────────────────────────── */}
+      <div className="hist-list">
         {filtered.length === 0 ? (
           <div className="hist-no-match">No sessions match your filters.</div>
         ) : (
           filtered.map(s => {
-            const date   = new Date(s.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-            const sc     = scoreColor(s.avgOverall);
-            const tColor = TYPE_COLORS[s.interview_type]  || '#4fc3f7';
-            const dColor = DIFF_COLORS[s.difficulty]       || '#4ade80';
-            const company = s.target_company || 'General';
+            const isBest   = s.id === bestSessionId;
+            const sc       = scoreColor(s.avgOverall);
+            const tColor   = TYPE_COLORS[s.interview_type] || '#4fc3f7';
+            const dColor   = DIFF_COLORS[s.difficulty]      || '#4ade80';
+            const company  = s.target_company || 'General';
+            const role     = s.job_role        || 'Other';
+            const dateStr  = new Date(s.created_at).toLocaleDateString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric'
+            });
 
             return (
-              <div key={s.id} className="hist-card">
-                {/* Left — date / duration / chips */}
-                <div className="hist-card-left">
-                  <div className="hist-card-date">{date}</div>
-                  <div className="hist-card-dur"><i className="fa-regular fa-clock" /> {s.durationStr}</div>
+              <div key={s.id} className="hist-entry">
+                {/* Left accent line */}
+                <div className="hist-entry-rail">
+                  <div className="hist-entry-dot" style={{ borderColor: sc }} />
+                  <div className="hist-entry-line" />
+                </div>
+
+                {/* Content */}
+                <div className="hist-entry-content">
+
+                  {/* Row 1: date + best badge */}
+                  <div className="hist-entry-meta">
+                    <div>
+                      <div className="hist-entry-date">{dateStr}</div>
+                      <div className="hist-entry-dur">{s.durationStr}</div>
+                    </div>
+                    {isBest && (
+                      <span className="hist-best-badge">Your Best Session</span>
+                    )}
+                  </div>
+
+                  {/* Row 2: chips */}
                   <div className="hist-chip-row">
-                    <span className="hist-chip" style={{ color: tColor, background: `${tColor}18` }}>
+                    <span className="hist-chip" style={{ color: tColor, borderColor: `${tColor}44` }}>
                       {TYPE_LABELS[s.interview_type] || s.interview_type}
                     </span>
-                    <span className="hist-chip" style={{ color: dColor, background: `${dColor}18` }}>
-                      {s.difficulty}
+                    <span className="hist-chip" style={{ color: dColor, borderColor: `${dColor}44` }}>
+                      {s.difficulty?.toUpperCase()}
                     </span>
                   </div>
-                </div>
 
-                {/* Centre — company, role, sub-scores */}
-                <div className="hist-card-centre">
-                  <div className="hist-card-company">{company}</div>
-                  <div className="hist-card-role">{s.job_role || 'Software Engineer'}</div>
-                  <div className="hist-sub-scores">
-                    <span><strong>C</strong> {s.avgClarity.toFixed(1)}</span>
-                    <span><strong>D</strong> {s.avgDepth.toFixed(1)}</span>
-                    <span><strong>S</strong> {s.avgStructure.toFixed(1)}</span>
-                  </div>
-                </div>
-
-                {/* Score ring */}
-                <div className="hist-card-score" style={{ '--ring': sc }}>
-                  {s.avgOverall.toFixed(1)}
-                </div>
-
-                {/* Right — buttons & difficulty progression */}
-                <div className="hist-card-right">
-                  <button className="hist-btn" onClick={() => navigate(`/replay/${s.id}`)}>
-                    View Report <i className="fa-solid fa-arrow-right" />
-                  </button>
-                  <button className="hist-btn blue" onClick={() => navigate(`/replay/${s.id}`)}>
-                    <i className="fa-solid fa-play" style={{ marginRight: 4 }} /> Replay
-                  </button>
-                  {s.difficulty_history?.length > 0 && (
-                    <div className="hist-diff-prog">
-                      {s.difficulty_history.map((d, i) => {
-                        const dc = DIFF_COLORS[d] || '#4fc3f7';
-                        return (
-                          <React.Fragment key={i}>
-                            {i > 0 && <i className="fa-solid fa-caret-right" style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)' }} />}
-                            <span className="hist-chip-tiny" style={{ color: dc, background: `${dc}18` }}>{d}</span>
-                          </React.Fragment>
-                        );
-                      })}
+                  {/* Row 3: inner card */}
+                  <div className="hist-inner-card">
+                    <div className="hist-inner-left">
+                      <div className="hist-inner-company">{company}</div>
+                      <div className="hist-inner-role" style={{ color: tColor }}>{role}</div>
+                      <div className="hist-inner-subscores">
+                        <span>C <strong>{s.avgClarity.toFixed(1)}</strong></span>
+                        <span>D <strong>{s.avgDepth.toFixed(1)}</strong></span>
+                        <span>S <strong>{s.avgStructure.toFixed(1)}</strong></span>
+                      </div>
                     </div>
-                  )}
+
+                    <div className="hist-inner-right">
+                      <ScoreGauge score={s.avgOverall} />
+                      <div className="hist-inner-btns">
+                        <button className="hist-btn-view" onClick={() => navigate(`/replay/${s.id}`)}>
+                          View report →
+                        </button>
+                        <button className="hist-btn-replay" onClick={() => navigate(`/replay/${s.id}`)}>
+                          <i className="fa-solid fa-play" style={{ fontSize: 11, marginRight: 5 }} />
+                          Replay
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
                 </div>
               </div>
             );
@@ -216,12 +322,6 @@ export default function HistoryPage() {
         )}
       </div>
 
-      {/* ── SECTION 4: Score trend chart ────────────────────────────────── */}
-      {trendData.length >= 2 && (
-        <div className="hist-chart-wrap">
-          <ScoreTrendChart data={trendData} />
-        </div>
-      )}
     </div>
   );
 }
