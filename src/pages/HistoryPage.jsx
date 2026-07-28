@@ -12,29 +12,27 @@ function scoreColor(v) {
   return '#ef4444';
 }
 
-const TYPE_COLORS = { behavioral: '#4fc3f7', technical: '#a78bfa', system_design: '#f59e0b', hr: '#4ade80' };
-const DIFF_COLORS = { easy: '#4ade80', medium: '#f59e0b', hard: '#ef4444' };
-const TYPE_LABELS = { behavioral: 'Behavioral', technical: 'Technical', system_design: 'System Design', hr: 'HR' };
+const TYPE_COLORS  = { behavioral: '#4fc3f7', technical: '#a78bfa', system_design: '#f59e0b', hr: '#4ade80' };
+const DIFF_COLORS  = { easy: '#4ade80', medium: '#f59e0b', hard: '#ef4444' };
+const TYPE_LABELS  = { behavioral: 'Behavioral', technical: 'Technical', system_design: 'System Design', hr: 'HR' };
 
 /* ── Circular SVG score gauge ────────────────────────────────────────────── */
 function ScoreGauge({ score }) {
-  const color = scoreColor(score);
-  const radius = 30;
+  const color  = scoreColor(score);
+  const radius = 28;
   const circ   = 2 * Math.PI * radius;
   const filled = (score / 10) * circ;
-
   return (
-    <svg width="80" height="80" viewBox="0 0 80 80" className="hist-gauge">
-      <circle cx="40" cy="40" r={radius} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="6" />
+    <svg width="76" height="76" viewBox="0 0 76 76" style={{ flexShrink: 0 }}>
+      <circle cx="38" cy="38" r={radius} fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="5" />
       <circle
-        cx="40" cy="40" r={radius} fill="none"
-        stroke={color} strokeWidth="6"
+        cx="38" cy="38" r={radius} fill="none"
+        stroke={color} strokeWidth="5"
         strokeDasharray={`${filled} ${circ}`}
         strokeLinecap="round"
-        transform="rotate(-90 40 40)"
-        style={{ transition: 'stroke-dasharray 0.6s ease' }}
+        transform="rotate(-90 38 38)"
       />
-      <text x="40" y="45" textAnchor="middle" fill="#fff" fontSize="16" fontWeight="700" fontFamily="inherit">
+      <text x="38" y="44" textAnchor="middle" fill="#fff" fontSize="15" fontWeight="700" fontFamily="inherit">
         {score.toFixed(1)}
       </text>
     </svg>
@@ -42,16 +40,14 @@ function ScoreGauge({ score }) {
 }
 
 /* ── Alex's motivational note ────────────────────────────────────────────── */
-function AlexNote({ sessions, stats }) {
-  const best = sessions.find(s => s.avgOverall.toFixed(1) === stats.bestScore);
+function AlexNote({ sessions, bestScore }) {
   const lastSess = sessions[0];
-
   let note = "Complete your first interview and Alex will have something to say.";
 
   if (sessions.length >= 1 && lastSess) {
-    const dur = lastSess.durationStr;
+    const dur      = lastSess.durationStr;
     const scoreVal = lastSess.avgOverall.toFixed(1);
-    const isBest = lastSess.id === best?.id;
+    const isBest   = scoreVal === bestScore;
 
     if (sessions.length === 1) {
       note = `First one's done. ${dur}, ${scoreVal} — that's your baseline. Everything from here is progress.`;
@@ -64,19 +60,21 @@ function AlexNote({ sessions, stats }) {
     }
   }
 
+  // Bold the score numbers
+  const parts = note.split(/(\d+\.\d+)/g);
+
   return (
     <div className="hist-alex-note">
       <div className="hist-alex-avatar">A</div>
       <div className="hist-alex-body">
         <div className="hist-alex-label">Alex's Note</div>
-        <p className="hist-alex-text"
-          dangerouslySetInnerHTML={{
-            __html: note.replace(
-              /(\d+\.\d+)/g,
-              '<strong>$1</strong>'
-            )
-          }}
-        />
+        <p className="hist-alex-text">
+          {parts.map((part, i) =>
+            /^\d+\.\d+$/.test(part)
+              ? <strong key={i}>{part}</strong>
+              : part
+          )}
+        </p>
       </div>
     </div>
   );
@@ -89,21 +87,7 @@ function HistorySkeleton() {
       <div className="hist-skel-title" />
       <div className="hist-skel-note" />
       <div className="hist-skel-strip" />
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginTop: 24 }}>
-        {[1, 2, 3].map(i => <div key={i} className="hist-skel-card" />)}
-      </div>
-    </div>
-  );
-}
-
-/* ── Filter pill ─────────────────────────────────────────────────────────── */
-function FilterPill({ label, value, options, onChange }) {
-  return (
-    <div className="hist-filter-pill">
-      <select value={value} onChange={e => onChange(e.target.value)}>
-        {options.map(o => <option key={o.value} value={o.value}>{o.label}</option>)}
-      </select>
-      <span>{options.find(o => o.value === value)?.label || label} ▾</span>
+      {[1, 2, 3].map(i => <div key={i} className="hist-skel-card" />)}
     </div>
   );
 }
@@ -138,7 +122,7 @@ export default function HistoryPage() {
   /* ── Best session id ───────────────────────────────────────────────── */
   const bestSessionId = useMemo(() => {
     if (!sessions.length) return null;
-    return sessions.reduce((best, s) => s.avgOverall > (best?.avgOverall ?? 0) ? s : best, null)?.id;
+    return sessions.reduce((b, s) => s.avgOverall > (b?.avgOverall ?? 0) ? s : b, null)?.id;
   }, [sessions]);
 
   /* ── Filtered list ─────────────────────────────────────────────────── */
@@ -177,7 +161,7 @@ export default function HistoryPage() {
       <h1 className="hist-title">Your training log.</h1>
 
       {/* ── Alex's Note ──────────────────────────────────────────────── */}
-      <AlexNote sessions={sessions} stats={stats} />
+      <AlexNote sessions={sessions} bestScore={stats.bestScore} />
 
       {/* ── Stats strip ──────────────────────────────────────────────── */}
       <div className="hist-strip">
@@ -198,7 +182,7 @@ export default function HistoryPage() {
         <div className="hist-strip-divider" />
         <div className="hist-strip-item">
           <div className="hist-strip-value" style={{ color: '#ff7a45' }}>
-            {stats.streak} <span style={{ fontSize: 20 }}>🔥</span>
+            {stats.streak}&nbsp;<span style={{ fontSize: 22, lineHeight: 1 }}>🔥</span>
           </div>
           <div className="hist-strip-label">Current Streak</div>
         </div>
@@ -206,39 +190,24 @@ export default function HistoryPage() {
 
       {/* ── Filter row ───────────────────────────────────────────────── */}
       <div className="hist-filter-row">
-        <FilterPill
-          label="All types"
-          value={typeFilter}
-          onChange={setTypeFilter}
-          options={[
-            { value: 'all',          label: 'All types' },
-            { value: 'behavioral',   label: 'Behavioral' },
-            { value: 'technical',    label: 'Technical' },
-            { value: 'system_design',label: 'System Design' },
-            { value: 'hr',           label: 'HR' },
-          ]}
-        />
-        <FilterPill
-          label="All difficulties"
-          value={diffFilter}
-          onChange={setDiffFilter}
-          options={[
-            { value: 'all',    label: 'All difficulties' },
-            { value: 'easy',   label: 'Easy' },
-            { value: 'medium', label: 'Medium' },
-            { value: 'hard',   label: 'Hard' },
-          ]}
-        />
-        <FilterPill
-          label="All time"
-          value={dateFilter}
-          onChange={setDateFilter}
-          options={[
-            { value: 'all',   label: 'All time' },
-            { value: 'week',  label: 'This week' },
-            { value: 'month', label: 'This month' },
-          ]}
-        />
+        <select className="hist-filter-select" value={typeFilter} onChange={e => setTypeFilter(e.target.value)}>
+          <option value="all">All types</option>
+          <option value="behavioral">Behavioral</option>
+          <option value="technical">Technical</option>
+          <option value="system_design">System Design</option>
+          <option value="hr">HR</option>
+        </select>
+        <select className="hist-filter-select" value={diffFilter} onChange={e => setDiffFilter(e.target.value)}>
+          <option value="all">All difficulties</option>
+          <option value="easy">Easy</option>
+          <option value="medium">Medium</option>
+          <option value="hard">Hard</option>
+        </select>
+        <select className="hist-filter-select" value={dateFilter} onChange={e => setDateFilter(e.target.value)}>
+          <option value="all">All time</option>
+          <option value="week">This week</option>
+          <option value="month">This month</option>
+        </select>
       </div>
 
       {/* ── Session list ─────────────────────────────────────────────── */}
@@ -247,54 +216,52 @@ export default function HistoryPage() {
           <div className="hist-no-match">No sessions match your filters.</div>
         ) : (
           filtered.map(s => {
-            const isBest   = s.id === bestSessionId;
-            const sc       = scoreColor(s.avgOverall);
-            const tColor   = TYPE_COLORS[s.interview_type] || '#4fc3f7';
-            const dColor   = DIFF_COLORS[s.difficulty]      || '#4ade80';
-            const company  = s.target_company || 'General';
-            const role     = s.job_role        || 'Other';
-            const dateStr  = new Date(s.created_at).toLocaleDateString('en-US', {
-              month: 'short', day: 'numeric', year: 'numeric'
+            const isBest  = s.id === bestSessionId;
+            const sc      = scoreColor(s.avgOverall);
+            const tColor  = TYPE_COLORS[s.interview_type] || '#4fc3f7';
+            const dColor  = DIFF_COLORS[s.difficulty]      || '#4ade80';
+            const company = s.target_company || 'General';
+            const role    = s.job_role        || 'Other';
+            const dateStr = new Date(s.created_at).toLocaleDateString('en-US', {
+              month: 'short', day: 'numeric', year: 'numeric',
             });
 
             return (
               <div key={s.id} className="hist-entry">
-                {/* Left accent line */}
-                <div className="hist-entry-rail">
-                  <div className="hist-entry-dot" style={{ borderColor: sc }} />
-                  <div className="hist-entry-line" />
+                {/* Left timeline rail */}
+                <div className="hist-rail">
+                  <div className="hist-rail-dot" style={{ borderColor: sc }} />
+                  <div className="hist-rail-line" />
                 </div>
 
-                {/* Content */}
-                <div className="hist-entry-content">
+                {/* Entry content */}
+                <div className="hist-entry-body">
 
-                  {/* Row 1: date + best badge */}
+                  {/* Meta: date + best badge */}
                   <div className="hist-entry-meta">
                     <div>
                       <div className="hist-entry-date">{dateStr}</div>
                       <div className="hist-entry-dur">{s.durationStr}</div>
                     </div>
-                    {isBest && (
-                      <span className="hist-best-badge">Your Best Session</span>
-                    )}
+                    {isBest && <span className="hist-best-badge">Your Best Session</span>}
                   </div>
 
-                  {/* Row 2: chips */}
+                  {/* Chips */}
                   <div className="hist-chip-row">
-                    <span className="hist-chip" style={{ color: tColor, borderColor: `${tColor}44` }}>
+                    <span className="hist-chip" style={{ color: tColor, borderColor: `${tColor}50` }}>
                       {TYPE_LABELS[s.interview_type] || s.interview_type}
                     </span>
-                    <span className="hist-chip" style={{ color: dColor, borderColor: `${dColor}44` }}>
-                      {s.difficulty?.toUpperCase()}
+                    <span className="hist-chip" style={{ color: dColor, borderColor: `${dColor}50` }}>
+                      {(s.difficulty || 'easy').toUpperCase()}
                     </span>
                   </div>
 
-                  {/* Row 3: inner card */}
+                  {/* Inner card */}
                   <div className="hist-inner-card">
                     <div className="hist-inner-left">
                       <div className="hist-inner-company">{company}</div>
                       <div className="hist-inner-role" style={{ color: tColor }}>{role}</div>
-                      <div className="hist-inner-subscores">
+                      <div className="hist-inner-scores">
                         <span>C <strong>{s.avgClarity.toFixed(1)}</strong></span>
                         <span>D <strong>{s.avgDepth.toFixed(1)}</strong></span>
                         <span>S <strong>{s.avgStructure.toFixed(1)}</strong></span>
@@ -308,8 +275,7 @@ export default function HistoryPage() {
                           View report →
                         </button>
                         <button className="hist-btn-replay" onClick={() => navigate(`/replay/${s.id}`)}>
-                          <i className="fa-solid fa-play" style={{ fontSize: 11, marginRight: 5 }} />
-                          Replay
+                          ▶ Replay
                         </button>
                       </div>
                     </div>
