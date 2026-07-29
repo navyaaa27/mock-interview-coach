@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useProgressData } from '../hooks/useProgressData';
 import { useAuth } from '../context/AuthContext';
@@ -11,12 +11,6 @@ import StudyPlan from '../components/StudyPlan/StudyPlan';
 import ReadinessScore from '../components/ReadinessScore/ReadinessScore';
 import './ProgressPage.css';
 
-/* ── Helpers ─────────────────────────────────────────────────────────────── */
-function scoreColor(v) {
-  if (v >= 7.5) return '#2dd4a0';
-  if (v >= 5)   return '#f59e0b';
-  return '#ef4444';
-}
 
 /* ── Alex insight note ───────────────────────────────────────────────────── */
 function AlexInsight({ data }) {
@@ -94,22 +88,21 @@ export default function ProgressPage() {
   const { data, loading, error } = useProgressData(currentUser?.id);
   const navigate = useNavigate();
 
-  /* ── Derived strip stats ─────────────────────────────────────────────── */
-  const strip = useMemo(() => {
-    const sessions = data?.sessionChartData || [];
-    const n = sessions.length;
-    if (!n) return { sessions: 0, avg: '—', best: '—', streak: data?.user?.current_streak || 0 };
-    const avg  = (sessions.reduce((s, d) => s + d.overall, 0) / n).toFixed(1);
-    const best = Math.max(...sessions.map(s => s.overall)).toFixed(1);
-    return { sessions: n, avg, best, streak: data?.user?.current_streak || 0 };
-  }, [data]);
 
   /* ── Guards ──────────────────────────────────────────────────────────── */
   if (loading) return <ProgressSkeleton />;
   if (error)   return <div className="prog-page"><p style={{ color: '#f87171' }}>Error loading data: {error.message}</p></div>;
 
-  const hasData    = (data?.sessionChartData?.length || 0) >= 1;
-  const hasCharts  = (data?.sessionChartData?.length || 0) >= 3;
+  const sessions  = data?.sessionChartData || [];
+  const hasData   = sessions.length >= 1;
+  const hasCharts = sessions.length >= 3;
+
+  /* ── Derived strip stats (safe — only runs after data loads) ─────────── */
+  const n       = sessions.length;
+  const avg     = n > 0 ? (sessions.reduce((s, d) => s + d.overall, 0) / n).toFixed(1) : '—';
+  const bestVal = n > 0 ? Math.max(...sessions.map(s => s.overall || 0)) : 0;
+  const best    = bestVal > 0 ? bestVal.toFixed(1) : '—';
+  const streak  = data?.user?.current_streak || 0;
 
   return (
     <div className="prog-page">
@@ -123,23 +116,23 @@ export default function ProgressPage() {
       {/* ── Stats strip ────────────────────────────────────────────────── */}
       <div className="prog-strip">
         <div className="prog-strip-item">
-          <div className="prog-strip-value">{strip.sessions}</div>
+          <div className="prog-strip-value">{n}</div>
           <div className="prog-strip-label">Sessions</div>
         </div>
         <div className="prog-strip-divider" />
         <div className="prog-strip-item">
-          <div className="prog-strip-value">{strip.avg}</div>
+          <div className="prog-strip-value">{avg}</div>
           <div className="prog-strip-label">Average Score</div>
         </div>
         <div className="prog-strip-divider" />
         <div className="prog-strip-item">
-          <div className="prog-strip-value" style={{ color: '#4fc3f7' }}>{strip.best}</div>
+          <div className="prog-strip-value" style={{ color: '#4fc3f7' }}>{best}</div>
           <div className="prog-strip-label">Best Score</div>
         </div>
         <div className="prog-strip-divider" />
         <div className="prog-strip-item">
           <div className="prog-strip-value" style={{ color: '#ff7a45' }}>
-            {strip.streak}&nbsp;<span style={{ fontSize: 22, lineHeight: 1 }}>🔥</span>
+            {streak}&nbsp;<span style={{ fontSize: 22, lineHeight: 1 }}>🔥</span>
           </div>
           <div className="prog-strip-label">Current Streak</div>
         </div>
@@ -192,13 +185,13 @@ export default function ProgressPage() {
       <div className="prog-row prog-row-2col" style={{ marginBottom: 20 }}>
         <div className="prog-card">
           <div className="prog-section-label">
-            <i className="fa-solid fa-hexagon-nodes" style={{ color: '#2dd4a0' }} /> Skill Profile
+            <i className="fa-solid fa-star" style={{ color: '#2dd4a0' }} /> Skill Profile
           </div>
           {hasCharts ? (
             <SkillRadarChart data={data.sessionChartData} />
           ) : (
             <div className="prog-empty-card" style={{ height: 180 }}>
-              <i className="fa-solid fa-hexagon-nodes" />
+              <i className="fa-solid fa-star" />
               Needs 3+ sessions to render.
             </div>
           )}
