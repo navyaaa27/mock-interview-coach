@@ -1,86 +1,7 @@
-import React from 'react';
+import React, { useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useProgressData } from '../hooks/useProgressData';
 import { useAuth } from '../context/AuthContext';
-import { useNavigate } from 'react-router-dom';
-
-function ProgressSkeleton() {
-  return (
-    <div className="progress-skeleton-container" style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' }}>
-      <style>
-        {`
-          @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: .5; }
-          }
-          .skel-box {
-            background-color: #333; /* Dark grey */
-            border-radius: 12px;
-            width: 100%;
-          }
-        `}
-      </style>
-      <div className="skel-box" style={{ height: '200px' }}></div>
-      <div style={{ display: 'flex', gap: '1.5rem' }}>
-        <div className="skel-box" style={{ height: '150px', flex: 1 }}></div>
-        <div className="skel-box" style={{ height: '150px', flex: 1 }}></div>
-      </div>
-      <div className="skel-box" style={{ height: '300px' }}></div>
-      <div className="skel-box" style={{ height: '250px' }}></div>
-    </div>
-  );
-}
-
-function ProgressEmptyState() {
-  const navigate = useNavigate();
-  return (
-    <div className="progress-empty-state" style={{ 
-      display: 'flex', 
-      flexDirection: 'column', 
-      alignItems: 'center', 
-      justifyContent: 'center', 
-      height: '80vh',
-      textAlign: 'center',
-      color: '#fff',
-      padding: '2rem'
-    }}>
-      <div style={{ marginBottom: '2rem' }}>
-        {/* Abstract Illustration Placeholder */}
-        <svg width="200" height="200" viewBox="0 0 200 200" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <circle cx="100" cy="100" r="80" stroke="#4F46E5" strokeWidth="4" strokeDasharray="10 10" />
-          <path d="M70 120 L100 90 L130 110 L160 70" stroke="#10B981" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-          <circle cx="70" cy="120" r="6" fill="#10B981" />
-          <circle cx="100" cy="90" r="6" fill="#10B981" />
-          <circle cx="130" cy="110" r="6" fill="#10B981" />
-          <circle cx="160" cy="70" r="6" fill="#10B981" />
-        </svg>
-      </div>
-      <h2 style={{ fontSize: '1.5rem', marginBottom: '1rem', fontWeight: 'bold' }}>Complete 3 sessions to unlock your progress analytics</h2>
-      <p style={{ color: '#9CA3AF', marginBottom: '2rem', maxWidth: '400px' }}>
-        We need a bit more data to show you meaningful trends and insights about your interview performance.
-      </p>
-      <button 
-        onClick={() => navigate('/setup')}
-        style={{
-          background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)',
-          color: 'white',
-          border: 'none',
-          padding: '0.75rem 2rem',
-          borderRadius: '9999px',
-          fontSize: '1.1rem',
-          fontWeight: '600',
-          cursor: 'pointer',
-          boxShadow: '0 4px 14px 0 rgba(79, 70, 229, 0.39)',
-          transition: 'all 0.2s ease-in-out'
-        }}
-        onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-        onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-      >
-        Start Interview →
-      </button>
-    </div>
-  );
-}
-
 import ScoreTrendChart from '../components/charts/ScoreTrendChart';
 import SkillRadarChart from '../components/charts/SkillRadarChart';
 import WeakAreaChart from '../components/charts/WeakAreaChart';
@@ -88,68 +9,242 @@ import TypeBreakdownChart from '../components/charts/TypeBreakdownChart';
 import DeliveryTrendChart from '../components/charts/DeliveryTrendChart';
 import StudyPlan from '../components/StudyPlan/StudyPlan';
 import ReadinessScore from '../components/ReadinessScore/ReadinessScore';
-import EmptyState from '../components/EmptyState/EmptyState';
+import './ProgressPage.css';
 
+/* ── Helpers ─────────────────────────────────────────────────────────────── */
+function scoreColor(v) {
+  if (v >= 7.5) return '#2dd4a0';
+  if (v >= 5)   return '#f59e0b';
+  return '#ef4444';
+}
+
+/* ── Alex insight note ───────────────────────────────────────────────────── */
+function AlexInsight({ data }) {
+  const sessions = data?.sessionChartData || [];
+  const n = sessions.length;
+
+  let note = "Finish a few sessions and Alex will start connecting the dots.";
+
+  if (n >= 1) {
+    const latest  = sessions[sessions.length - 1];
+    const best    = sessions.reduce((b, s) => s.overall > b.overall ? s : b, sessions[0]);
+    const avg     = (sessions.reduce((s, d) => s + d.overall, 0) / n).toFixed(1);
+    const trend   = n >= 3
+      ? sessions.slice(-3).reduce((s, d) => s + d.overall, 0) / 3
+      : null;
+    const improving = trend !== null && trend > Number(avg);
+
+    if (n === 1) {
+      note = `One session down. You scored ${latest.overall.toFixed(1)}. That's the first data point — come back to make it a line.`;
+    } else if (n === 2) {
+      note = `Two sessions in. Average sitting at ${avg}. Not enough to call it a trend yet — one more and the picture starts to form.`;
+    } else if (improving) {
+      note = `${n} sessions. Last three are trending up. Average ${avg}, best at ${best.overall.toFixed(1)}. That's not noise — that's a pattern. Keep the streak alive.`;
+    } else if (latest.overall >= 8) {
+      note = `${n} sessions in. Your last score — ${latest.overall.toFixed(1)} — is your clearest signal yet. The work is compounding. Don't stop now.`;
+    } else {
+      note = `${n} sessions. Average at ${avg}, best at ${best.overall.toFixed(1)}. The gap between those two numbers is your opportunity. Keep showing up.`;
+    }
+  }
+
+  const parts = note.split(/(\d+\.\d+|\d+)/g);
+
+  return (
+    <div className="prog-note">
+      <div className="prog-note-avatar">A</div>
+      <div className="prog-note-body">
+        <div className="prog-note-label">Alex's Note</div>
+        <p className="prog-note-text">
+          {parts.map((part, i) =>
+            /^[\d.]+$/.test(part) && part.length > 0
+              ? <strong key={i}>{part}</strong>
+              : part
+          )}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ── Skeleton ────────────────────────────────────────────────────────────── */
+function ProgressSkeleton() {
+  return (
+    <div className="prog-page">
+      <div className="prog-skel-title" />
+      <div className="prog-skel-note" />
+      <div className="prog-skel-strip" />
+      <div className="prog-row prog-row-2col">
+        <div className="prog-skel-card" style={{ height: 260 }} />
+        <div className="prog-skel-card" style={{ height: 260 }} />
+      </div>
+      <div className="prog-skel-card" style={{ height: 200, marginBottom: 20 }} />
+      <div className="prog-row prog-row-2col">
+        <div className="prog-skel-card" style={{ height: 200 }} />
+        <div className="prog-skel-card" style={{ height: 200 }} />
+      </div>
+    </div>
+  );
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   MAIN COMPONENT
+   ══════════════════════════════════════════════════════════════════════════ */
 export default function ProgressPage() {
   const { currentUser } = useAuth();
   const { data, loading, error } = useProgressData(currentUser?.id);
   const navigate = useNavigate();
 
+  /* ── Derived strip stats ─────────────────────────────────────────────── */
+  const strip = useMemo(() => {
+    const sessions = data?.sessionChartData || [];
+    const n = sessions.length;
+    if (!n) return { sessions: 0, avg: '—', best: '—', streak: data?.user?.current_streak || 0 };
+    const avg  = (sessions.reduce((s, d) => s + d.overall, 0) / n).toFixed(1);
+    const best = Math.max(...sessions.map(s => s.overall)).toFixed(1);
+    return { sessions: n, avg, best, streak: data?.user?.current_streak || 0 };
+  }, [data]);
+
+  /* ── Guards ──────────────────────────────────────────────────────────── */
   if (loading) return <ProgressSkeleton />;
-  if (error) return <div style={{ color: 'red', padding: '2rem' }}>Error loading data: {error.message}</div>;
-  
-  if (!data?.sessionChartData?.length || data.sessionChartData.length < 3) {
-    return (
-      <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1400px', margin: '0 auto' }}>
-        <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 'bold', color: '#fff', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '2rem', alignItems: 'start' }}>
-          <ReadinessScore />
-          <div style={{ background: '#111', padding: '2rem', borderRadius: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-            <EmptyState
-              message="Three sessions in and the pattern starts to show. You're not there yet."
-            />
-          </div>
-        </div>
-      </div>
-    );
-  }
+  if (error)   return <div className="prog-page"><p style={{ color: '#f87171' }}>Error loading data: {error.message}</p></div>;
+
+  const hasData    = (data?.sessionChartData?.length || 0) >= 1;
+  const hasCharts  = (data?.sessionChartData?.length || 0) >= 3;
 
   return (
-    <div className="progress-page" style={{ padding: '2rem', color: '#fff', maxWidth: '1400px', margin: '0 auto' }}>
-      <h1 style={{ fontFamily: 'var(--font-display)', fontSize: '2rem', fontWeight: 'bold', margin: '0 0 2rem 0' }}>Progress Analytics</h1>
-      
-      <div style={{ display: 'grid', gridTemplateColumns: 'minmax(300px, 1fr) 2fr', gap: '2rem', marginBottom: '2rem', alignItems: 'start' }}>
-        {/* Left Column */}
-        <div>
+    <div className="prog-page">
+
+      {/* ── Title ──────────────────────────────────────────────────────── */}
+      <h1 className="prog-title">Your progress, mapped.</h1>
+
+      {/* ── Alex's insight note ────────────────────────────────────────── */}
+      <AlexInsight data={data} />
+
+      {/* ── Stats strip ────────────────────────────────────────────────── */}
+      <div className="prog-strip">
+        <div className="prog-strip-item">
+          <div className="prog-strip-value">{strip.sessions}</div>
+          <div className="prog-strip-label">Sessions</div>
+        </div>
+        <div className="prog-strip-divider" />
+        <div className="prog-strip-item">
+          <div className="prog-strip-value">{strip.avg}</div>
+          <div className="prog-strip-label">Average Score</div>
+        </div>
+        <div className="prog-strip-divider" />
+        <div className="prog-strip-item">
+          <div className="prog-strip-value" style={{ color: '#4fc3f7' }}>{strip.best}</div>
+          <div className="prog-strip-label">Best Score</div>
+        </div>
+        <div className="prog-strip-divider" />
+        <div className="prog-strip-item">
+          <div className="prog-strip-value" style={{ color: '#ff7a45' }}>
+            {strip.streak}&nbsp;<span style={{ fontSize: 22, lineHeight: 1 }}>🔥</span>
+          </div>
+          <div className="prog-strip-label">Current Streak</div>
+        </div>
+      </div>
+
+      {/* ── Readiness + Type Breakdown ─────────────────────────────────── */}
+      <div className="prog-row prog-row-2col" style={{ marginBottom: 20 }}>
+        <div className="prog-card">
+          <div className="prog-section-label">
+            <i className="fa-solid fa-bullseye" style={{ color: '#ff7a45' }} /> Readiness Score
+          </div>
           <ReadinessScore />
-          <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px', marginTop: '-1rem' }}>
+        </div>
+        <div className="prog-card">
+          <div className="prog-section-label">
+            <i className="fa-solid fa-chart-pie" style={{ color: '#a78bfa' }} /> By Interview Type
+          </div>
+          {hasData ? (
             <TypeBreakdownChart data={data.typeData} />
-          </div>
+          ) : (
+            <div className="prog-empty-card">
+              <i className="fa-solid fa-chart-pie" />
+              Complete sessions to see type breakdown.
+            </div>
+          )}
         </div>
+      </div>
 
-        {/* Right Column */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
-          <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
+      {/* ── Score Trend ────────────────────────────────────────────────── */}
+      <div className="prog-row prog-row-1col" style={{ marginBottom: 20 }}>
+        <div className="prog-card">
+          <div className="prog-section-label">
+            <i className="fa-solid fa-chart-line" style={{ color: '#4fc3f7' }} /> Score Trend
+          </div>
+          {hasCharts ? (
             <ScoreTrendChart data={data.sessionChartData} />
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2rem' }}>
-            <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
-              <SkillRadarChart data={data.sessionChartData} />
+          ) : (
+            <div className="prog-empty-card" style={{ height: 160 }}>
+              <i className="fa-solid fa-chart-line" />
+              Three sessions in and the pattern starts to show. You're not there yet.
+              <button className="prog-start-btn" onClick={() => navigate('/session')}>
+                Start Interview →
+              </button>
             </div>
-            <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
-              <WeakAreaChart data={data.weakAreaData} />
-            </div>
-          </div>
+          )}
         </div>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '2rem', marginBottom: '2rem' }}>
-        <div style={{ background: '#111', padding: '1.5rem', borderRadius: '16px' }}>
-          <DeliveryTrendChart data={data.sessionChartData} />
+      {/* ── Skill Radar + Weak Areas ───────────────────────────────────── */}
+      <div className="prog-row prog-row-2col" style={{ marginBottom: 20 }}>
+        <div className="prog-card">
+          <div className="prog-section-label">
+            <i className="fa-solid fa-hexagon-nodes" style={{ color: '#2dd4a0' }} /> Skill Profile
+          </div>
+          {hasCharts ? (
+            <SkillRadarChart data={data.sessionChartData} />
+          ) : (
+            <div className="prog-empty-card" style={{ height: 180 }}>
+              <i className="fa-solid fa-hexagon-nodes" />
+              Needs 3+ sessions to render.
+            </div>
+          )}
+        </div>
+        <div className="prog-card">
+          <div className="prog-section-label">
+            <i className="fa-solid fa-triangle-exclamation" style={{ color: '#f59e0b' }} /> Areas to Strengthen
+          </div>
+          {data?.weakAreaData?.length > 0 ? (
+            <WeakAreaChart data={data.weakAreaData} />
+          ) : (
+            <div className="prog-empty-card" style={{ height: 180 }}>
+              <i className="fa-solid fa-triangle-exclamation" />
+              No weak areas identified yet.
+            </div>
+          )}
         </div>
       </div>
 
-      <StudyPlan studyPlanData={data.studyPlan} />
+      {/* ── Delivery Trend ─────────────────────────────────────────────── */}
+      <div className="prog-row prog-row-1col" style={{ marginBottom: 20 }}>
+        <div className="prog-card">
+          <div className="prog-section-label">
+            <i className="fa-solid fa-waveform-lines" style={{ color: '#f59e0b' }} /> Delivery Trend
+          </div>
+          {hasCharts ? (
+            <DeliveryTrendChart data={data.sessionChartData} />
+          ) : (
+            <div className="prog-empty-card" style={{ height: 140 }}>
+              <i className="fa-solid fa-waveform-lines" />
+              Delivery metrics unlock after 3 sessions.
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* ── Study Plan ─────────────────────────────────────────────────── */}
+      <div className="prog-row prog-row-1col prog-study-wrap">
+        <div className="prog-card">
+          <div className="prog-section-label">
+            <i className="fa-solid fa-book-open" style={{ color: '#a78bfa' }} /> Study Plan
+          </div>
+          <StudyPlan studyPlanData={data?.studyPlan} />
+        </div>
+      </div>
+
     </div>
   );
 }
