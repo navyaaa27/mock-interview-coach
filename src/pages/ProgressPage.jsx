@@ -139,7 +139,7 @@ export default function ProgressPage() {
       </div>
 
       {/* ── Readiness + Type Breakdown ─────────────────────────────────── */}
-      <div className="prog-row prog-row-2col" style={{ marginBottom: 20 }}>
+      <div className="prog-row prog-row-2col">
         <div className="prog-card">
           <div className="prog-section-label">
             <i className="fa-solid fa-bullseye" style={{ color: '#ff7a45' }} /> Readiness Score
@@ -162,7 +162,7 @@ export default function ProgressPage() {
       </div>
 
       {/* ── Score Trend ────────────────────────────────────────────────── */}
-      <div className="prog-row prog-row-1col" style={{ marginBottom: 20 }}>
+      <div className="prog-row prog-row-1col">
         <div className="prog-card">
           <div className="prog-section-label">
             <i className="fa-solid fa-chart-line" style={{ color: '#4fc3f7' }} /> Score Trend
@@ -182,7 +182,7 @@ export default function ProgressPage() {
       </div>
 
       {/* ── Skill Radar + Weak Areas ───────────────────────────────────── */}
-      <div className="prog-row prog-row-2col" style={{ marginBottom: 20 }}>
+      <div className="prog-row prog-row-2col">
         <div className="prog-card">
           <div className="prog-section-label">
             <i className="fa-solid fa-star" style={{ color: '#2dd4a0' }} /> Skill Profile
@@ -212,16 +212,16 @@ export default function ProgressPage() {
       </div>
 
       {/* ── Delivery Trend ─────────────────────────────────────────────── */}
-      <div className="prog-row prog-row-1col" style={{ marginBottom: 20 }}>
+      <div className="prog-row prog-row-1col">
         <div className="prog-card">
           <div className="prog-section-label">
-            <i className="fa-solid fa-waveform-lines" style={{ color: '#f59e0b' }} /> Delivery Trend
+            <i className="fa-solid fa-gauge-high" style={{ color: '#f59e0b' }} /> Delivery Trend
           </div>
           {hasCharts ? (
             <DeliveryTrendChart data={data.sessionChartData} />
           ) : (
             <div className="prog-empty-card" style={{ height: 140 }}>
-              <i className="fa-solid fa-waveform-lines" />
+              <i className="fa-solid fa-gauge-high" />
               Delivery metrics unlock after 3 sessions.
             </div>
           )}

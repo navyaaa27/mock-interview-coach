@@ -167,6 +167,16 @@
 .prog-row-2col { grid-template-columns: 1fr 1fr; }
 .prog-row-1col { grid-template-columns: 1fr; }
 
+/* ── Strip ReadinessScore's own card background so it sits cleanly in glass card ── */
+.prog-card > div[style*="background: #111"],
+.prog-card > div[style*="background:#111"] {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  margin-bottom: 0 !important;
+  border-radius: 0 !important;
+}
+
 /* ── Study plan section ──────────────────────────────────────────────────── */
 .prog-study-wrap {
   margin-top: 8px;
