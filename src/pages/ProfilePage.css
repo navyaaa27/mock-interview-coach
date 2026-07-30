@@ -13,9 +13,8 @@
   min-height: 100vh;
   color: var(--text-primary, #fff);
   font-family: var(--font-sans, 'Plus Jakarta Sans', system-ui, sans-serif);
-  padding: 40px 40px 100px;
+  padding: 40px 48px 100px;
   box-sizing: border-box;
-  max-width: 960px;
 }
 
 /* ── Title ───────────────────────────────────────────────────────────────── */
@@ -145,6 +144,7 @@
   grid-template-columns: 1.6fr 1fr;
   gap: 20px;
   align-items: start;
+  width: 100%;
 }
 
 .prof-side-col {
