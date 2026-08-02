@@ -2534,9 +2534,10 @@
         <div>
           <div style="font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.8); margin-bottom: 12px;">3. Duration</div>
           <select id="setup-duration" class="modern-select" style="width: 100%; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 14px; color: white; font-size: 14px; appearance: none;">
-            <option value="15">15 mins (3-4 Qs)</option>
-            <option value="25" selected>25 mins (5-6 Qs)</option>
-            <option value="40">40 mins (7-8 Qs)</option>
+            <option value="15">15 mins (5–6 Qs)</option>
+            <option value="25" selected>30 mins (8–10 Qs)</option>
+            <option value="40">45 mins (12–14 Qs)</option>
+            <option value="60">60 mins (15–18 Qs)</option>
           </select>
         </div>
 
@@ -4281,7 +4282,7 @@ SESSION CONTEXT:
       
       // Determine duration details
       const dur = parseInt(document.getElementById('setup-duration').value);
-      interviewState.totalQuestions = dur === 15 ? 4 : (dur === 25 ? 6 : 8);
+      interviewState.totalQuestions = dur === 15 ? 6 : (dur === 25 ? 10 : (dur === 40 ? 14 : 18));
       document.getElementById('total-q-num').textContent = interviewState.totalQuestions;
       
       // Initialize dots
