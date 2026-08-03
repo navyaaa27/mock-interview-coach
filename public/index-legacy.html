@@ -5437,8 +5437,8 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
       
       if (feedbackRows && feedbackRows.length > 0) {
         for (const f of feedbackRows) {
-          if (f.overall_score < 6 && Array.isArray(f.improvements)) weakAreas.push(...f.improvements);
-          if (f.overall_score >= 8 && Array.isArray(f.strengths)) strongAreas.push(...f.strengths);
+          if (f.overall_score <= 7 && Array.isArray(f.improvements)) weakAreas.push(...f.improvements);
+          if (f.overall_score >= 6.5 && Array.isArray(f.strengths)) strongAreas.push(...f.strengths);
           if (Array.isArray(f.improvements)) allImprovements.push(...f.improvements);
         }
       }
