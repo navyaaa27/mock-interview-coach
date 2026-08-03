@@ -5270,8 +5270,7 @@ SESSION CONTEXT:
         console.log(`✅ Answer saved on retry → answers.id: ${answerId}`);
         return answerId;
       } catch (secondErr) {
-        // Double failure — log but DO NOT interrupt interview
-        alert("CRITICAL DATABASE ERROR: " + secondErr.message);
+        // Double failure — log silently, DO NOT interrupt interview
         console.error(`saveAnswer failed after retry: ${secondErr.message} — session continues.`);
         return null;
       }
