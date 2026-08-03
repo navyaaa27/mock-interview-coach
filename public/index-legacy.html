@@ -5443,16 +5443,16 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
         }
       }
 
-      // 3. Upsert progress table row for this user
+      // 3. Insert a new progress row for this session (time-series — one row per session)
       const { error: progressErr } = await sb
         .from('progress')
-        .upsert({
+        .insert({
           user_id:           currentUser.id,
           weak_areas:        weakAreas.slice(0, 10),
           strong_areas:      strongAreas.slice(0, 10),
           improvement_notes: allImprovements.join(' | '),
-          updated_at:        new Date().toISOString()
-        }, { onConflict: 'user_id' });
+          recorded_at:       new Date().toISOString()
+        });
 
       if (progressErr) {
         console.error('Progress update failed:', progressErr.message);
