@@ -122,7 +122,7 @@ export default function HistoryPage() {
   /* ── Best session id ───────────────────────────────────────────────── */
   const bestSessionId = useMemo(() => {
     if (!sessions.length) return null;
-    return sessions.reduce((b, s) => s.avgOverall > (b?.avgOverall ?? 0) ? s : b, null)?.id;
+    return sessions.reduce((b, s) => ((s.avgOverall || 0) > (b?.avgOverall || 0) ? s : b), null)?.id;
   }, [sessions]);
 
   /* ── Filtered list ─────────────────────────────────────────────────── */
