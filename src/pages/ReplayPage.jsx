@@ -210,7 +210,13 @@ Scoring rubric:
 - depth_score: Did they go deep enough? Did they explain WHY, not just WHAT? Did they use specifics?
 - structure_score (behavioral only): Did they follow STAR format?
 
-Be honest. A score of 7 means genuinely good. Reserve 9-10 for exceptional answers. Most answers should score 5-7.
+Scoring calibration:
+- 1-4: Poor — vague, off-topic, or very incomplete
+- 5-6: Average — some good points but missing depth or structure
+- 7-8: Good — clear, specific, well-structured
+- 9-10: Exceptional — reserve for truly outstanding answers
+
+IMPORTANT: The "strengths" array MUST always contain at least 2 specific positive observations, even for poor answers. The "improvements" array MUST always contain at least 3 specific, actionable suggestions, even for great answers.
 
 CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra text. Just the JSON.`;
 
