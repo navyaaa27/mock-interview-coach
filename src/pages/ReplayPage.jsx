@@ -241,6 +241,7 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
           
           const parsed = JSON.parse(raw);
           const safeInt = (val) => (typeof val === 'number' && val >= 1 && val <= 10) ? Math.round(val) : 5;
+          const safeArr = (v) => Array.isArray(v) ? v.filter(s => typeof s === 'string') : [];
           
           const payload = {
             overall_score: safeInt(parsed.overall_score),
@@ -249,6 +250,8 @@ CRITICAL: Return ONLY the raw JSON object. No markdown code blocks, no extra tex
             structure_score: safeInt(parsed.structure_score),
             feedback_text: parsed.feedback_text || 'Feedback generated.',
             model_answer: parsed.model_answer || '',
+            strengths: safeArr(parsed.strengths),
+            improvements: safeArr(parsed.improvements),
             company_fit: parsed.company_fit || {},
             generation_status: 'complete'
           };
