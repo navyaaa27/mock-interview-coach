@@ -22,13 +22,7 @@ export default function SkillRadarChart({ data }) {
   ];
 
   return (
-    <div style={{ width: '100%', marginBottom: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Skill Breakdown</h2>
-        <p style={{ fontSize: '0.875rem', color: '#9CA3AF', margin: 0 }}>Last {recentSessions.length} sessions average</p>
-      </div>
-      <div style={{ height: '280px', width: '100%' }}>
-        <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height={280}>
           <RadarChart cx="50%" cy="50%" outerRadius="70%" data={radarData}>
             <PolarGrid stroke="rgba(255,255,255,0.08)" />
             <PolarAngleAxis dataKey="subject" tick={{ fill: '#888', fontSize: 12 }} />
@@ -52,8 +46,6 @@ export default function SkillRadarChart({ data }) {
             
             <Legend wrapperStyle={{ fontSize: '12px' }} />
           </RadarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    </ResponsiveContainer>
   );
 }

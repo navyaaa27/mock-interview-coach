@@ -37,13 +37,7 @@ export default function WeakAreaChart({ data }) {
   }
 
   return (
-    <div style={{ width: '100%', marginBottom: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Most Flagged Weak Areas</h2>
-        <p style={{ fontSize: '0.875rem', color: '#9CA3AF', margin: 0 }}>Across your last 10 sessions</p>
-      </div>
-      <div style={{ height: '240px', width: '100%' }}>
-        <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height={240}>
           <BarChart data={data} layout="vertical" margin={{ top: 5, right: 30, left: 10, bottom: 5 }}>
             <XAxis type="number" hide />
             <YAxis dataKey="name" type="category" stroke="#888" tick={{ fill: '#888', fontSize: 12 }} width={120} axisLine={false} tickLine={false} />
@@ -55,8 +49,6 @@ export default function WeakAreaChart({ data }) {
               <LabelList dataKey="count" position="right" fill="#888" fontSize={12} />
             </Bar>
           </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    </ResponsiveContainer>
   );
 }

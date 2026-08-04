@@ -18,13 +18,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 export default function DeliveryTrendChart({ data }) {
   return (
-    <div style={{ width: '100%', marginBottom: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Delivery Over Time</h2>
-        <p style={{ fontSize: '0.875rem', color: '#9CA3AF', margin: 0 }}>Pace and Eye Contact Trends</p>
-      </div>
-      <div style={{ height: '240px', width: '100%' }}>
-        <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height={240}>
           <LineChart data={data} margin={{ top: 20, right: 0, left: -20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" vertical={false} />
             <XAxis dataKey="session" stroke="#888" tick={{ fill: '#888', fontSize: 12 }} />
@@ -47,8 +41,6 @@ export default function DeliveryTrendChart({ data }) {
             <Line yAxisId="left" name="Pace (WPM)" type="monotone" dataKey="pace" stroke="#ffcc60" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
             <Line yAxisId="right" name="Eye Contact (%)" type="monotone" dataKey="eyeContact" stroke="#2dd4a0" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
           </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    </ResponsiveContainer>
   );
 }

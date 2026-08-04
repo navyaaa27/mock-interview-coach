@@ -26,12 +26,7 @@ const CustomTooltip = ({ active, payload }) => {
 
 export default function TypeBreakdownChart({ data }) {
   return (
-    <div style={{ width: '100%', marginBottom: '2rem' }}>
-      <div style={{ marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Performance by Interview Type</h2>
-      </div>
-      <div style={{ height: '220px', width: '100%' }}>
-        <ResponsiveContainer width="100%" height="100%">
+    <ResponsiveContainer width="100%" height={220}>
           <BarChart data={data} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
             <XAxis dataKey="type" stroke="#888" tick={{ fill: '#888', fontSize: 12, textTransform: 'capitalize' }} />
             <YAxis domain={[0, 10]} stroke="#888" tick={{ fill: '#888', fontSize: 12 }} />
@@ -44,8 +39,6 @@ export default function TypeBreakdownChart({ data }) {
               })}
             </Bar>
           </BarChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
+    </ResponsiveContainer>
   );
 }
