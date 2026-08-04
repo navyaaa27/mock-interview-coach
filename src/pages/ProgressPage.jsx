@@ -95,7 +95,7 @@ export default function ProgressPage() {
 
   const sessions  = data?.sessionChartData || [];
   const hasData   = sessions.length >= 1;
-  const hasCharts = sessions.length >= 3;
+  const hasCharts = sessions.length >= 1;
 
   /* ── Derived strip stats (safe — only runs after data loads) ─────────── */
   const n       = sessions.length;
@@ -172,7 +172,7 @@ export default function ProgressPage() {
           ) : (
             <div className="prog-empty-card" style={{ height: 160 }}>
               <i className="fa-solid fa-chart-line" />
-              Three sessions in and the pattern starts to show. You're not there yet.
+              Complete your first session to unlock the score trend chart.
               <button className="prog-start-btn" onClick={() => navigate('/session')}>
                 Start Interview →
               </button>
@@ -192,7 +192,7 @@ export default function ProgressPage() {
           ) : (
             <div className="prog-empty-card" style={{ height: 180 }}>
               <i className="fa-solid fa-star" />
-              Needs 3+ sessions to render.
+              Complete at least one session to build your skill profile.
             </div>
           )}
         </div>
@@ -222,7 +222,7 @@ export default function ProgressPage() {
           ) : (
             <div className="prog-empty-card" style={{ height: 140 }}>
               <i className="fa-solid fa-gauge-high" />
-              Delivery metrics unlock after 3 sessions.
+              Delivery metrics appear once you've completed a session.
             </div>
           )}
         </div>
