@@ -67,7 +67,9 @@ export function useProgressData(userId) {
             ? Math.round((arr.reduce((sum,v)=>sum+v,0)/arr.length)*10)/10 : 0;
           return {
             session: i + 1,
-            date: new Date(s.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short'}),
+            date: (s.created_at && !isNaN(new Date(s.created_at).getTime()))
+              ? new Date(s.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short'})
+              : `Session ${i + 1}`,
             overall:   avg(allFeedback.map(f => f.overall_score).filter(Boolean)),
             clarity:   avg(allFeedback.map(f => f.clarity_score).filter(Boolean)),
             depth:     avg(allFeedback.map(f => f.depth_score).filter(Boolean)),
