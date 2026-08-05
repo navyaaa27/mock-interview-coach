@@ -54,20 +54,24 @@ export default function ReadinessScore() {
         const end = Date.now() + duration;
 
         const frame = () => {
-          confetti({
-            particleCount: 5,
-            angle: 60,
-            spread: 55,
-            origin: { x: 0 },
-            colors: ['#2dd4a0', '#b06aff', '#60cfff']
-          });
-          confetti({
-            particleCount: 5,
-            angle: 120,
-            spread: 55,
-            origin: { x: 1 },
-            colors: ['#2dd4a0', '#b06aff', '#60cfff']
-          });
+          try {
+            confetti({
+              particleCount: 5,
+              angle: 60,
+              spread: 55,
+              origin: { x: 0 },
+              colors: ['#2dd4a0', '#b06aff', '#60cfff']
+            });
+            confetti({
+              particleCount: 5,
+              angle: 120,
+              spread: 55,
+              origin: { x: 1 },
+              colors: ['#2dd4a0', '#b06aff', '#60cfff']
+            });
+          } catch (err) {
+            console.warn('Confetti animation error:', err);
+          }
 
           if (Date.now() < end) {
             requestAnimationFrame(frame);
