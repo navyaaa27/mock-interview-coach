@@ -69,17 +69,17 @@ export default function OnboardingPage() {
         .upsert({ id: currentUser.id, email: currentUser.email, full_name: fullName.trim(), plan: 'free' });
       if (userErr) throw userErr;
 
-      // B. Insert profile row into public.profiles
+      // B. Upsert profile row into public.profiles (prevents duplicate key errors on retry)
       const targetCompanies = companies.split(',').map(c => c.trim()).filter(Boolean);
       const { error: profileErr } = await supabase
         .from('profiles')
-        .insert({
+        .upsert({
           user_id:          currentUser.id,
           job_role:         jobRole,
           experience_level: experienceLevel,
           target_companies: targetCompanies,
           interview_goal:   interviewGoal,
-        });
+        }, { onConflict: 'user_id' });
       if (profileErr) throw profileErr;
 
       // C. Navigate to dashboard via React Router (not window.location)
