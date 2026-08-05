@@ -44,7 +44,7 @@ function getSmartSuggestion(recentSessions) {
       session.answers.forEach(a => {
         if (a.feedback) {
           a.feedback.forEach(fb => {
-            if (fb.improvements) {
+            if (Array.isArray(fb.improvements)) {
               fb.improvements.forEach(imp => { weakAreas[imp] = (weakAreas[imp] || 0) + 1; });
             }
           });
