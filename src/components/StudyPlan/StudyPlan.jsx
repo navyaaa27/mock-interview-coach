@@ -231,7 +231,7 @@ export default function StudyPlan({ studyPlanData }) {
 
                     <button 
                       onClick={() => {
-                        window.location.href = `/?autoStart=true&type=${session.session_type}&difficulty=${session.difficulty}`;
+                        navigate(`/session?autoStart=true&type=${session.session_type}&difficulty=${session.difficulty}`);
                       }}
                       style={{ background: '#fff', color: '#000', border: 'none', padding: '10px 20px', borderRadius: '8px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap' }}
                     >
