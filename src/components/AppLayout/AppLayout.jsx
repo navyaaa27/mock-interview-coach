@@ -14,7 +14,7 @@ export default function AppLayout({ children }) {
   // Track desktop sidebar collapse state (default open)
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   
-  const dropdownRef = useRef(null);
+  const sidebarBottomRef = useRef(null);
 
   const fullName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
   const email = currentUser?.email || 'user@example.com';
@@ -27,7 +27,7 @@ export default function AppLayout({ children }) {
 
   useEffect(() => {
     function handleClickOutside(event) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+      if (sidebarBottomRef.current && !sidebarBottomRef.current.contains(event.target)) {
         setDropdownOpen(false);
       }
     }
@@ -86,9 +86,9 @@ export default function AppLayout({ children }) {
           })}
         </div>
 
-        <div className="sidebar-bottom" style={{ position: 'relative' }}>
+        <div className="sidebar-bottom" ref={sidebarBottomRef} style={{ position: 'relative' }}>
           {dropdownOpen && (
-            <div className="avatar-dropdown" ref={dropdownRef} style={{ display: 'block' }}>
+            <div className="avatar-dropdown" style={{ display: 'block' }}>
               <button className="avatar-dropdown-item" onClick={() => { setDropdownOpen(false); navigate('/profile'); }}>
                 <i className="fa-solid fa-user-gear"></i> Profile Settings
               </button>
