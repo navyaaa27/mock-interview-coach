@@ -40,11 +40,13 @@ export function useHistoryData(userId) {
         let totalOverall = 0, totalClarity = 0, totalDepth = 0, totalStructure = 0, count = 0;
         (s.answers || []).forEach(a => {
           (a.feedback || []).forEach(fb => {
-            totalOverall   += fb.overall_score   || 0;
-            totalClarity   += fb.clarity_score   || 0;
-            totalDepth     += fb.depth_score     || 0;
-            totalStructure += fb.structure_score  || 0;
-            count++;
+            if (fb.overall_score && fb.overall_score > 0) {
+              totalOverall   += fb.overall_score;
+              totalClarity   += fb.clarity_score   || 0;
+              totalDepth     += fb.depth_score     || 0;
+              totalStructure += fb.structure_score  || 0;
+              count++;
+            }
           });
         });
 
