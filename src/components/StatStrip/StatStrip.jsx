@@ -1,6 +1,15 @@
 import './StatStrip.css';
 
+function formatScore(val) {
+  if (val === null || val === undefined || val === '—' || val === 0) return '—';
+  const num = Number(val);
+  return !isNaN(num) && num > 0 ? num.toFixed(1) : '—';
+}
+
 export default function StatStrip({ sessionsCompleted, avgScore, bestScore, hoursPracticed }) {
+  const formattedAvg = formatScore(avgScore);
+  const formattedBest = formatScore(bestScore);
+
   const cells = [
     {
       val: sessionsCompleted ?? 0,
@@ -8,14 +17,14 @@ export default function StatStrip({ sessionsCompleted, avgScore, bestScore, hour
       dim: !sessionsCompleted,
     },
     {
-      val: avgScore ? Number(avgScore).toFixed(1) : '—',
+      val: formattedAvg,
       label: 'Average score',
-      dim: !avgScore,
+      dim: formattedAvg === '—',
     },
     {
-      val: bestScore ? Number(bestScore).toFixed(1) : '—',
+      val: formattedBest,
       label: 'Best score',
-      dim: !bestScore,
+      dim: formattedBest === '—',
     },
     {
       val: hoursPracticed ?? 0,
