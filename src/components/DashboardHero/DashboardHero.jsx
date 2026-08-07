@@ -53,11 +53,13 @@ export default function DashboardHero({
   let countdownColor = 'var(--text-tertiary)';
   if (interviewDate) {
     const dt   = new Date(interviewDate + 'T00:00:00');
-    const now  = new Date(); now.setHours(0, 0, 0, 0);
-    const days = Math.ceil((dt - now) / 86400000);
-    if (days < 0)       { countdownText = 'Interview date passed'; }
-    else if (days <= 3) { countdownText = `⚡ ${days}d left`; countdownColor = '#f87171'; }
-    else                { countdownText = `${days} days to interview`; countdownColor = 'var(--accent-blue)'; }
+    if (!isNaN(dt.getTime())) {
+      const now  = new Date(); now.setHours(0, 0, 0, 0);
+      const days = Math.ceil((dt - now) / 86400000);
+      if (days < 0)       { countdownText = 'Interview date passed'; }
+      else if (days <= 3) { countdownText = `⚡ ${days}d left`; countdownColor = '#f87171'; }
+      else                { countdownText = `${days} days to interview`; countdownColor = 'var(--accent-blue)'; }
+    }
   }
 
   return (
