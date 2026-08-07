@@ -66,11 +66,21 @@ function ScoreTrendSection({ trendData }) {
     );
   }
 
-  const withRolling = trendData.map((d, i) => ({
-    ...d,
-    label: new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    rolling: i >= 2 ? (trendData[i].avg + trendData[i - 1].avg + trendData[i - 2].avg) / 3 : null,
-  }));
+  const withRolling = trendData.map((d, i) => {
+    const isValDate = d.date && !isNaN(new Date(d.date).getTime());
+    const label = isValDate
+      ? new Date(d.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+      : `S${i + 1}`;
+    const avgCurrent = d.avg || 0;
+    const avgPrev1 = (trendData[i - 1]?.avg) || 0;
+    const avgPrev2 = (trendData[i - 2]?.avg) || 0;
+    return {
+      ...d,
+      label,
+      avg: avgCurrent,
+      rolling: i >= 2 ? (avgCurrent + avgPrev1 + avgPrev2) / 3 : null,
+    };
+  });
 
   return (
     <div className="dash-card dash-chart-container">
