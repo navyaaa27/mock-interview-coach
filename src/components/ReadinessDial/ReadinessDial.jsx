@@ -4,9 +4,10 @@ import './ReadinessDial.css';
 export default function ReadinessDial({ score = 0, tierLabel = 'Just getting started' }) {
   const circleRef = useRef(null);
   const circumference = 2 * Math.PI * 90; // r=90
+  const safeScore = Math.min(100, Math.max(0, Math.round(Number(score) || 0)));
 
   useEffect(() => {
-    const offset = circumference - (score / 100) * circumference;
+    const offset = circumference - (safeScore / 100) * circumference;
     if (circleRef.current) {
       circleRef.current.style.strokeDashoffset = circumference;
       requestAnimationFrame(() => {
@@ -14,7 +15,7 @@ export default function ReadinessDial({ score = 0, tierLabel = 'Just getting sta
         circleRef.current.style.strokeDashoffset = offset;
       });
     }
-  }, [score, circumference]);
+  }, [safeScore, circumference]);
 
   return (
     <div className="dial-wrap">
@@ -37,7 +38,7 @@ export default function ReadinessDial({ score = 0, tierLabel = 'Just getting sta
         />
       </svg>
       <div className="dial-center">
-        <div className="dial-num">{score}</div>
+        <div className="dial-num">{safeScore}</div>
         <div className="dial-label">
           Readiness<br />score
         </div>
