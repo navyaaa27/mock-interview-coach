@@ -15,15 +15,18 @@ export default function ReadinessScore() {
   const [isStale, setIsStale] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     async function loadData() {
-      setLoading(true);
+      if (isMounted) setLoading(true);
       try {
         const { data: user } = await supabase
           .from('users')
           .select('readiness_updated_at, readiness_score_stale')
-          .eq('id', currentUser.id)
+          .eq('id', currentUser?.id)
           .maybeSingle();
           
+        if (!isMounted) return;
+
         if (user?.readiness_updated_at) {
           setUpdatedAt(new Date(user.readiness_updated_at));
         } else {
@@ -32,16 +35,19 @@ export default function ReadinessScore() {
         if (user?.readiness_score_stale) setIsStale(true);
 
         const res = await recalculateReadiness(currentUser.id, true);
+        if (!isMounted) return;
+
         setData(res);
         if (res?.score !== undefined) setScore(res.score);
         if (!user?.readiness_updated_at) setUpdatedAt(new Date());
       } catch (err) {
         console.error('ReadinessScore load error:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     }
     if (currentUser?.id) loadData();
+    return () => { isMounted = false; };
   }, [currentUser]);
 
   useEffect(() => {
