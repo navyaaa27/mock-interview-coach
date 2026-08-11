@@ -1,7 +1,7 @@
 import './CoachCard.css';
 
 export default function CoachCard({ suggestion, onStartSession }) {
-  if (!suggestion) return null;
+  if (!suggestion || !suggestion.text) return null;
 
   return (
     <div className="coach-card" id="dash-coach-card">
