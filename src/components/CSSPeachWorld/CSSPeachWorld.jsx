@@ -1,12 +1,15 @@
 import React, { useState } from 'react';
-import { motion, useTransform, useSpring, useMotionValueEvent } from 'framer-motion';
+import { motion, useTransform, useSpring, useMotionValue, useMotionValueEvent } from 'framer-motion';
 import './CSSPeachWorld.css';
 
 export default function CSSPeachWorld({ scrollYProgress }) {
   const [hasSplashed, setHasSplashed] = useState(false);
 
+  const fallbackMotion = useMotionValue(0);
+  const progressInput = scrollYProgress || fallbackMotion;
+
   // Add a buttery smooth spring to absorb choppy mouse wheel scrolling
-  const smoothProgress = useSpring(scrollYProgress, {
+  const smoothProgress = useSpring(progressInput, {
     stiffness: 40,
     damping: 15,
     restDelta: 0.001
