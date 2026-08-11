@@ -33,7 +33,9 @@ export default function SessionPage() {
   useEffect(() => {
     const handleMessage = (event) => {
       if (event.data?.type === 'SESSION_COMPLETED' && event.data?.userId) {
-        import('../lib/readinessService').then(m => m.recalculateReadiness(event.data.userId))
+        import('../lib/readinessService')
+          .then(m => m.recalculateReadiness(event.data.userId))
+          .catch(err => console.error('Failed to recalculate readiness on session complete:', err))
       }
     }
     window.addEventListener('message', handleMessage)
