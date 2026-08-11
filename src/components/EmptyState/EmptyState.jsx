@@ -10,10 +10,10 @@ import './EmptyState.css';
  * - Progress charts:          "Three sessions in and the pattern starts to show. You're not there yet."
  * - Study plan not generated: "No plan yet — generate one and Alex will map out exactly what to practice and when."
  */
-export default function EmptyState({ message, dashed = true }) {
+export default function EmptyState({ message = "No data available yet.", dashed = true }) {
   return (
     <div className={`empty-state${dashed ? ' dashed' : ''}`}>
-      <p>{message}</p>
+      <p>{message || "No data available yet."}</p>
     </div>
   );
 }
