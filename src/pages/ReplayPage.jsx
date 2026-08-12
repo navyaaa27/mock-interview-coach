@@ -133,11 +133,13 @@ export default function ReplayPage() {
       if (fb.generation_status === 'pending_retry' || fb.generation_status === 'pending') {
         pendingCount++;
       } else {
-        sumO += fb.overall_score || 0;
-        sumC += fb.clarity_score || 0;
-        sumD += fb.depth_score || 0;
-        sumS += fb.structure_score || 0;
-        count++;
+        if (fb.overall_score && fb.overall_score > 0) {
+          sumO += fb.overall_score;
+          sumC += fb.clarity_score || 0;
+          sumD += fb.depth_score || 0;
+          sumS += fb.structure_score || 0;
+          count++;
+        }
         
         if (Array.isArray(fb.strengths)) allStrengths.push(...fb.strengths);
         if (Array.isArray(fb.improvements)) allImprovements.push(...fb.improvements);
