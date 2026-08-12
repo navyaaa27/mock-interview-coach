@@ -118,7 +118,10 @@ export function useDashboardData(userId) {
       let totalOverall = 0, totalFeedbackCount = 0, bestScore = 0, totalMinutes = 0;
       allSessions.forEach(s => {
         if (s.created_at && s.completed_at) {
-          totalMinutes += Math.round((new Date(s.completed_at) - new Date(s.created_at)) / 60000);
+          const diff = new Date(s.completed_at) - new Date(s.created_at);
+          if (!isNaN(diff) && diff > 0) {
+            totalMinutes += Math.round(diff / 60000);
+          }
         }
         if (s.answers) {
           s.answers.forEach(a => {
