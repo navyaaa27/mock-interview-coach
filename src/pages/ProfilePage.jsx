@@ -93,7 +93,7 @@ export default function ProfilePage() {
   // Countdown
   let countdownText = null, countdownColor = 'var(--text-tertiary)';
   if (interviewDate) {
-    const d = new Date(interviewDate);
+    const d = new Date(interviewDate + (interviewDate.includes('T') ? '' : 'T00:00:00'));
     if (!isNaN(d.getTime())) {
       const today = new Date(); today.setHours(0,0,0,0);
       const days = Math.ceil((d - today) / 86400000);
