@@ -134,8 +134,11 @@ export async function generateStudyPlan(userId) {
 
   let weeks_until_interview = 4;
   if (profile?.interview_date) {
-    const diffTime = Math.abs(new Date(profile.interview_date) - new Date());
-    weeks_until_interview = Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7));
+    const dt = new Date(profile.interview_date);
+    if (!isNaN(dt.getTime())) {
+      const diffTime = dt.getTime() - Date.now();
+      weeks_until_interview = diffTime > 0 ? Math.ceil(diffTime / (1000 * 60 * 60 * 24 * 7)) : 1;
+    }
   }
 
   // 3. Claude API Call
