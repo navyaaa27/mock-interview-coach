@@ -263,6 +263,9 @@ export default function Orb({
     container.addEventListener('mouseleave', handleMouseLeave);
 
     let rafId;
+    let cachedBgHex = '';
+    let cachedBgVec = new Vec3(0, 0, 0);
+
     const update = t => {
       rafId = requestAnimationFrame(update);
       const dt = (t - lastTime) * 0.001;
@@ -270,7 +273,11 @@ export default function Orb({
       program.uniforms.iTime.value = t * 0.001;
       program.uniforms.hue.value = hue;
       program.uniforms.hoverIntensity.value = hoverIntensity;
-      program.uniforms.backgroundColor.value = hexToVec3(backgroundColor);
+      if (backgroundColor !== cachedBgHex) {
+        cachedBgHex = backgroundColor;
+        cachedBgVec = hexToVec3(backgroundColor);
+      }
+      program.uniforms.backgroundColor.value = cachedBgVec;
 
       const effectiveHover = forceHoverState ? 1 : targetHover;
       program.uniforms.hover.value += (effectiveHover - program.uniforms.hover.value) * 0.1;
@@ -289,7 +296,9 @@ export default function Orb({
       window.removeEventListener('resize', resize);
       container.removeEventListener('mousemove', handleMouseMove);
       container.removeEventListener('mouseleave', handleMouseLeave);
-      container.removeChild(gl.canvas);
+      if (container && container.contains(gl.canvas)) {
+        container.removeChild(gl.canvas);
+      }
       gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
