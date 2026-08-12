@@ -120,7 +120,12 @@ export default function DashboardPage() {
 
   const handleSaveInterviewDate = useCallback(async (value) => {
     setInterviewDate(value);
-    await supabase.from('profiles').update({ interview_date: value || null }).eq('user_id', currentUser.id);
+    try {
+      const { error } = await supabase.from('profiles').update({ interview_date: value || null }).eq('user_id', currentUser.id);
+      if (error) console.error('Failed to update interview date:', error.message);
+    } catch (e) {
+      console.error('Exception updating interview date:', e.message);
+    }
   }, [currentUser]);
 
   const handleSignOut = useCallback(async () => {
