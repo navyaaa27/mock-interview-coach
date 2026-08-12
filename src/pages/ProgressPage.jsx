@@ -98,11 +98,12 @@ export default function ProgressPage() {
   const hasCharts = sessions.length >= 1;
 
   /* ── Derived strip stats (safe — only runs after data loads) ─────────── */
-  const n       = sessions.length;
-  const avg     = n > 0 ? (sessions.reduce((s, d) => s + d.overall, 0) / n).toFixed(1) : '—';
-  const bestVal = n > 0 ? Math.max(...sessions.map(s => s.overall || 0)) : 0;
-  const best    = bestVal > 0 ? bestVal.toFixed(1) : '—';
-  const streak  = data?.user?.current_streak || 0;
+  const n           = sessions.length;
+  const scoredSess  = sessions.filter(s => typeof s.overall === 'number' && s.overall > 0);
+  const avg         = scoredSess.length > 0 ? (scoredSess.reduce((s, d) => s + d.overall, 0) / scoredSess.length).toFixed(1) : '—';
+  const bestVal     = n > 0 ? Math.max(...sessions.map(s => s.overall || 0)) : 0;
+  const best        = bestVal > 0 ? bestVal.toFixed(1) : '—';
+  const streak      = data?.user?.current_streak || 0;
 
   return (
     <div className="prog-page">
