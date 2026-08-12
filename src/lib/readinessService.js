@@ -1,6 +1,7 @@
 import { supabase } from './supabase';
 
 export async function recalculateReadiness(userId, saveToDb = true) {
+  if (!userId) return { score: 0, signals: [], gap_analysis: null };
   try {
     // 1. Fetch user streak from profiles table
     const { data: user, error: userErr } = await supabase
