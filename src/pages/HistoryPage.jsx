@@ -133,7 +133,9 @@ export default function HistoryPage() {
     if (dateFilter !== 'all') {
       const now = Date.now();
       list = list.filter(s => {
-        const age = now - new Date(s.created_at).getTime();
+        const dt = s.created_at ? new Date(s.created_at).getTime() : NaN;
+        if (isNaN(dt)) return true;
+        const age = now - dt;
         if (dateFilter === 'week')  return age < 7  * 86400000;
         if (dateFilter === 'month') return age < 30 * 86400000;
         return true;
