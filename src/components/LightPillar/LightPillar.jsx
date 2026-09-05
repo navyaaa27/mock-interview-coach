@@ -314,8 +314,12 @@ const LightPillar = ({
   useEffect(() => {
     if (!materialRef.current) return;
     const parseColor = hex => {
-      const color = new THREE.Color(hex);
-      return new THREE.Vector3(color.r, color.g, color.b);
+      try {
+        const color = new THREE.Color(hex || '#000000');
+        return new THREE.Vector3(color.r, color.g, color.b);
+      } catch {
+        return new THREE.Vector3(0, 0, 0);
+      }
     };
     materialRef.current.uniforms.uTopColor.value = parseColor(topColor);
   }, [topColor]);
