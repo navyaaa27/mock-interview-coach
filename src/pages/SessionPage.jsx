@@ -32,6 +32,7 @@ export default function SessionPage() {
   // P5.05 Listen for session completed event from legacy app
   useEffect(() => {
     const handleMessage = (event) => {
+      if (event.origin !== window.location.origin) return;
       if (event.data?.type === 'SESSION_COMPLETED' && event.data?.userId) {
         import('../lib/readinessService')
           .then(m => m.recalculateReadiness(event.data.userId))
