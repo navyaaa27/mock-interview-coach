@@ -686,6 +686,7 @@ export const GridScan = ({
   useEffect(() => {
     let stop = false;
     let lastDetect = 0;
+    let localStream = null;
     const video = videoRef.current;
 
     const start = async () => {
@@ -697,6 +698,11 @@ export const GridScan = ({
           video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
           audio: false
         });
+        localStream = stream;
+        if (stop) {
+          stream.getTracks().forEach(t => t.stop());
+          return;
+        }
         video.srcObject = stream;
         await video.play();
       } catch {
@@ -777,6 +783,9 @@ export const GridScan = ({
 
     return () => {
       stop = true;
+      if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+      }
       if (video) {
         const stream = video.srcObject;
         if (stream) stream.getTracks().forEach(t => t.stop());
