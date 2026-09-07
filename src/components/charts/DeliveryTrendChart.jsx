@@ -5,11 +5,13 @@ import {
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
+    const paceVal = payload.find(p => p.dataKey === 'pace')?.value ?? '—';
+    const eyeVal = payload.find(p => p.dataKey === 'eyeContact')?.value ?? '—';
     return (
       <div style={{ background: '#1a1a2a', border: '1px solid #2a2a4a', padding: '10px', color: '#e8e8e8', borderRadius: '4px' }}>
         <p style={{ margin: 0, fontWeight: 'bold' }}>Session {label}</p>
-        <p style={{ margin: 0, color: '#ffcc60' }}>Pace: {payload[0]?.value} WPM</p>
-        <p style={{ margin: 0, color: '#2dd4a0' }}>Eye Contact: {payload[1]?.value}%</p>
+        <p style={{ margin: 0, color: '#ffcc60' }}>Pace: {paceVal} WPM</p>
+        <p style={{ margin: 0, color: '#2dd4a0' }}>Eye Contact: {eyeVal}%</p>
       </div>
     );
   }
@@ -17,6 +19,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function DeliveryTrendChart({ data }) {
+  if (!data || data.length === 0) return null;
   return (
     <ResponsiveContainer width="100%" height={240}>
           <LineChart data={data} margin={{ top: 20, right: 0, left: -20, bottom: 5 }}>
