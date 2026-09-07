@@ -5,7 +5,8 @@ import {
 
 const CustomizedDot = (props) => {
   const { cx, cy, payload } = props;
-  const score = payload.overall;
+  if (!payload || cx === undefined || cy === undefined) return null;
+  const score = payload.overall || 0;
   let fill = '#ff6b6b'; // red
   if (score >= 7.5) fill = '#2dd4a0'; // green
   else if (score >= 5.0) fill = '#ffcc60'; // amber
@@ -17,12 +18,12 @@ const CustomizedDot = (props) => {
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload && payload.length) {
-    const data = payload[0].payload;
+    const data = payload[0].payload || {};
     return (
       <div style={{ background: '#1a1a2a', border: '1px solid #2a2a4a', padding: '10px', color: '#e8e8e8', borderRadius: '4px' }}>
         <p style={{ margin: 0, fontWeight: 'bold' }}>{label}</p>
-        <p style={{ margin: 0 }}>Score: {data.overall}</p>
-        <p style={{ margin: 0, fontSize: '12px', color: '#aaa' }}>Type: {data.type?.replace('_', ' ')}</p>
+        <p style={{ margin: 0 }}>Score: {data.overall ?? '—'}</p>
+        <p style={{ margin: 0, fontSize: '12px', color: '#aaa' }}>Type: {data.type ? data.type.replace('_', ' ') : 'General'}</p>
       </div>
     );
   }
@@ -30,11 +31,17 @@ const CustomTooltip = ({ active, payload, label }) => {
 };
 
 export default function ScoreTrendChart({ data }) {
-  const rollingData = (data || []).map((d, i) => ({
-    ...d,
-    rolling: i < 2 ? d.overall :
-      Math.round((data.slice(i-2, i+1).reduce((s, x) => s + x.overall, 0) / 3) * 10) / 10
-  }));
+  if (!data || data.length === 0) return null;
+
+  const rollingData = data.map((d, i) => {
+    const windowSlice = data.slice(Math.max(0, i - 2), i + 1);
+    const sum = windowSlice.reduce((s, x) => s + (x.overall || 0), 0);
+    const count = windowSlice.length || 1;
+    return {
+      ...d,
+      rolling: Math.round((sum / count) * 10) / 10
+    };
+  });
 
   return (
     <ResponsiveContainer width="100%" height={280}>
