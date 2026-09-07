@@ -25,6 +25,8 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export default function TypeBreakdownChart({ data }) {
+  if (!data || data.length === 0) return null;
+
   return (
     <ResponsiveContainer width="100%" height={220}>
           <BarChart data={data} margin={{ top: 20, right: 30, left: -20, bottom: 5 }}>
@@ -34,7 +36,8 @@ export default function TypeBreakdownChart({ data }) {
             <ReferenceLine y={7.5} stroke="#aaa" strokeDasharray="3 3" />
             <Bar dataKey="avg" radius={[4, 4, 0, 0]}>
               {data.map((entry, index) => {
-                const color = TYPE_COLORS[entry.type.toLowerCase()] || '#60cfff';
+                const typeKey = (entry.type || '').toLowerCase();
+                const color = TYPE_COLORS[typeKey] || '#60cfff';
                 return <Cell key={`cell-${index}`} fill={color} />;
               })}
             </Bar>
