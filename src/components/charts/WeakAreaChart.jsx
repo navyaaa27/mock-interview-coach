@@ -22,19 +22,7 @@ const CustomTooltip = ({ active, payload }) => {
 };
 
 export default function WeakAreaChart({ data }) {
-  if (!data || data.length === 0) {
-    return (
-      <div style={{ width: '100%', marginBottom: '2rem' }}>
-        <div style={{ marginBottom: '1rem' }}>
-          <h2 style={{ fontSize: '1.25rem', margin: 0 }}>Most Flagged Weak Areas</h2>
-          <p style={{ fontSize: '0.875rem', color: '#9CA3AF', margin: 0 }}>Across your last 10 sessions</p>
-        </div>
-        <div style={{ height: '240px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <p style={{ color: '#2dd4a0', fontSize: '1.1rem', fontWeight: 'bold' }}>No weak areas flagged yet 🎉</p>
-        </div>
-      </div>
-    );
-  }
+  if (!data || data.length === 0) return null;
 
   return (
     <ResponsiveContainer width="100%" height={240}>
