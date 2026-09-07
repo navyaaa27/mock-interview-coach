@@ -4,8 +4,10 @@ import {
 } from 'recharts';
 
 export default function SkillRadarChart({ data }) {
+  if (!data || data.length === 0) return null;
+
   // Use last 5 sessions for the average
-  const recentSessions = (data || []).slice(-5);
+  const recentSessions = data.slice(-5);
   
   const avg = (key, divisor = 1) => {
     if (!recentSessions.length) return 0;
