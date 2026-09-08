@@ -70,7 +70,7 @@ export async function recalculateReadiness(userId, saveToDb = true) {
     signals.push({ name: 'Score Average', value: `${s1Raw.toFixed(1)} avg`, weight: '30%', contribution: s1Contrib, max: 30 });
 
     // SIGNAL 2: Interview type coverage (20%)
-    const distinctTypes = new Set(sessionScores.map(s => s.type));
+    const distinctTypes = new Set(sessionScores.map(s => s.type).filter(Boolean));
     const s2Score = (distinctTypes.size / 4) * 100;
     const s2Contrib = s2Score * 0.20;
     signals.push({ name: 'Type Coverage', value: `${distinctTypes.size}/4 types`, weight: '20%', contribution: s2Contrib, max: 20 });
