@@ -18,7 +18,14 @@ export default function AppLayout({ children }) {
 
   const fullName = currentUser?.user_metadata?.full_name || currentUser?.email?.split('@')[0] || 'User';
   const email = currentUser?.email || 'user@example.com';
-  const initials = fullName.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+  const initials = fullName
+    .trim()
+    .split(/\s+/)
+    .map(n => n[0])
+    .filter(Boolean)
+    .join('')
+    .toUpperCase()
+    .substring(0, 2) || 'U';
 
   const handleSignOut = async () => {
     await signOut();
