@@ -45,12 +45,11 @@ export default function OnboardingPage() {
   // ── Step navigation with validation ─────────────────────────────────────
   function goToStep(target) {
     setError('');
-    if (target === 2) {
-      if (!fullName.trim()) { setError('Please enter your full name.'); return; }
-      if (!jobRole)         { setError('Please select a target job role.'); return; }
-    }
-    if (target === 4) {
-      if (!companies.trim()) { setError('Please enter at least one target company.'); return; }
+    if (target > step) {
+      if (step === 1) {
+        if (!fullName.trim()) { setError('Please enter your full name.'); return; }
+        if (!jobRole)         { setError('Please select a target job role.'); return; }
+      }
     }
     setStep(target);
   }
