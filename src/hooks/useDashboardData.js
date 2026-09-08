@@ -14,6 +14,7 @@ function getSmartSuggestion(recentSessions) {
   const typeScores = {};
   recentSessions.forEach(session => {
     const type = session.interview_type;
+    if (!type) return;
     if (!typeScores[type]) typeScores[type] = { total: 0, count: 0 };
     if (session.answers) {
       session.answers.forEach(a => {
