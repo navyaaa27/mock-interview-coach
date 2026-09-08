@@ -76,8 +76,7 @@ export default function ProfilePage() {
       if (userErr) throw userErr;
       const targetCompanies = companies.split(',').map(c => c.trim()).filter(Boolean);
       const { error: profileErr } = await supabase.from('profiles')
-        .update({ job_role: jobRole, experience_level: experienceLevel, target_companies: targetCompanies, interview_goal: interviewGoal, interview_date: interviewDate || null })
-        .eq('user_id', currentUser.id);
+        .upsert({ user_id: currentUser.id, job_role: jobRole, experience_level: experienceLevel, target_companies: targetCompanies, interview_goal: interviewGoal, interview_date: interviewDate || null }, { onConflict: 'user_id' });
       if (profileErr) throw profileErr;
       setSuccessMsg('Profile updated successfully.');
       setTimeout(() => setSuccessMsg(''), 3000);
