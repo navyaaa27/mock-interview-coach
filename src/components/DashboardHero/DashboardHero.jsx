@@ -43,7 +43,8 @@ export default function DashboardHero({
 }) {
   const timeOfDay = getTimeOfDay();
   const greeting  = `Good ${timeOfDay}`;
-  const firstName = (profile.full_name || user.email || 'there').split(' ')[0];
+  const rawName = profile.full_name || user.full_name || (user.email ? user.email.split('@')[0] : 'there');
+  const firstName = rawName.trim().split(/\s+/)[0] || 'there';
 
   const readinessScore = user.readiness_score ?? 0;
   const tierLabel      = getTierLabel(readinessScore);
