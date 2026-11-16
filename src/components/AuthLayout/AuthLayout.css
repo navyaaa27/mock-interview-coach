@@ -112,31 +112,31 @@
 }
 
 .auth-feature-section {
-  max-width: 1200px;
+  max-width: 1120px;
   margin: 80px auto;
   padding: 0 24px;
   display: flex;
   flex-direction: column;
   gap: 100px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .auth-card-wrapper {
   width: 100%;
   max-width: 440px;
   margin: 0 auto;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.9), 0 0 20px rgba(0, 0, 0, 1), 0 0 40px rgba(0, 0, 0, 0.8);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.8);
 }
 
 .auth-card-wrapper .auth-card {
   margin: 0;
   position: relative;
-  background: rgba(10, 12, 20, 0.7);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: none;
+  background: rgba(10, 12, 22, 0.55);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
 }
 
 .auth-card-wrapper input {
@@ -144,7 +144,7 @@
 }
 
 /* ==============================================================
-   EDITORIAL CARDS (Matching Reference Image)
+   EDITORIAL CARDS (Matching Reference Image with Glass Translucency)
    ============================================================== */
 
 .editorial-card-wrapper {
@@ -152,22 +152,26 @@
   width: 100%;
   border-radius: 20px;
   padding: 1px; /* Holds gradient border */
-  background: linear-gradient(135deg, rgba(34, 211, 238, 0.6), rgba(196, 181, 253, 0.4), rgba(244, 114, 182, 0.6));
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(34, 211, 238, 0.08);
+  background: linear-gradient(135deg, rgba(34, 211, 238, 0.45), rgba(196, 181, 253, 0.25), rgba(244, 114, 182, 0.45));
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), 0 0 35px rgba(34, 211, 238, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .editorial-card-wrapper:hover {
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.8), 0 0 45px rgba(34, 211, 238, 0.15);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.7), 0 0 45px rgba(34, 211, 238, 0.15);
 }
 
 .editorial-card {
   display: flex;
   align-items: stretch;
   width: 100%;
-  background: #080b12;
+  background: rgba(8, 11, 20, 0.45);
   border-radius: 19px;
   overflow: hidden;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .editorial-card.reverse {
@@ -178,16 +182,18 @@
 
 .editorial-left {
   flex: 1.15;
-  background: rgba(12, 16, 28, 0.95);
-  padding: 56px 48px;
+  background: rgba(10, 14, 26, 0.52);
+  padding: 52px 44px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(255, 255, 255, 0.07);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .editorial-card.reverse .editorial-left {
   border-right: none;
-  border-left: 1px solid rgba(255, 255, 255, 0.07);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 /* Badge with small colored square */
@@ -293,7 +299,7 @@
 
 .editorial-right {
   flex: 1;
-  background: #04060b;
+  background: rgba(4, 6, 14, 0.38);
   padding: 40px;
   display: flex;
   flex-direction: column;
@@ -301,6 +307,8 @@
   align-items: stretch;
   position: relative;
   overflow: hidden;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 
 .mesh-visual-container {
@@ -408,11 +416,13 @@
   max-width: 640px;
   margin-bottom: 56px;
   position: relative;
-  background: rgba(12, 16, 28, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 14, 26, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 20px;
   padding: 40px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .grid-header h2 {
@@ -438,16 +448,19 @@
 
 .grid-item {
   position: relative;
-  background: rgba(12, 16, 28, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 14, 26, 0.52);
+  border: 1px solid rgba(255, 255, 255, 0.09);
   border-radius: 18px;
   padding: 36px;
   text-align: left;
-  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease, background 0.25s ease;
 }
 
 .grid-item:hover {
   transform: translateY(-4px);
+  background: rgba(15, 20, 36, 0.65);
   border-color: rgba(34, 211, 238, 0.4);
   box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7);
 }
