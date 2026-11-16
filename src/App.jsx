@@ -1,6 +1,42 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'
 import { AuthProvider, useAuth } from './context/AuthContext'
-import { lazy, Suspense } from 'react'
+import React, { Component, lazy, Suspense } from 'react'
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false, error: null };
+  }
+
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
+  }
+
+  componentDidCatch(error, errorInfo) {
+    console.error('ErrorBoundary caught an error:', error, errorInfo);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div style={{ height: '100vh', width: '100vw', background: '#0a0a0f', color: '#fff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', textAlign: 'center', fontFamily: 'sans-serif' }}>
+          <i className="fa-solid fa-triangle-exclamation" style={{ fontSize: '48px', color: '#f87171', marginBottom: '16px' }}></i>
+          <h2 style={{ fontSize: '24px', marginBottom: '8px' }}>Something went wrong</h2>
+          <p style={{ color: 'rgba(255,255,255,0.7)', maxWidth: '500px', marginBottom: '24px', fontSize: '14px' }}>
+            {this.state.error?.message || 'An unexpected error occurred while rendering the page.'}
+          </p>
+          <button 
+            onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}
+            style={{ padding: '10px 24px', background: '#4fc3f7', border: 'none', borderRadius: '8px', color: '#000', fontWeight: 'bold', cursor: 'pointer' }}
+          >
+            Reload Page
+          </button>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const SignupPage = lazy(() => import('./pages/SignupPage'))
@@ -154,13 +190,15 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
-      <Router>
-        <Suspense fallback={<PageSkeleton />}>
-          <AppRoutes />
-        </Suspense>
-      </Router>
-    </AuthProvider>
+    <ErrorBoundary>
+      <AuthProvider>
+        <Router>
+          <Suspense fallback={<PageSkeleton />}>
+            <AppRoutes />
+          </Suspense>
+        </Router>
+      </AuthProvider>
+    </ErrorBoundary>
   )
 }
 

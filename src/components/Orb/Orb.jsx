@@ -189,34 +189,36 @@ export default function Orb({
 
     let renderer;
     let gl;
+    let program;
+    let mesh;
     try {
       renderer = new Renderer({ alpha: true, premultipliedAlpha: false });
       gl = renderer.gl;
       gl.clearColor(0, 0, 0, 0);
+
+      const geometry = new Triangle(gl);
+      program = new Program(gl, {
+        vertex: vert,
+        fragment: frag,
+        uniforms: {
+          iTime: { value: 0 },
+          iResolution: {
+            value: new Vec3(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height)
+          },
+          hue: { value: hue },
+          hover: { value: 0 },
+          rot: { value: 0 },
+          hoverIntensity: { value: hoverIntensity },
+          backgroundColor: { value: hexToVec3(backgroundColor) }
+        }
+      });
+
+      mesh = new Mesh(gl, { geometry, program });
       container.appendChild(gl.canvas);
     } catch (err) {
-      console.warn("WebGL not supported, Orb will not render.");
+      console.warn("WebGL not supported, Orb will not render.", err);
       return;
     }
-
-    const geometry = new Triangle(gl);
-    const program = new Program(gl, {
-      vertex: vert,
-      fragment: frag,
-      uniforms: {
-        iTime: { value: 0 },
-        iResolution: {
-          value: new Vec3(gl.canvas.width, gl.canvas.height, gl.canvas.width / gl.canvas.height)
-        },
-        hue: { value: hue },
-        hover: { value: 0 },
-        rot: { value: 0 },
-        hoverIntensity: { value: hoverIntensity },
-        backgroundColor: { value: hexToVec3(backgroundColor) }
-      }
-    });
-
-    const mesh = new Mesh(gl, { geometry, program });
 
     function resize() {
       if (!container) return;

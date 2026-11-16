@@ -23,18 +23,26 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // Safety fallback: prevent hanging on a black screen if Supabase is slow/offline
+    const safetyTimer = setTimeout(() => {
+      setLoading(false)
+    }, 2500)
+
     // Check active session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      clearTimeout(safetyTimer)
       setCurrentUser(session?.user ?? null)
       if (session?.user) fetchProfile(session.user.id)
       else setLoading(false)
     }).catch(err => {
+      clearTimeout(safetyTimer)
       console.error('getSession error:', err)
       setLoading(false)
     })
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      clearTimeout(safetyTimer)
       setCurrentUser(session?.user ?? null)
       if (session?.user) {
         fetchProfile(session.user.id)
@@ -107,7 +115,13 @@ export function AuthProvider({ children }) {
 
   return (
     <AuthContext.Provider value={{ currentUser, profile, loading, signOut }}>
-      {!loading && children}
+      {loading ? (
+        <div style={{ height: '100vh', width: '100vw', background: '#0a0a0f', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px' }}>
+          <div style={{ width: '40px', height: '40px', border: '3px solid rgba(255,255,255,0.1)', borderTopColor: '#4fc3f7', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }}></div>
+          <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '14px', fontFamily: 'sans-serif' }}>Loading InterviewAI...</p>
+          <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        </div>
+      ) : children}
     </AuthContext.Provider>
   )
 }
