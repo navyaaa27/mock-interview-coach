@@ -41,68 +41,145 @@ export default function AuthLayout({ children, orbHue = 0 }) {
         </div>
 
         <section className="auth-feature-section">
-           {/* Section 1 */}
+           {/* Section 1: Eye Tracking */}
            <div className="feature-block">
              <div className="feature-content">
-               <span className="feature-badge">Advanced MediaPipe Technology</span>
-               <h2>Real-time facial &<br/>eye tracking</h2>
+               <span className="feature-badge"><span className="badge-dot" style={{background: '#22d3ee'}}></span> Advanced MediaPipe Technology</span>
+               <h2>Real-time facial &<br/><span className="accent-word">eye tracking</span></h2>
                <p>Our intelligent system uses advanced Face Mesh technology to track your eye contact, expressions, and engagement level in real-time, giving you unparalleled insights into your non-verbal communication.</p>
-               <ul className="feature-checks">
-                 <li><i className="fa-solid fa-check"></i> 468 facial landmarks tracked</li>
-                 <li><i className="fa-solid fa-check"></i> Eye contact & engagement scoring</li>
-               </ul>
+               <div className="feature-numbered-list">
+                 <div className="numbered-item">
+                   <span className="item-number">01</span>
+                   <div className="item-text">
+                     <strong>Eye Contact Analysis</strong>
+                     <span>Measures where you look during answers</span>
+                   </div>
+                 </div>
+                 <div className="numbered-item">
+                   <span className="item-number">02</span>
+                   <div className="item-text">
+                     <strong>Expression Tracking</strong>
+                     <span>Reads your expressions as you speak</span>
+                   </div>
+                 </div>
+                 <div className="numbered-item">
+                   <span className="item-number">03</span>
+                   <div className="item-text">
+                     <strong>Engagement Scoring</strong>
+                     <span>Turns it all into one score per answer</span>
+                   </div>
+                 </div>
+               </div>
              </div>
-             <div className="feature-graphic glass-panel">
-               <div className="fake-ui-item"><i className="fa-solid fa-eye"></i> <div><strong>Eye Contact Analysis</strong><span>Measures where you look during answers</span></div></div>
-               <div className="fake-ui-item"><i className="fa-solid fa-face-smile"></i> <div><strong>Expression Tracking</strong><span>Evaluates your confidence and posture</span></div></div>
-               <div className="fake-ui-item"><i className="fa-solid fa-chart-line"></i> <div><strong>Real-time Analytics</strong><span>Instant processing with MediaPipe</span></div></div>
+             <div className="feature-graphic feature-visual-panel">
+               <div className="visual-labels">
+                 <span className="visual-tag tag-top">ENGAGEMENT</span>
+                 <span className="visual-tag tag-right">GAZE <span className="tag-icon">◎</span></span>
+                 <span className="visual-tag tag-bottom">EXPRESSION</span>
+               </div>
+               <div className="visual-face-mesh">
+                 <i className="fa-solid fa-head-side-cough" style={{fontSize: '120px', opacity: 0.15, color: '#22d3ee'}}></i>
+               </div>
+               <div className="stat-callout">
+                 <span className="stat-number">468</span>
+                 <span className="stat-label">FACIAL LANDMARKS<br/>TRACKED LIVE</span>
+               </div>
              </div>
            </div>
 
-           {/* Section 2 */}
+           {/* Section 2: Session Replays */}
            <div className="feature-block reverse">
              <div className="feature-content">
-               <span className="feature-badge">Review & Improve</span>
-               <h2>Session replays &<br/>detailed feedback</h2>
+               <span className="feature-badge"><span className="badge-dot" style={{background: '#c4b5fd'}}></span> Review & Improve</span>
+               <h2>Session replays &<br/><span className="accent-word">detailed feedback</span></h2>
                <p>Don't just practice blindly. Watch full session replays, review your question breakdowns, and get an honest assessment of your Key Strengths and Areas to Improve from Alex, your AI reviewer.</p>
-               <ul className="feature-checks">
-                 <li><i className="fa-solid fa-check"></i> Full video session replay</li>
-                 <li><i className="fa-solid fa-check"></i> Question-by-question breakdown</li>
-               </ul>
+               <div className="feature-numbered-list">
+                 <div className="numbered-item">
+                   <span className="item-number">01</span>
+                   <div className="item-text">
+                     <strong>Full Video Replay</strong>
+                     <span>Watch your complete interview session back</span>
+                   </div>
+                 </div>
+                 <div className="numbered-item">
+                   <span className="item-number">02</span>
+                   <div className="item-text">
+                     <strong>Question Breakdown</strong>
+                     <span>See scoring per question with AI analysis</span>
+                   </div>
+                 </div>
+                 <div className="numbered-item">
+                   <span className="item-number">03</span>
+                   <div className="item-text">
+                     <strong>AI Reviewer Insights</strong>
+                     <span>Get strengths and areas to improve from Alex</span>
+                   </div>
+                 </div>
+               </div>
              </div>
-             <div className="feature-graphic glass-panel">
-                <div className="skill-bar"><span>Overall Score</span><div className="bar"><div style={{width: '85%', background: '#10b981'}}></div></div></div>
-                <div className="skill-bar"><span>Eye Contact</span><div className="bar"><div style={{width: '92%', background: '#8b5cf6'}}></div></div></div>
-                <div className="skill-bar"><span>Confidence</span><div className="bar"><div style={{width: '78%', background: '#3b82f6'}}></div></div></div>
-                <div className="skill-bar"><span>Technical Accuracy</span><div className="bar"><div style={{width: '88%', background: '#f59e0b'}}></div></div></div>
+             <div className="feature-graphic feature-visual-panel">
+               <div className="visual-score-bars">
+                 <div className="score-row">
+                   <span className="score-label">Overall Score</span>
+                   <div className="score-bar"><div className="score-fill" style={{width: '85%', background: 'linear-gradient(90deg, #22d3ee, #10b981)'}}></div></div>
+                   <span className="score-pct">85%</span>
+                 </div>
+                 <div className="score-row">
+                   <span className="score-label">Eye Contact</span>
+                   <div className="score-bar"><div className="score-fill" style={{width: '92%', background: 'linear-gradient(90deg, #8b5cf6, #c4b5fd)'}}></div></div>
+                   <span className="score-pct">92%</span>
+                 </div>
+                 <div className="score-row">
+                   <span className="score-label">Confidence</span>
+                   <div className="score-bar"><div className="score-fill" style={{width: '78%', background: 'linear-gradient(90deg, #3b82f6, #22d3ee)'}}></div></div>
+                   <span className="score-pct">78%</span>
+                 </div>
+                 <div className="score-row">
+                   <span className="score-label">Technical</span>
+                   <div className="score-bar"><div className="score-fill" style={{width: '88%', background: 'linear-gradient(90deg, #f472b6, #f59e0b)'}}></div></div>
+                   <span className="score-pct">88%</span>
+                 </div>
+               </div>
+               <div className="stat-callout">
+                 <span className="stat-number">4.2<span className="stat-unit">x</span></span>
+                 <span className="stat-label">FASTER IMPROVEMENT<br/>WITH REPLAYS</span>
+               </div>
              </div>
            </div>
 
-           {/* Section 3 */}
+           {/* Section 3: Practice Grid */}
            <div className="feature-grid-section">
              <div className="grid-header">
-               <span className="feature-badge">Track your growth</span>
-               <h2>Practice makes perfect</h2>
+               <span className="feature-badge"><span className="badge-dot" style={{background: '#f472b6'}}></span> Track your growth</span>
+               <h2>Practice makes <span className="accent-word">perfect</span></h2>
                <p>Monitor your progress over time with visual history trends.<br/>Configure your sessions to target exactly what you need to work on.</p>
              </div>
              <div className="feature-grid">
                <div className="grid-item">
-                 <i className="fa-solid fa-chart-area" style={{color: '#10b981'}}></i>
+                 <div className="grid-item-icon" style={{background: 'rgba(16, 185, 129, 0.15)', color: '#10b981'}}>
+                   <i className="fa-solid fa-chart-area"></i>
+                 </div>
                  <h3>Score Progression</h3>
                  <p>Visualize your improvement over multiple interviews using interactive charts and historical data.</p>
                </div>
                <div className="grid-item">
-                 <i className="fa-solid fa-building" style={{color: '#3b82f6'}}></i>
+                 <div className="grid-item-icon" style={{background: 'rgba(59, 130, 246, 0.15)', color: '#3b82f6'}}>
+                   <i className="fa-solid fa-building"></i>
+                 </div>
                  <h3>FAANG-Level Questions</h3>
                  <p>Practice with rigorous, real-world questions asked by top tech companies like Meta, Amazon, Netflix, and Google.</p>
                </div>
                <div className="grid-item">
-                 <i className="fa-solid fa-arrow-trend-up" style={{color: '#f59e0b'}}></i>
+                 <div className="grid-item-icon" style={{background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b'}}>
+                   <i className="fa-solid fa-arrow-trend-up"></i>
+                 </div>
                  <h3>Key Strengths</h3>
                  <p>Identify what you are doing right so you can double down on your best interview qualities.</p>
                </div>
                <div className="grid-item">
-                 <i className="fa-solid fa-screwdriver-wrench" style={{color: '#8b5cf6'}}></i>
+                 <div className="grid-item-icon" style={{background: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6'}}>
+                   <i className="fa-solid fa-screwdriver-wrench"></i>
+                 </div>
                  <h3>Areas to Improve</h3>
                  <p>Get actionable, targeted advice on the specific technical and behavioral areas you struggle with.</p>
                </div>
